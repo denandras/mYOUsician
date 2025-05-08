@@ -25,8 +25,11 @@ export default function Signup() {
 
       if (signupError) {
         setError(signupError.message)
-      } else {
-        // Insert additional user details (like forename and surname) into the 'users' table
+        console.error("Signup error:", signupError.message)
+      } else if (user) {
+        // Check if user is valid
+        console.log("User created:", user)
+        // Insert additional user details (like forename and surname) into the 'musicians' table
         const { data, error: insertError } = await supabase
           .from('musicians') // Your table name
           .insert([
@@ -40,10 +43,14 @@ export default function Signup() {
 
         if (insertError) {
           setError(insertError.message)
+          console.error("Error inserting user data:", insertError.message)
         } else {
           console.log('User signed up and data inserted:', data)
           // Optionally redirect or notify user on success
         }
+      } else {
+        setError("Unexpected user object")
+        console.error("Unexpected user object:", user)
       }
     } catch (err) {
       console.error('Error during signup:', err)
