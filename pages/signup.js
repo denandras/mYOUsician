@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { supabase } from '../lib/supabase' // Adjust path based on your file structure
+import { supabase } from '../lib/supabase'
 
 export default function Signup() {
   const [forename, setForename] = useState('')

@@ -1,4 +1,4 @@
-export default function Signup() {
+export default function Login() {
     return (
       <div>
         <input type="password" placeholder="Password" />
