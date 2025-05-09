@@ -3,7 +3,6 @@ export default function Database() {
       <div>
         <h1>Database</h1>
         <p>Welcome to the mYOUsician database!</p>
-        
       </div>
     );
   }

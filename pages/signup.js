@@ -1,97 +1,42 @@
-import { useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { useState } from 'react';
+import { signup } from '../lib/auth'; // Use the signup function from ../lib/auth
 
-export default function Signup() {
-  const [forename, setForename] = useState('')
-  const [surname, setSurname] = useState('')
-  const [password, setPassword] = useState('')
-  const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+export default function SignupForm() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  // Handle sign-up form submission
-  const handleSignup = async (e) => {
-    e.preventDefault()
-
-    setLoading(true) // Set loading to true
-    setError('') // Reset previous errors
-
+  async function handleSubmit(event) {
+    event.preventDefault();
     try {
-      // Use Supabase auth to sign up the user
-      const { user, error: signupError } = await supabase.auth.signUp({
-        email: email,
-        password: password, // Supabase automatically hashes the password for you
-      })
-
-      if (signupError) {
-        setError(signupError.message)
-        console.error("Signup error:", signupError.message)
-      } else if (user) {
-        // Check if user is valid
-        console.log("User created:", user)
-        // Insert additional user details (like forename and surname) into the 'musicians' table
-        const { data, error: insertError } = await supabase
-          .from('musicians') // Your table name
-          .insert([
-            {
-              forename: forename,
-              surname: surname,
-              email: email,
-              user_id: user.id, // Link the user to the authentication record
-            },
-          ])
-
-        if (insertError) {
-          setError(insertError.message)
-          console.error("Error inserting user data:", insertError.message)
-        } else {
-          console.log('User signed up and data inserted:', data)
-          // Optionally redirect or notify user on success
-        }
-      } else {
-        setError("Unexpected user object")
-        console.error("Unexpected user object:", user)
+      // Call the signup function and get the response
+      const { user, message } = await signup(email, password);
+      if (!user) {
+        alert('Signup successful! Please check your email to confirm your account.');
+        return;
       }
+
+      // Inform the user about the signup status
+      alert(message);
     } catch (err) {
-      console.error('Error during signup:', err)
-      setError('An unexpected error occurred')
-    } finally {
-      setLoading(false)
+      alert(err.message);
     }
   }
 
   return (
-    <div>
-      <form onSubmit={handleSignup}>
-        <input
-          type="text"
-          placeholder="Forename"
-          value={forename}
-          onChange={(e) => setForename(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Surname"
-          value={surname}
-          onChange={(e) => setSurname(e.target.value)}
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button type="submit" disabled={loading}>
-          {loading ? 'Signing up...' : 'Sign Up'}
-        </button>
-      </form>
-      {error && <p>{error}</p>}
-    </div>
-  )
+    <form onSubmit={handleSubmit}>
+      <input
+        type="email"
+        placeholder="Email"
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        onChange={(e) => setPassword(e.target.value)}
+        required
+      />
+      <button type="submit">Sign up</button>
+    </form>
+  );
 }
