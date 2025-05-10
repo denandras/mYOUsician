@@ -92,9 +92,9 @@ export default function LoginPage() {
             </a>
           </div>
           <div>
-            <button type="button" onClick={() => router.push('/signup')} className="login-button">
+            <a href="/signup" className="login-button">
               Sign up
-            </button>
+            </a>
           </div>
         </form>
       )}
