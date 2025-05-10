@@ -1,13 +1,25 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase'; // Ensure this is correctly initialized
-import { useRouter } from 'next/navigation'; // For navigation
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
-  const router = useRouter();
+  const [user, setUser] = useState(null);
+
+  // Check if a user is already logged in
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setUser(session.user);
+        // Redirect to profile page
+        window.location.href = '/profile';
+      }
+    };
+    checkUser();
+  }, []);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -36,37 +48,41 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="signup-container">
-      <h1>Sign Up</h1>
-      <form onSubmit={handleSignup} className="signup-form">
-        <div className="form-group">
-          <label>Email:</label>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+    <main className="signup-page">
+      <section className="signup-container">
+        <h1 className="signup-title">Sign Up</h1>
+        <form onSubmit={handleSignup} className="signup-form">
+          <div className="form-group">
+            <label htmlFor="email" className="form-label">Email:</label>
+            <input
+              id="email"
+              type="email"
+              className="form-input"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="password" className="form-label">Password:</label>
+            <input
+              id="password"
+              type="password"
+              className="form-input"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="signup-button">Sign Up</button>
+        </form>
+        {message && <p className="signup-message">{message}</p>}
+        <div className="signup-footer">
+          <a href="/login" className="login-link">Already have an account? Log in</a>
         </div>
-        <div className="form-group">
-          <label>Password:</label>
-          <input
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit" className="signup-button">Sign Up</button>
-      </form>
-      {message && <p className="message">{message}</p>}
-      <div>
-        <button type="button" onClick={() => router.push('/login')} className="login-button">
-          Login
-        </button>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
