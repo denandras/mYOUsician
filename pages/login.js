@@ -50,43 +50,49 @@ export default function LoginPage() {
   };
 
   return (
-    <div>
-      <h1>Login</h1>
-      {user ? (
-        <div>
-          <p>Welcome, {user.email}</p>
-          <button onClick={handleLogout}>
-            Logout
-          </button>
-        </div>
-      ) : (
-        <form onSubmit={handleLogin}>
-          <div>
-            <label>Email:</label>
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+    <main className="login-page">
+      <section className="login-container">
+        <h1 className="login-title">Login</h1>
+        {user ? (
+          <div className="user-info">
+            <p className="welcome-message">Welcome, {user.email}</p>
+            <button onClick={handleLogout} className="logout-button">
+              Logout
+            </button>
           </div>
-          <div>
-            <label>Password:</label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <button type="submit">
-            Login
-          </button>
-        </form>
-      )}
-      {message && <p>{message}</p>}
-    </div>
+        ) : (
+          <form onSubmit={handleLogin} className="login-form">
+            <div className="form-group">
+              <label htmlFor="email" className="form-label">Email:</label>
+              <input
+                id="email"
+                type="email"
+                className="form-input"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="password" className="form-label">Password:</label>
+              <input
+                id="password"
+                type="password"
+                className="form-input"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <button type="submit" className="login-button">
+              Login
+            </button>
+          </form>
+        )}
+        {message && <p className="login-message">{message}</p>}
+      </section>
+    </main>
   );
 }

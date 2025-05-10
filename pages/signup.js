@@ -34,32 +34,41 @@ export default function SignupPage() {
   };
 
   return (
-    <div>
-      <h1>Sign Up</h1>
-      <form onSubmit={handleSignup}>
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+    <main className="signup-page">
+      <section className="signup-container">
+        <h1 className="signup-title">Sign Up</h1>
+        <form onSubmit={handleSignup} className="signup-form">
+          <div className="form-group">
+            <label htmlFor="email" className="form-label">Email:</label>
+            <input
+              id="email"
+              type="email"
+              className="form-input"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="password" className="form-label">Password:</label>
+            <input
+              id="password"
+              type="password"
+              className="form-input"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="signup-button">Sign Up</button>
+        </form>
+        {message && <p className="signup-message">{message}</p>}
+        <div className="signup-footer">
+          <a href="/login" className="login-link">Already have an account? Log in</a>
         </div>
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Sign Up</button>
-      </form>
-      {message && <p>{message}</p>}
-    </div>
+      </section>
+    </main>
   );
 }
