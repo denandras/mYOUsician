@@ -7,42 +7,30 @@ export default function Confirm() {
   const router = useRouter();
 
   useEffect(() => {
-    async function confirmSession() {
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    const getSession = async () => {
+      const { data: sessionData, error } = await supabase.auth.getSession();
 
-      if (sessionError || !sessionData.session?.user) {
-        setStatus('No active session found. Please log in again.');
+      if (error || !sessionData.session) {
+        setStatus('No active session. Please sign up or log in again.');
         return;
       }
 
-      const user = sessionData.session.user;
-
-      // Check if the user is already in the musicians table
-
-      // Insert or update user in musicians table
-      const { error: insertError } = await supabase
-        .from('musicians')
-        .upsert(
-          {
-            user_id: user.id,       // 👈 match your RLS condition
-            email: user.email,      // optional: save user email too
-            password: user.user_metadata?.password, // optional: save user password too
-            forename: "András", // optional: replace with actual data
-            surname: "Dénes",
-          },
-          { onConflict: 'user_id' } // 👈 assumes 'user_id' is the unique key
-        );
-
-      if (insertError) {
-        setStatus(`Error adding user to musicians table: ${insertError.message}`);
+      // Fetch the user data properly
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData.user) {
+        setStatus('Error fetching user data. Please log in again.');
         return;
       }
 
-      setStatus('Email confirmed and user logged in!');
-      setTimeout(() => router.push('/login'), 3000);
-    }
+      const user = userData.user; // Correctly fetched user
+      console.log('User confirmed:', user);
 
-    confirmSession();
+      setStatus('Email confirmed! You can now log in.');
+      // Optionally redirect to dashboard, etc.
+      // setTimeout(() => router.push('/dashboard'), 3000);
+    };
+
+    getSession();
   }, []);
 
   return (
