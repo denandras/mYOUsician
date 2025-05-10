@@ -14,6 +14,8 @@ export default function LoginPage() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setUser(session.user);
+        // Redirect to profile page
+        window.location.href = '/profile';
       }
     };
     checkUser();
@@ -37,6 +39,8 @@ export default function LoginPage() {
       setUser(data.user);
       setMessage('Login successful!');
       console.log('Login success:', data);
+      // Redirect to profile page after successful login
+      window.location.href = '/profile';
     } catch (err) {
       setMessage('An unexpected error occurred.');
       console.error('Unexpected error:', err);
