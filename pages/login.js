@@ -50,18 +50,18 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="signup-container">
+    <div>
       <h1>Login</h1>
       {user ? (
         <div>
           <p>Welcome, {user.email}</p>
-          <button onClick={handleLogout} className="signup-button">
+          <button onClick={handleLogout}>
             Logout
           </button>
         </div>
       ) : (
-        <form onSubmit={handleLogin} className="signup-form">
-          <div className="form-group">
+        <form onSubmit={handleLogin}>
+          <div>
             <label>Email:</label>
             <input
               type="email"
@@ -71,7 +71,7 @@ export default function LoginPage() {
               required
             />
           </div>
-          <div className="form-group">
+          <div>
             <label>Password:</label>
             <input
               type="password"
@@ -81,22 +81,12 @@ export default function LoginPage() {
               required
             />
           </div>
-          <button type="submit" className="signup-button">
+          <button type="submit">
             Login
           </button>
-          <div>
-            <a href="/forgot-password" className="login-button">
-              Forgot Password?
-            </a>
-          </div>
-          <div>
-            <a href="/signup" className="login-button">
-              Sign up
-            </a>
-          </div>
         </form>
       )}
-      {message && <p className="message">{message}</p>}
+      {message && <p>{message}</p>}
     </div>
   );
 }
