@@ -36,10 +36,10 @@ export default function SignupPage() {
   };
 
   return (
-    <div>
+    <div className="signup-container">
       <h1>Sign Up</h1>
-      <form onSubmit={handleSignup}>
-        <div>
+      <form onSubmit={handleSignup} className="signup-form">
+        <div className="form-group">
           <label>Email:</label>
           <input
             type="email"
@@ -49,7 +49,7 @@ export default function SignupPage() {
             required
           />
         </div>
-        <div>
+        <div className="form-group">
           <label>Password:</label>
           <input
             type="password"
@@ -59,11 +59,11 @@ export default function SignupPage() {
             required
           />
         </div>
-        <button type="submit">Sign Up</button>
+        <button type="submit" className="signup-button">Sign Up</button>
       </form>
-      {message && <p>{message}</p>}
+      {message && <p className="message">{message}</p>}
       <div>
-        <button type="button" onClick={() => router.push('/login')}>
+        <button type="button" onClick={() => router.push('/login')} className="login-button">
           Login
         </button>
       </div>

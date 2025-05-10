@@ -52,18 +52,18 @@ export default function LoginPage() {
   };
 
   return (
-    <div>
+    <div className="signup-container">
       <h1>Login</h1>
       {user ? (
         <div>
           <p>Welcome, {user.email}</p>
-          <button onClick={handleLogout}>
+          <button onClick={handleLogout} className="signup-button">
             Logout
           </button>
         </div>
       ) : (
-        <form onSubmit={handleLogin}>
-          <div>
+        <form onSubmit={handleLogin} className="signup-form">
+          <div className="form-group">
             <label>Email:</label>
             <input
               type="email"
@@ -73,7 +73,7 @@ export default function LoginPage() {
               required
             />
           </div>
-          <div>
+          <div className="form-group">
             <label>Password:</label>
             <input
               type="password"
@@ -83,22 +83,22 @@ export default function LoginPage() {
               required
             />
           </div>
-          <button type="submit">
+          <button type="submit" className="signup-button">
             Login
           </button>
           <div>
-            <a href="#" onClick={() => alert('Forgot password functionality not implemented yet.')}>
+            <a href="#" onClick={() => alert('Forgot password functionality not implemented yet.')} className="login-button">
               Forgot password?
             </a>
           </div>
           <div>
-            <button type="button" onClick={() => router.push('/signup')}>
+            <button type="button" onClick={() => router.push('/signup')} className="login-button">
               Sign up
             </button>
           </div>
         </form>
       )}
-      {message && <p>{message}</p>}
+      {message && <p className="message">{message}</p>}
     </div>
   );
 }
