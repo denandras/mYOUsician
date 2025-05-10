@@ -1,25 +1,11 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase'; // Ensure this is correctly initialized
+import { useState } from 'react';
+import supabase from '../lib/supabase'; // Import the singleton Supabase client
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
-  const [user, setUser] = useState(null);
-
-  // Check if a user is already logged in
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setUser(session.user);
-        // Redirect to profile page
-        window.location.href = '/profile';
-      }
-    };
-    checkUser();
-  }, []);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -76,12 +62,11 @@ export default function SignupPage() {
               required
             />
           </div>
-          <button type="submit" className="signup-button">Sign Up</button>
+          <button type="submit" className="signup-button">
+            Sign Up
+          </button>
         </form>
         {message && <p className="signup-message">{message}</p>}
-        <div className="signup-footer">
-          <a href="/login" className="login-link">Already have an account? Log in</a>
-        </div>
       </section>
     </main>
   );

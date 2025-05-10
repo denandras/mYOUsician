@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase'; // Ensure this is correctly initialized
+import supabase from '../lib/supabase'; // Import the singleton Supabase client
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -11,7 +11,11 @@ export default function LoginPage() {
   // Check if a user is already logged in
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error('Error fetching session:', error);
+        return;
+      }
       if (session) {
         setUser(session.user);
         // Redirect to profile page

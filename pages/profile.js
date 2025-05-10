@@ -1,41 +1,53 @@
 import { useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+import supabase from '../lib/supabase'; // Import the singleton Supabase client
 
 export default function Profile() {
     useEffect(() => {
         const checkUser = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
+            try {
+                // Use the updated method to get the session
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-            if (!session) {
-                // Redirect to login page if no session exists
-                window.location.href = '/login';
-                return;
-            }
-
-            const userId = session.user.id;
-
-            const { data: musician, error } = await supabase
-                .from('musicians')
-                .select('*')
-                .eq('id', userId)
-                .single();
-
-            if (error && error.code === 'PGRST116') {
-                // No row found, insert a new one
-                const { error: insertError } = await supabase
-                    .from('musicians')
-                    .insert([{ id: userId, name: session.user.email }]);
-
-                if (insertError) {
-                    console.error('Error inserting musician:', insertError);
+                if (sessionError) {
+                    console.error('Error fetching session:', sessionError);
+                    return;
                 }
-            } else if (error) {
-                console.error('Error fetching musician:', error);
+
+                if (!session) {
+                    // Redirect to login page if no session exists
+                    window.location.href = '/login';
+                    return;
+                }
+
+                const userId = session.user.id;
+
+                // Fetch user data
+                const { data: user, error: fetchError } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('uid', userId) // Use 'uid' instead of 'id'
+                    .single();
+
+                if (fetchError) {
+                    if (fetchError.code === 'PGRST116') {
+                        // No row found, insert a new one
+                        const { error: insertError } = await supabase
+                            .from('users')
+                            .insert([{ uid: userId, email: session.user.email }]);
+
+                        if (insertError) {
+                            console.error('Error inserting user:', insertError);
+                        } else {
+                            console.log('New user record created successfully.');
+                        }
+                    } else {
+                        console.error('Error fetching user:', fetchError);
+                    }
+                } else {
+                    console.log('User data fetched successfully:', user);
+                }
+            } catch (err) {
+                console.error('Unexpected error in checkUser:', err);
             }
         };
 
