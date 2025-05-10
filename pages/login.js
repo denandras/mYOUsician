@@ -1,0 +1,92 @@
+'use client';
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase'; // Ensure this is correctly initialized
+
+export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
+  const [user, setUser] = useState(null);
+
+  // Check if a user is already logged in
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setUser(session.user);
+      }
+    };
+    checkUser();
+  }, []);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setMessage('');
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setMessage(`Error: ${error.message}`);
+        return;
+      }
+
+      setUser(data.user);
+      setMessage('Login successful!');
+      console.log('Login success:', data);
+    } catch (err) {
+      setMessage('An unexpected error occurred.');
+      console.error('Unexpected error:', err);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setMessage('Logged out successfully.');
+  };
+
+  return (
+    <div>
+      <h1>Login</h1>
+      {user ? (
+        <div>
+          <p>Welcome, {user.email}</p>
+          <button onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
+      ) : (
+        <form onSubmit={handleLogin}>
+          <div>
+            <label>Email:</label>
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label>Password:</label>
+            <input
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit">
+            Login
+          </button>
+        </form>
+      )}
+      {message && <p>{message}</p>}
+    </div>
+  );
+}

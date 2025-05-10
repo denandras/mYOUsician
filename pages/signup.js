@@ -15,6 +15,9 @@ export default function SignupPage() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/confirm`, // Redirect after email confirmation
+        },
       });
 
       if (error) {
@@ -31,10 +34,10 @@ export default function SignupPage() {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '0 auto', padding: '20px' }}>
+    <div>
       <h1>Sign Up</h1>
       <form onSubmit={handleSignup}>
-        <div style={{ marginBottom: '10px' }}>
+        <div>
           <label>Email:</label>
           <input
             type="email"
@@ -42,10 +45,9 @@ export default function SignupPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
           />
         </div>
-        <div style={{ marginBottom: '10px' }}>
+        <div>
           <label>Password:</label>
           <input
             type="password"
@@ -53,14 +55,11 @@ export default function SignupPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
           />
         </div>
-        <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#0070f3', color: '#fff', border: 'none', cursor: 'pointer' }}>
-          Sign Up
-        </button>
+        <button type="submit">Sign Up</button>
       </form>
-      {message && <p style={{ marginTop: '20px', color: message.startsWith('Error') ? 'red' : 'green' }}>{message}</p>}
+      {message && <p>{message}</p>}
     </div>
   );
 }
