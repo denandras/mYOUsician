@@ -1,14 +1,12 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase'; // Ensure this is correctly initialized
-import { useRouter } from 'next/router'; // Correct import for pages directory
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [user, setUser] = useState(null);
-  const router = useRouter();
 
   // Check if a user is already logged in
   useEffect(() => {
@@ -87,8 +85,8 @@ export default function LoginPage() {
             Login
           </button>
           <div>
-            <a href="#" onClick={() => alert('Forgot password functionality not implemented yet.')} className="login-button">
-              Forgot password?
+            <a href="/forgot-password" className="login-button">
+              Forgot Password?
             </a>
           </div>
           <div>
