@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase'; // Ensure this is correctly initialized
-import { useRouter } from 'next/navigation'; // For navigation
+import { useRouter } from 'next/router'; // Correct import for pages directory
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
