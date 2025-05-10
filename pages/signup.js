@@ -1,11 +1,13 @@
 'use client';
 import { useState } from 'react';
 import { supabase } from '../lib/supabase'; // Ensure this is correctly initialized
+import { useRouter } from 'next/navigation'; // For navigation
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const router = useRouter();
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -60,6 +62,11 @@ export default function SignupPage() {
         <button type="submit">Sign Up</button>
       </form>
       {message && <p>{message}</p>}
+      <div>
+        <button type="button" onClick={() => router.push('/login')}>
+          Login
+        </button>
+      </div>
     </div>
   );
 }
