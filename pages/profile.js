@@ -568,6 +568,7 @@ export default function Profile() {
 
     return (
         <main className="profile-page">
+            <Header /> {/* Add the Header component */}
             <section className="profile-container">
                 <h1 className="profile-title">Profile Editor</h1>
                 {message && <p className="profile-message">{message}</p>}

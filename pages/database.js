@@ -33,6 +33,7 @@ export default function Database() {
     // Render content for signed-in users
     return (
       <main className="database-page">
+        <Header /> {/* Add the Header component */}
         <section className="database-container">
           <h1 className="database-title">Welcome to the Database</h1>
           <p className="database-description">Here you can explore all the data available to you.</p>

@@ -2,11 +2,13 @@
 import { useState, useEffect } from 'react';
 import supabase from '../lib/supabase'; // Import the singleton Supabase client
 import verifyUser from '../lib/getuser'; // Import the verifyUser function
+import Header from '../components/Header'; // Adjust the path based on your folder structure
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [user, setUser] = useState(null); // Define the user state
 
   // Check if the user is already logged in
   useEffect(() => {
@@ -21,9 +23,9 @@ export default function SignupPage() {
       // Use verifyUser to check if the user is logged in and handle redirection
       const isVerified = await verifyUser(session);
       if (isVerified) {
-        setUser(session.user);
+        setUser(session.user); // Set the user state
         // Redirect to profile page
-        window.location.href = '/profile';
+        window.location.href = '/';
       }
     };
 
@@ -107,6 +109,7 @@ export default function SignupPage() {
 
   return (
     <main className="signup-page">
+      <Header /> {/* Add the Header component */}
       <section className="signup-container">
         <h1 className="signup-title">Sign Up</h1>
         <form onSubmit={handleSignup} className="signup-form">

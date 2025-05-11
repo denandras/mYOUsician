@@ -2,12 +2,14 @@
 import { useState, useEffect } from 'react';
 import supabase from '../lib/supabase'; // Import the singleton Supabase client
 import verifyUser from '../lib/getuser'; // Import the verifyUser function
+import Header from '../components/Header'; // Adjust the path based on your folder structure
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); // Add loading state
 
   // Check if a user is already logged in
   useEffect(() => {
@@ -16,6 +18,7 @@ export default function LoginPage() {
 
       if (error) {
         console.error('Error fetching session:', error);
+        setLoading(false); // Stop loading if there's an error
         return;
       }
 
@@ -25,7 +28,10 @@ export default function LoginPage() {
         setUser(session.user);
         // Redirect to profile page
         window.location.href = '/profile';
+        return;
       }
+
+      setLoading(false); // Stop loading after the check
     };
 
     checkUser();
@@ -88,8 +94,14 @@ export default function LoginPage() {
     setMessage('Logged out successfully.');
   };
 
+  // Render nothing while loading
+  if (loading) {
+    return null;
+  }
+
   return (
     <main className="login-page">
+      <Header /> {/* Add the Header component */}
       <section className="login-container">
         <h1 className="login-title">Login</h1>
         {user ? (
