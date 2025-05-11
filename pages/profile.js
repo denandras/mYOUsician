@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import supabase from '../lib/supabase'; // Import the singleton Supabase client
+import verifyUser from '../lib/getuser'; // Import the verifyUser function
 
 export default function Profile() {
     const [profile, setProfile] = useState({
@@ -22,6 +23,7 @@ export default function Profile() {
     const [newGenre, setNewGenre] = useState(''); // For adding a new genre
     const [newInstrument, setNewInstrument] = useState(''); // For adding a new instrument
     const [deleteConfirmation, setDeleteConfirmation] = useState(''); // For Danger Zone input
+    const [loading, setLoading] = useState(true); // Loading state
 
     // Fetch user data and email from session on component mount
     useEffect(() => {
@@ -31,6 +33,7 @@ export default function Profile() {
 
                 if (sessionError) {
                     console.error('Error fetching session:', sessionError);
+                    setLoading(false); // Stop loading if there's an error
                     return;
                 }
 
@@ -40,12 +43,16 @@ export default function Profile() {
                     return;
                 }
 
+                // call verifyUser function to check if the session user matches the Supabase auth user
+                const isVerified = await verifyUser(session);
+                if (!isVerified) {
+                    console.error('User verification failed. Redirecting to login.');
+                    window.location.href = '/index';
+                    return;
+                }
+
                 const userId = session.user.id;
                 const userEmail = session.user.email; // Extract email from session
-
-                // Debugging logs
-                console.log('Session:', session);
-                console.log('User ID:', userId);
 
                 if (!userId) {
                     console.error('User ID is undefined. Redirecting to login.');
@@ -62,6 +69,7 @@ export default function Profile() {
 
                 if (error) {
                     console.error('Error fetching user:', error);
+                    setLoading(false); // Stop loading if there's an error
                     return;
                 }
 
@@ -91,6 +99,7 @@ export default function Profile() {
 
                     if (insertError) {
                         console.error('Error creating new profile:', insertError);
+                        setLoading(false); // Stop loading if there's an error
                         return;
                     }
 
@@ -116,11 +125,24 @@ export default function Profile() {
                 }
             } catch (err) {
                 console.error('Unexpected error fetching profile:', err);
+            } finally {
+                setLoading(false); // Stop loading once the process is complete
             }
         };
 
         fetchProfile();
     }, []);
+
+    if (loading) {
+        // Render a loading indicator while data is being fetched
+        return (
+            <main className="profile-page">
+                <section className="profile-container">
+                    <h1 className="profile-title"></h1>
+                </section>
+            </main>
+        );
+    }
 
     // Handle input changes
     const handleChange = (e) => {
