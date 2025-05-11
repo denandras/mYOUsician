@@ -4,6 +4,7 @@ import verifyUser from '../lib/getuser'; // Import the verifyUser function
 
 export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
+  const [loading, setLoading] = useState(true); // State to track loading status
 
   useEffect(() => {
     const checkSession = async () => {
@@ -12,11 +13,13 @@ export default function Header() {
       if (error) {
         console.error('Error fetching session:', error);
         setIsLoggedIn(false);
+        setLoading(false); // Stop loading if there's an error
         return;
       }
 
       const isVerified = await verifyUser(session);
       setIsLoggedIn(isVerified); // Set login status based on session verification
+      setLoading(false); // Stop loading after session check
     };
 
     checkSession();
@@ -31,7 +34,9 @@ export default function Header() {
   return (
     <header className="header">
       <nav className="header-nav">
-        {isLoggedIn ? (
+        {loading ? (
+          <div className="header-loading">Loading...</div> // Styled loading text
+        ) : isLoggedIn ? (
           <>
             <a href="/" className="header-link">Home</a>
             <a href="/database" className="header-link">Database</a>
