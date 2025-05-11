@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import supabase from '../lib/supabase'; // Import the singleton Supabase client
+import verifyUser from '../lib/getuser'; // Import the verifyUser function
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -12,16 +13,21 @@ export default function LoginPage() {
   useEffect(() => {
     const checkUser = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
+
       if (error) {
         console.error('Error fetching session:', error);
         return;
       }
-      if (session) {
+
+      // Use verifyUser to check if the user is logged in and handle redirection
+      const isVerified = await verifyUser(session);
+      if (isVerified) {
         setUser(session.user);
         // Redirect to profile page
         window.location.href = '/profile';
       }
     };
+
     checkUser();
   }, []);
 
@@ -30,6 +36,7 @@ export default function LoginPage() {
     setMessage('');
 
     try {
+      // Step 1: Attempt to log in the user
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -43,10 +50,34 @@ export default function LoginPage() {
       setUser(data.user);
       setMessage('Login successful!');
       console.log('Login success:', data);
-      // Redirect to profile page after successful login
-      window.location.href = '/profile';
+
+      // Step 2: Check if the user exists in the `users` table
+      const { data: existingUser, error: userCheckError } = await supabase
+        .from('users')
+        .select('uid')
+        .eq('uid', data.user.id)
+        .single();
+
+      if (userCheckError && userCheckError.code === 'PGRST116') {
+        // User does not exist in the `users` table (first login)
+        console.log('First login detected. Redirecting to profile page...');
+        window.location.href = '/profile';
+        return;
+      }
+
+      if (userCheckError) {
+        // Handle unexpected errors
+        console.error('Error checking user in users table:', userCheckError);
+        setMessage('An error occurred while checking your account. Please try again.');
+        return;
+      }
+
+      // User exists in the `users` table, redirect to index page
+      console.log('User exists. Redirecting to index page...');
+      window.location.href = '/';
     } catch (err) {
-      setMessage('An unexpected error occurred.');
+      // Handle unexpected errors
+      setMessage('An unexpected error occurred. Please try again.');
       console.error('Unexpected error:', err);
     }
   };
