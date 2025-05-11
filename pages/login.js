@@ -97,6 +97,9 @@ export default function LoginPage() {
             <button type="submit" className="login-button">
               Login
             </button>
+            <p className="signup-link">
+              Don't have an account? <a href="/signup">Sign up here</a>
+            </p>
           </form>
         )}
         {message && <p className="login-message">{message}</p>}
