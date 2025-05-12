@@ -111,15 +111,19 @@ export default function SignupPage() {
     <main className="signup-page">
       <Header /> {/* Add the Header component */}
       <section className="signup-container">
-        <h1 className="signup-title">Sign Up</h1>
+        <h2 className="signup-title">Sign Up</h2>
+        <p className="signup-description">
+          Create an account to get started!
+          </p>
         <form onSubmit={handleSignup} className="signup-form">
           <div className="form-group">
             <label htmlFor="email" className="form-label">Email:</label>
+            <br/>
             <input
               id="email"
               type="email"
               className="form-input"
-              placeholder="Enter your email"
+              placeholder=""
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -127,22 +131,24 @@ export default function SignupPage() {
           </div>
           <div className="form-group">
             <label htmlFor="password" className="form-label">Password:</label>
+            <br/>
             <input
               id="password"
               type="password"
               className="form-input"
-              placeholder="Enter your password"
+              placeholder=""
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
+          <br/>
           <button type="submit" className="signup-button">
             Sign Up
           </button>
         </form>
         {message && <p className="signup-message">{message}</p>}
-        <p className="login-redirect">
+        <p className="login-redirect small-text">
           Already have an account?{' '}
           <a href="/login" className="login-link">Log in</a>.
         </p>

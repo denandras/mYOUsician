@@ -119,7 +119,7 @@ export default function LoginPage() {
                 id="email"
                 type="email"
                 className="form-input"
-                placeholder="Enter your email"
+                placeholder=""
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -131,7 +131,7 @@ export default function LoginPage() {
                 id="password"
                 type="password"
                 className="form-input"
-                placeholder="Enter your password"
+                placeholder=""
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -140,7 +140,7 @@ export default function LoginPage() {
             <button type="submit" className="login-button">
               Login
             </button>
-            <p className="signup-link">
+            <p className="signup-link small-text">
               Don't have an account? <a href="/signup">Sign up here</a>
             </p>
           </form>
