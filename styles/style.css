@@ -20,7 +20,8 @@ body {
     font-family: 'Open Sans', Helvetica, sans-serif;
     /* background-color: var(--blue); */
     /* background-image: url('https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80'); */
-    background-image: url(./assets/bg-2.png);
+    /* background-image: url(./assets/bg-2.png);  az a prroductionhoz, a másik path a gites deploymenthez*/
+    background-image: url("styles/assets/bg-2.png");
     background-size: cover;
     background-repeat: no-repeat;
     background-size: cover;
