@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import supabase from '../lib/supabase'; // Import the Supabase client
 import verifyUser from '../lib/getuser'; // Import the verifyUser function
+import signOut from '../lib/signOut'; // Import the reusable signOut function
 
 export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
@@ -26,9 +27,13 @@ export default function Header() {
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setIsLoggedIn(false); // Update state after logging out
-    window.location.href = '/login'; // Redirect to login page
+    const success = await signOut(); // Call the reusable signOut function
+    if (success) {
+      setIsLoggedIn(false); // Update state after logging out
+      window.location.href = '/login'; // Redirect to login page
+    } else {
+      console.error('Error logging out. Please try again.');
+    }
   };
 
   return (

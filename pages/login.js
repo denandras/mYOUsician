@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import supabase from '../lib/supabase'; // Import the singleton Supabase client
 import verifyUser from '../lib/getuser'; // Import the verifyUser function
-import Header from '../components/Header'; // Adjust the path based on your folder structure
+import signOut from '../lib/signOut'; // Import the reusable signOut function
+import Header from '../components/Header';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -88,10 +89,15 @@ export default function LoginPage() {
     }
   };
 
+  // Logout function using the reusable signOut function
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setMessage('Logged out successfully.');
+    const success = await signOut(); // Call the reusable signOut function
+    if (success) {
+      setUser(null); // Clear the user state
+      setMessage('Logged out successfully.');
+    } else {
+      setMessage('Error logging out. Please try again.');
+    }
   };
 
   // Render nothing while loading

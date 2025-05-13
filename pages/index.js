@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import verifyUser from '../lib/getuser'; // Import the verifyUser function
 import supabase from '../lib/supabase'; // Import the singleton Supabase client
-import Header from '../components/Header'; // Adjust the path based on your folder structure
+import Header from '../components/Header';
 
 export default function Home() {
   const [isSignedIn, setIsSignedIn] = useState(null); // null indicates loading state

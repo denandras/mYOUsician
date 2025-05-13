@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import supabase from '../lib/supabase'; // Import the singleton Supabase client
 import verifyUser from '../lib/getuser'; // Import the verifyUser function
-import Header from '../components/Header'; // Adjust the path based on your folder structure
+import signOut from '../lib/signOut'; // Import the reusable signOut function
+import Header from '../components/Header';
 
 export default function Profile() {
     const [profile, setProfile] = useState({
@@ -489,17 +490,13 @@ export default function Profile() {
         }
     };
 
-    // Logout function
+    // Logout function using the reusable signOut function
     const handleLogout = async () => {
-        try {
-            const { error } = await supabase.auth.signOut();
-            if (error) {
-                console.error('Error logging out:', error);
-            } else {
-                window.location.href = '/'; // Redirect to index page
-            }
-        } catch (err) {
-            console.error('Unexpected error during logout:', err);
+        const success = await signOut(); // Call the reusable signOut function
+        if (success) {
+            window.location.href = '/'; // Redirect to the homepage after logout
+        } else {
+            setMessage('Error logging out. Please try again.');
         }
     };
 

@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import Header from '../components/Header'; // Adjust the path based on your folder structure
+import Header from '../components/Header';
 
 export default function ConfirmPage() {
   const [message, setMessage] = useState('Confirming your email...');
