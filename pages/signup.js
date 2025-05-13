@@ -1,8 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
-import supabase from '../lib/supabase'; // Import the singleton Supabase client
+import supabase from '../lib/supabase'; // Import the Supabase client
 import verifyUser from '../lib/getuser'; // Import the verifyUser function
-import Header from '../components/Header'; // Adjust the path based on your folder structure
+import signOut from '../lib/signOut';
+import Header from '../components/Header';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -57,10 +58,13 @@ export default function SignupPage() {
             <a href="/login" className="login-link">log in</a> instead.
           </>
         );
+
+        // Step 2: Sign out the user after checking
+        await signOut();
         return;
       }
 
-      // Step 2: Handle login errors
+      // Step 3: Handle login errors
       if (loginError.message.includes('Invalid login credentials')) {
         setMessage(
           <>
@@ -72,7 +76,7 @@ export default function SignupPage() {
       }
 
       if (loginError.message.includes('User not found')) {
-        // Step 3: If no user exists, proceed with signup
+        // Step 4: If no user exists, proceed with signup
         const { data, error: signupError } = await supabase.auth.signUp({
           email,
           password,
@@ -82,7 +86,10 @@ export default function SignupPage() {
         });
 
         if (signupError) {
-          if (signupError.message.includes('Invalid password')) {
+          // Handle specific error for existing user
+          if (signupError.message.includes('User already exists')) {
+            setMessage('User already exists. Please log in instead.');
+          } else if (signupError.message.includes('Invalid password')) {
             setMessage('The password you entered is invalid. Please try again.');
           } else {
             setMessage(`Error: ${signupError.message}`);
@@ -114,11 +121,11 @@ export default function SignupPage() {
         <h2 className="signup-title">Sign Up</h2>
         <p className="signup-description">
           Create an account to get started!
-          </p>
+        </p>
         <form onSubmit={handleSignup} className="signup-form">
           <div className="form-group">
             <label htmlFor="email" className="form-label">Email:</label>
-            <br/>
+            <br />
             <input
               id="email"
               type="email"
@@ -131,7 +138,7 @@ export default function SignupPage() {
           </div>
           <div className="form-group">
             <label htmlFor="password" className="form-label">Password:</label>
-            <br/>
+            <br />
             <input
               id="password"
               type="password"
@@ -142,7 +149,7 @@ export default function SignupPage() {
               required
             />
           </div>
-          <br/>
+          <br />
           <button type="submit" className="signup-button">
             Sign Up
           </button>
