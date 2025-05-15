@@ -18,24 +18,25 @@ export default function Database() {
         .from('users')
         .select('forename, surname, email, genre_instrument, social');
 
-      // Apply filters if selected
+      // Filter by genre using PostgREST jsonb contains operator
       if (genreFilter) {
-        query = query.ilike('genre_instrument', `%${genreFilter}%`);
+        query = query.contains('genre_instrument', [{ genre: genreFilter }]);
       }
+      // Filter by instrument using PostgREST jsonb contains operator
       if (instrumentFilter) {
-        query = query.ilike('genre_instrument', `%${instrumentFilter}%`);
+        query = query.contains('genre_instrument', [{ instrument: instrumentFilter }]);
       }
 
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching users:', error);
+        alert('Error fetching users.');
         return;
       }
 
-      setUsers(data || []); // Set the fetched users
+      setUsers(data || []);
     } catch (err) {
-      console.error('Unexpected error fetching users:', err);
+      alert('Unexpected error fetching users.');
     } finally {
       setLoading(false);
     }
@@ -148,80 +149,91 @@ export default function Database() {
           <table className="user-table">
             <thead>
               <tr>
-                <th>Forename</th>
-                <th>Surname</th>
+                <th>Name</th>
+                <th>Instrument(s) & Genre(s)</th>
                 <th>Email</th>
-                <th>Instrument-Genre</th>
                 <th>Social Links</th>
+                {/* Certificates column is hidden */}
               </tr>
             </thead>
             <tbody>
               {users.length > 0 ? (
                 users.map((user, index) => (
                   <tr key={index}>
-                    <td>{user.forename || 'N/A'}</td>
-                    <td>{user.surname || 'N/A'}</td>
-                    <td>{user.email || 'N/A'}</td>
+                    {/* Name field */}
                     <td>
-                      {user.genre_instrument ? (
-                        (() => {
-                          try {
-                            const parsedGenres = JSON.parse(user.genre_instrument); // Attempt to parse JSON
-                            return Array.isArray(parsedGenres)
-                          ? parsedGenres.map((item, i) => {
+                      {user.forename || user.surname
+                        ? `${user.forename || ''} ${user.surname || ''}`.trim()
+                        : 'N/A'}
+                    </td>
+                    {/* Instrument(s) & Genre(s) as comma-separated */}
+                    <td>
+                      {Array.isArray(user.genre_instrument) && user.genre_instrument.length > 0 ? (
+                        user.genre_instrument
+                          .map((item) => {
+                            let genreObj = item;
+                            if (typeof item === 'string') {
                               try {
-                                const parsedItem = typeof item === 'string' ? JSON.parse(item) : item;
-                                return (
-                                  <div key={i}>
-                                    {parsedItem.genre} - {parsedItem.instrument}
-                                  </div>
-                                );
-                              } catch (err) {
-                                return <div key={i}>Invalid item format</div>;
+                                genreObj = JSON.parse(item);
+                              } catch {
+                                return null;
                               }
-                            })
-                            : <div>Invalid format</div>;
-
-                          } catch (err) {
-                            return <div>Invalid JSON</div>; // Handle parsing errors
-                          }
-                        })()
+                            }
+                            if (genreObj && genreObj.genre && genreObj.instrument) {
+                              return `${genreObj.instrument} (${genreObj.genre})`;
+                            }
+                            return null;
+                          })
+                          .filter(Boolean)
+                          .join(', ')
                       ) : (
                         'N/A'
                       )}
                     </td>
+                    {/* Email */}
+                    <td>{user.email || 'N/A'}</td>
+                    {/* Social Links as icons */}
                     <td>
-                      {user.social ? (
-                        (() => {
-                          try {
-                            // Check if social is a JSON string and parse it
-                            const socialLinks = typeof user.social === 'string' ? JSON.parse(user.social) : user.social;
-
-                            // Check if it's an array and render each link
-                            return Array.isArray(socialLinks) ? (
-                              socialLinks.map((item, i) => (
-                                <div key={i}>
-                                  <a href={item.link} target="_blank" rel="noopener noreferrer">
-                                    {item.platform}
-                                  </a>
-                                </div>
-                              ))
-                            ) : (
-                              <div>Invalid format</div> // Handle non-array data
-                            );
-                          } catch (err) {
-                            return <div>Invalid JSON</div>; // Handle parsing errors
-                          }
-                        })()
-                      ) : (
-                        'N/A'
-                      )}
+                      {user.social ? (() => {
+                        try {
+                          const socialLinks = typeof user.social === 'string' ? JSON.parse(user.social) : user.social;
+                          return Array.isArray(socialLinks) ? (
+                            socialLinks.map((item, i) => {
+                              // Map platform to icon (FontAwesome or emoji fallback)
+                              const icons = {
+                                Instagram: <span role="img" aria-label="Instagram">📸</span>,
+                                Facebook: <span role="img" aria-label="Facebook">📘</span>,
+                                TikTok: <span role="img" aria-label="TikTok">🎵</span>,
+                                X: <span role="img" aria-label="X">🐦</span>,
+                                LinkedIn: <span role="img" aria-label="LinkedIn">💼</span>,
+                              };
+                              return (
+                                <a
+                                  key={i}
+                                  href={item.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{ marginRight: 8, fontSize: '1.2em' }}
+                                  title={item.platform}
+                                >
+                                  {icons[item.platform] || <span>{item.platform}</span>}
+                                </a>
+                              );
+                            })
+                          ) : (
+                            <div>Invalid format</div>
+                          );
+                        } catch (err) {
+                          return <div>Invalid JSON</div>;
+                        }
+                      })() : 'N/A'}
                     </td>
+                    {/* Certificates column is hidden */}
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5">No users found.</td>
+                  <td colSpan="4">No users found.</td>
                 </tr>
               )}
             </tbody>
