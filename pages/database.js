@@ -64,15 +64,16 @@ export default function Database() {
   const fetchInstruments = async () => {
     try {
       const { data, error } = await supabase
-        .from('instruments') // Assuming an `instruments` table exists
-        .select('name'); // Fetch instrument names
+        .from('instruments')
+        .select('name')
+        .order('name', { ascending: true }); // Order alphabetically
 
       if (error) {
         console.error('Error fetching instruments:', error);
         return;
       }
 
-      setInstruments(data || []); // Set the fetched instruments
+      setInstruments(data || []);
     } catch (err) {
       console.error('Unexpected error fetching instruments:', err);
     }
