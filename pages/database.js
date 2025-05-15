@@ -1,60 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import supabase from '../lib/supabase'; // Import the Supabase client
+import supabase from '../lib/supabase';
 import Header from '../components/Header';
 
 export default function Database() {
-  const [users, setUsers] = useState([]); // State to store queried users
-  const [genres, setGenres] = useState([]); // State to store genre options
-  const [instruments, setInstruments] = useState([]); // State to store instrument options
-  const [selectedGenre, setSelectedGenre] = useState(''); // State for the selected genre
-  const [selectedInstrument, setSelectedInstrument] = useState(''); // State for the selected instrument
-  const [loading, setLoading] = useState(true); // State to track loading
-
-  // Fetch users from the database
-  const fetchUsers = async (genreFilter = '', instrumentFilter = '') => {
-    setLoading(true);
-    try {
-      let query = supabase
-        .from('users')
-        .select('forename, surname, email, genre_instrument, social');
-
-      // Filter by genre using PostgREST jsonb contains operator
-      if (genreFilter) {
-        query = query.contains('genre_instrument', [{ genre: genreFilter }]);
-      }
-      // Filter by instrument using PostgREST jsonb contains operator
-      if (instrumentFilter) {
-        query = query.contains('genre_instrument', [{ instrument: instrumentFilter }]);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        alert('Error fetching users.');
-        return;
-      }
-
-      setUsers(data || []);
-    } catch (err) {
-      alert('Unexpected error fetching users.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [users, setUsers] = useState([]);
+  const [genres, setGenres] = useState([]);
+  const [instruments, setInstruments] = useState([]);
+  const [selectedGenre, setSelectedGenre] = useState('');
+  const [selectedInstrument, setSelectedInstrument] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false); // Track if search button was pressed
 
   // Fetch genres for the dropdown
   const fetchGenres = async () => {
     try {
       const { data, error } = await supabase
-        .from('genres') // Assuming a `genres` table exists
-        .select('name'); // Fetch genre names
-
+        .from('genres')
+        .select('name');
       if (error) {
         console.error('Error fetching genres:', error);
         return;
       }
-
-      setGenres(data || []); // Set the fetched genres
+      setGenres(data || []);
     } catch (err) {
       console.error('Unexpected error fetching genres:', err);
     }
@@ -66,43 +33,80 @@ export default function Database() {
       const { data, error } = await supabase
         .from('instruments')
         .select('name')
-        .order('name', { ascending: true }); // Order alphabetically
-
+        .order('name', { ascending: true });
       if (error) {
         console.error('Error fetching instruments:', error);
         return;
       }
-
       setInstruments(data || []);
     } catch (err) {
       console.error('Unexpected error fetching instruments:', err);
     }
   };
 
-  // Fetch users, genres, and instruments on component mount
+  // Fetch users from the database
+  const fetchUsers = async () => {
+    setHasSearched(true);
+    if (!selectedGenre && !selectedInstrument) {
+      setUsers([]);
+      return;
+    }
+    setLoading(true);
+    try {
+      let query = supabase
+        .from('users')
+        .select('forename, surname, email, genre_instrument, social');
+
+      if (selectedGenre && selectedInstrument) {
+        query = query.contains('genre_instrument', { genre: selectedGenre, instrument: selectedInstrument });
+      } else if (selectedGenre) {
+        query = query.contains('genre_instrument', { genre: selectedGenre });
+      } else if (selectedInstrument) {
+        query = query.contains('genre_instrument', { instrument: selectedInstrument });
+      }
+
+      const { data, error } = await query;
+      console.log('Fetched users:', data, 'Error:', error);
+
+      if (error) {
+        alert('Error fetching users.');
+        setUsers([]);
+        return;
+      }
+
+      setUsers(data || []);
+    } catch (err) {
+      alert('Unexpected error fetching users.');
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetchUsers(); // Fetch all users initially
-    fetchGenres(); // Fetch genres for the dropdown
-    fetchInstruments(); // Fetch instruments for the dropdown
+    fetchGenres();
+    fetchInstruments();
+    // Do NOT fetch users on mount
   }, []);
 
   // Handle genre selection
   const handleGenreChange = (e) => {
-    const genre = e.target.value;
-    setSelectedGenre(genre);
-    fetchUsers(genre, selectedInstrument); // Fetch users filtered by genre and instrument
+    setSelectedGenre(e.target.value);
+    setHasSearched(false); // Reset search state on change
   };
 
   // Handle instrument selection
   const handleInstrumentChange = (e) => {
-    const instrument = e.target.value;
-    setSelectedInstrument(instrument);
-    fetchUsers(selectedGenre, instrument); // Fetch users filtered by genre and instrument
+    setSelectedInstrument(e.target.value);
+    setHasSearched(false); // Reset search state on change
   };
+
+  // Determine if search is enabled
+  const canSearch = selectedGenre || selectedInstrument;
 
   return (
     <main className="database-page">
-      <Header /> {/* Add the Header component */}
+      <Header />
       <section className="database-container">
         <h1 className="database-title">User Database</h1>
         <p className="database-description">Search and explore user data.</p>
@@ -116,7 +120,7 @@ export default function Database() {
             value={selectedGenre}
             onChange={handleGenreChange}
           >
-            <option value="">All Genres</option>
+            <option value="">Select Genre</option>
             {genres.map((genre, index) => (
               <option key={index} value={genre.name}>
                 {genre.name}
@@ -134,7 +138,7 @@ export default function Database() {
             value={selectedInstrument}
             onChange={handleInstrumentChange}
           >
-            <option value="">All Instruments</option>
+            <option value="">Select Instrument</option>
             {instruments.map((instrument, index) => (
               <option key={index} value={instrument.name}>
                 {instrument.name}
@@ -143,10 +147,19 @@ export default function Database() {
           </select>
         </div>
 
-        {/* Display loading state */}
-        {loading ? (
-          <p className="loading-message">Loading users...</p>
-        ) : (
+        {/* Search button */}
+        <div className="filter-container">
+          <button
+            className="search-button"
+            onClick={fetchUsers}
+            disabled={!canSearch || loading}
+          >
+            {loading ? 'Searching...' : 'Search'}
+          </button>
+        </div>
+
+        {/* Only show table if a search has been made */}
+        {hasSearched && canSearch && !loading && (
           <table className="user-table">
             <thead>
               <tr>
@@ -154,7 +167,6 @@ export default function Database() {
                 <th>Instrument(s) & Genre(s)</th>
                 <th>Email</th>
                 <th>Social Links</th>
-                {/* Certificates column is hidden */}
               </tr>
             </thead>
             <tbody>
@@ -200,7 +212,6 @@ export default function Database() {
                           const socialLinks = typeof user.social === 'string' ? JSON.parse(user.social) : user.social;
                           return Array.isArray(socialLinks) ? (
                             socialLinks.map((item, i) => {
-                              // Map platform to icon (FontAwesome or emoji fallback)
                               const icons = {
                                 Instagram: <span role="img" aria-label="Instagram">📸</span>,
                                 Facebook: <span role="img" aria-label="Facebook">📘</span>,
@@ -229,7 +240,6 @@ export default function Database() {
                         }
                       })() : 'N/A'}
                     </td>
-                    {/* Certificates column is hidden */}
                   </tr>
                 ))
               ) : (

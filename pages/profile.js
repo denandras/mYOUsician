@@ -204,17 +204,12 @@ export default function Profile() {
 
         // Save the updated list immediately
         try {
-            const { error } = await supabase
+            await supabase
                 .from('users')
                 .update({ genre_instrument: updatedGenreInstrument })
                 .eq('uid', profile.uid);
 
-            if (error) {
-                console.error('Error saving genre-instrument list:', error);
-                setMessage('Error saving genre-instrument list.');
-            } else {
-                setMessage('Genre-instrument list updated successfully!');
-            }
+            setMessage('Genre-instrument list updated successfully!');
         } catch (err) {
             console.error('Unexpected error saving genre-instrument list:', err);
             setMessage('Unexpected error occurred.');
@@ -671,11 +666,8 @@ export default function Profile() {
                         <ul>
                             {profile.genre_instrument?.map((item, index) => (
                                 <li key={index}>
-                                    {item.genre} - {item.instrument}{' '}
-                                    <button
-                                        type="button"
-                                        onClick={() => handleDeleteGenreInstrument(index)}
-                                    >
+                                    {item.genre} - {item.instrument}
+                                    <button type="button" onClick={() => handleDeleteGenreInstrument(index)}>
                                         Delete
                                     </button>
                                 </li>
