@@ -206,7 +206,11 @@ export default function Database() {
                   <div key={index} className="user-list-row" style={{ display: 'flex', borderBottom: '1px solid #eee', padding: '0.5em 0' }}>
                     <div style={{ flex: 2 }}>{user.forename || user.surname ? `${user.forename || ''} ${user.surname || ''}`.trim() : 'N/A'}</div>
                     <div style={{ flex: 2 }}>{Array.isArray(user.genre_instrument) && user.genre_instrument.length > 0 ? user.genre_instrument.join(', ') : ''}</div>
-                    <div style={{ flex: 2 }}>{user.email ? <a href={`mailto:${user.email}`}>{user.email}</a> : ''}</div>
+                    <div style={{ flex: 2 }}>
+                      {user.email
+                        ? <a href={`mailto:${user.email}`}>Email</a>
+                        : ''}
+                    </div>
                     <div style={{ flex: 2 }}>
                       {user.social && (() => {
                         try {
@@ -260,8 +264,14 @@ export default function Database() {
                     <div style={{ flex: 2 }}>
                       {Array.isArray(user.video_links) && user.video_links.length > 0
                         ? user.video_links.map((link, i) => (
-                            <a key={i} href={link} target="_blank" rel="noopener noreferrer" style={{ marginRight: 8 }}>
-                              {link}
+                            <a
+                              key={i}
+                              href={link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ marginRight: 8 }}
+                            >
+                              {`Video ${i + 1}`}
                             </a>
                           ))
                         : ''}
