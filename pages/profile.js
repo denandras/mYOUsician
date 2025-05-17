@@ -174,7 +174,11 @@ export default function Profile() {
             setGenres(data || []);
         };
         const fetchInstruments = async () => {
-            const { data } = await supabase.from('instruments').select('name').order('name', { ascending: true });
+            const { data } = await supabase
+                .from('instruments')
+                .select('name, category')
+                .order('category', { ascending: true })
+                .order('name', { ascending: true });
             setInstruments(data || []);
         };
         const fetchEducationOptions = async () => {
@@ -737,12 +741,12 @@ export default function Profile() {
                                         acc[inst.category].push(inst);
                                         return acc;
                                     }, {});
-                                    // Render optgroups sorted by category name
+                                    // Render optgroups sorted by category name, and instruments sorted by name
                                     return Object.keys(grouped).sort().map(category => (
                                         <optgroup key={category} label={category}>
                                             {grouped[category]
                                                 .sort((a, b) => a.name.localeCompare(b.name))
-                                                .map((inst, idx) => (
+                                                .map(inst => (
                                                     <option key={inst.name} value={inst.name}>
                                                         {inst.name}
                                                     </option>

@@ -44,7 +44,6 @@ export default function LoginPage() {
     setMessage('');
 
     try {
-      // Step 1: Attempt to log in the user
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -57,31 +56,8 @@ export default function LoginPage() {
 
       setUser(data.user);
       setMessage('Login successful!');
-      console.log('Login success:', data);
-
-      // Step 2: Check if user exists in users table
-      const { data: userRows, error: userError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('uid', data.user.id)
-        .maybeSingle();
-
-      if (userError) {
-        setMessage('Error checking user profile row.');
-        return; // Do NOT create a new user row if there was an error!
-      }
-
-      if (!userRows) {
-        // Only create if there was NO error and NO user row found
-        const result = await createuser({ uid: data.user.id, email: data.user.email });
-        if (result && result.error) {
-          setMessage('Error creating user profile row.');
-          return;
-        }
-        window.location.href = '/profile';
-      } else {
-        window.location.href = '/';
-      }
+      // Just redirect to the main page or profile page as you wish
+      window.location.href = '/';
     } catch (err) {
       setMessage('An unexpected error occurred. Please try again.');
       console.error('Unexpected error:', err);
