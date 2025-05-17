@@ -730,9 +730,26 @@ export default function Profile() {
                                 onChange={(e) => setNewInstrument(e.target.value)}
                             >
                                 <option value="">Select Instrument</option>
-                                {instruments.map((i, idx) => (
-                                    <option key={idx} value={i.name}>{i.name}</option>
-                                ))}
+                                {(() => {
+                                    // Group instruments by category
+                                    const grouped = instruments.reduce((acc, inst) => {
+                                        if (!acc[inst.category]) acc[inst.category] = [];
+                                        acc[inst.category].push(inst);
+                                        return acc;
+                                    }, {});
+                                    // Render optgroups sorted by category name
+                                    return Object.keys(grouped).sort().map(category => (
+                                        <optgroup key={category} label={category}>
+                                            {grouped[category]
+                                                .sort((a, b) => a.name.localeCompare(b.name))
+                                                .map((inst, idx) => (
+                                                    <option key={inst.name} value={inst.name}>
+                                                        {inst.name}
+                                                    </option>
+                                                ))}
+                                        </optgroup>
+                                    ));
+                                })()}
                             </select>
                             <button type="button" onClick={async () => {
                                 if (!newGenre || !newInstrument) return;

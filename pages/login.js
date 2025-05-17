@@ -68,20 +68,18 @@ export default function LoginPage() {
 
       if (userError) {
         setMessage('Error checking user profile row.');
-        return;
+        return; // Do NOT create a new user row if there was an error!
       }
 
       if (!userRows) {
-        // User does not exist, create and redirect to profile
+        // Only create if there was NO error and NO user row found
         const result = await createuser({ uid: data.user.id, email: data.user.email });
         if (result && result.error) {
-          console.error('Error creating user row:', result.error);
           setMessage('Error creating user profile row.');
           return;
         }
         window.location.href = '/profile';
       } else {
-        // User exists, redirect to index
         window.location.href = '/';
       }
     } catch (err) {

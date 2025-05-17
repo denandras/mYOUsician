@@ -8,22 +8,32 @@ export default function Header() {
   const [loading, setLoading] = useState(true); // State to track loading status
 
   useEffect(() => {
+    let mounted = true;
+
     const checkSession = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
-
+      if (!mounted) return;
       if (error) {
-        console.error('Error fetching session:', error);
         setIsLoggedIn(false);
-        setLoading(false); // Stop loading if there's an error
+        setLoading(false);
         return;
       }
-
-      const isVerified = await verifyUser(session);
-      setIsLoggedIn(isVerified); // Set login status based on session verification
-      setLoading(false); // Stop loading after session check
+      const user = await verifyUser(session);
+      setIsLoggedIn(!!user);
+      setLoading(false);
     };
 
     checkSession();
+
+    // Listen for auth state changes
+    const { data: listener } = supabase.auth.onAuthStateChange(() => {
+      checkSession();
+    });
+
+    return () => {
+      mounted = false;
+      listener?.subscription?.unsubscribe?.();
+    };
   }, []);
 
   const handleLogout = async () => {

@@ -41,7 +41,8 @@ export default function Database() {
     try {
       const { data, error } = await supabase
         .from('instruments')
-        .select('name')
+        .select('name, category') // <-- include category
+        .order('category', { ascending: true })
         .order('name', { ascending: true });
       if (error) {
         console.error('Error fetching instruments:', error);
@@ -64,6 +65,7 @@ export default function Database() {
 
       if (selectedGenre && selectedInstrument) {
         const searchString = `${selectedGenre} ${selectedInstrument}`;
+        console.log('Searching for:', searchString);
         query = query.contains('genre_instrument', [searchString]);
       }
 
@@ -205,11 +207,25 @@ export default function Database() {
               onChange={handleInstrumentChange}
             >
               <option value="">Select Instrument</option>
-              {instruments.map((instrument, index) => (
-                <option key={index} value={instrument.name}>
-                  {instrument.name}
-                </option>
-              ))}
+              {(() => {
+                // Group by category
+                const grouped = instruments.reduce((acc, inst) => {
+                  if (!acc[inst.category]) acc[inst.category] = [];
+                  acc[inst.category].push(inst);
+                  return acc;
+                }, {});
+                return Object.keys(grouped).sort().map(category => (
+                  <optgroup key={category} label={category}>
+                    {grouped[category]
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                      .map(inst => (
+                        <option key={inst.name} value={inst.name}>
+                          {inst.name}
+                        </option>
+                      ))}
+                  </optgroup>
+                ));
+              })()}
             </select>
           </div>
 
