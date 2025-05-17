@@ -189,38 +189,37 @@ export default function Database() {
 
         {/* Only show list if a search has been made */}
         {hasSearched && canSearch && !loading && (
-          <ul className="user-list">
-            {users.length > 0 ? (
-              users.map((user, index) => (
-                <li key={index} className="user-list-item" style={{ marginBottom: '1.5em', borderBottom: '1px solid #eee', paddingBottom: '1em' }}>
-                  <div>
-                    <strong>Name:</strong> {user.forename || user.surname ? `${user.forename || ''} ${user.surname || ''}`.trim() : 'N/A'}
-                  </div>
-                  {Array.isArray(user.genre_instrument) && user.genre_instrument.length > 0 && (
-                    <div>
-                      <strong>Instrument(s) & Genre(s):</strong> {user.genre_instrument.join(', ')}
-                    </div>
-                  )}
-                  {user.email && (
-                    <div>
-                      <strong>Email:</strong> <a href={`mailto:${user.email}`}>{user.email}</a>
-                    </div>
-                  )}
-                  {user.social && (() => {
-                    try {
-                      const socialLinks = typeof user.social === 'string' ? JSON.parse(user.social) : user.social;
-                      if (Array.isArray(socialLinks) && socialLinks.length > 0) {
-                        const icons = {
-                          Instagram: <span role="img" aria-label="Instagram">📸</span>,
-                          Facebook: <span role="img" aria-label="Facebook">📘</span>,
-                          TikTok: <span role="img" aria-label="TikTok">🎵</span>,
-                          X: <span role="img" aria-label="X">🐦</span>,
-                          LinkedIn: <span role="img" aria-label="LinkedIn">💼</span>,
-                        };
-                        return (
-                          <div>
-                            <strong>Social Links:</strong>{' '}
-                            {socialLinks.map((item, i) => (
+          <>
+            <div className="user-list-header" style={{ display: 'flex', fontWeight: 'bold', borderBottom: '2px solid #ccc', padding: '0.5em 0' }}>
+              <div style={{ flex: 2 }}>Name</div>
+              <div style={{ flex: 2 }}>Instrument(s) & Genre(s)</div>
+              <div style={{ flex: 2 }}>Email</div>
+              <div style={{ flex: 2 }}>Social Links</div>
+              <div style={{ flex: 2 }}>Education</div>
+              <div style={{ flex: 2 }}>Occupation</div>
+              <div style={{ flex: 2 }}>Certificates</div>
+              <div style={{ flex: 2 }}>Video Links</div>
+            </div>
+            <ul className="user-list" style={{ listStyle: 'none', padding: 0 }}>
+              {users.length > 0 ? (
+                users.map((user, index) => (
+                  <div key={index} className="user-list-row" style={{ display: 'flex', borderBottom: '1px solid #eee', padding: '0.5em 0' }}>
+                    <div style={{ flex: 2 }}>{user.forename || user.surname ? `${user.forename || ''} ${user.surname || ''}`.trim() : 'N/A'}</div>
+                    <div style={{ flex: 2 }}>{Array.isArray(user.genre_instrument) && user.genre_instrument.length > 0 ? user.genre_instrument.join(', ') : ''}</div>
+                    <div style={{ flex: 2 }}>{user.email ? <a href={`mailto:${user.email}`}>{user.email}</a> : ''}</div>
+                    <div style={{ flex: 2 }}>
+                      {user.social && (() => {
+                        try {
+                          const socialLinks = typeof user.social === 'string' ? JSON.parse(user.social) : user.social;
+                          if (Array.isArray(socialLinks) && socialLinks.length > 0) {
+                            const icons = {
+                              Instagram: <span role="img" aria-label="Instagram">📸</span>,
+                              Facebook: <span role="img" aria-label="Facebook">📘</span>,
+                              TikTok: <span role="img" aria-label="TikTok">🎵</span>,
+                              X: <span role="img" aria-label="X">🐦</span>,
+                              LinkedIn: <span role="img" aria-label="LinkedIn">💼</span>,
+                            };
+                            return socialLinks.map((item, i) => (
                               <a
                                 key={i}
                                 href={item.link}
@@ -231,56 +230,49 @@ export default function Database() {
                               >
                                 {icons[item.platform] || <span>{item.platform}</span>}
                               </a>
-                            ))}
-                          </div>
-                        );
-                      }
-                      return null;
-                    } catch (err) {
-                      return null;
-                    }
-                  })()}
-                  {Array.isArray(user.education) && user.education.length > 0 && (
-                    <div>
-                      <strong>Education:</strong>{' '}
-                      {user.education.map((edu, i) =>
-                        typeof edu === 'object'
-                          ? `${edu.place}${edu.name ? ` – ${edu.name}` : ''}`
-                          : edu
-                      ).join(', ')}
+                            ));
+                          }
+                          return null;
+                        } catch (err) {
+                          return null;
+                        }
+                      })()}
                     </div>
-                  )}
-                  {Array.isArray(user.occupation) && user.occupation.length > 0 && (
-                    <div>
-                      <strong>Occupation:</strong> {user.occupation.join(', ')}
+                    <div style={{ flex: 2 }}>
+                      {Array.isArray(user.education) && user.education.length > 0
+                        ? user.education.map((edu, i) =>
+                            typeof edu === 'object'
+                              ? `${edu.place}${edu.name ? ` – ${edu.name}` : ''}`
+                              : edu
+                          ).join(', ')
+                        : ''}
                     </div>
-                  )}
-                  {Array.isArray(user.certificates) && user.certificates.length > 0 && (
-                    <div>
-                      <strong>Certificates:</strong>{' '}
-                      {user.certificates.map((cert, i) =>
-                        typeof cert === 'object'
-                          ? `${cert.certificate || ''}${cert.organization ? ` from ${cert.organization}` : ''}`
-                          : cert
-                      ).join(', ')}
+                    <div style={{ flex: 2 }}>{Array.isArray(user.occupation) && user.occupation.length > 0 ? user.occupation.join(', ') : ''}</div>
+                    <div style={{ flex: 2 }}>
+                      {Array.isArray(user.certificates) && user.certificates.length > 0
+                        ? user.certificates.map((cert, i) =>
+                            typeof cert === 'object'
+                              ? `${cert.certificate || ''}${cert.organization ? ` from ${cert.organization}` : ''}`
+                              : cert
+                          ).join(', ')
+                        : ''}
                     </div>
-                  )}
-                  {Array.isArray(user.video_links) && user.video_links.length > 0 && (
-                    <div>
-                      <strong>Video Links:</strong>{' '}
-                      {user.video_links.map((link, i) => (
-                        <a key={i} href={link} target="_blank" rel="noopener noreferrer" style={{ marginRight: 8 }}>
-                          {link}
-                        </a>
-                      ))}
+                    <div style={{ flex: 2 }}>
+                      {Array.isArray(user.video_links) && user.video_links.length > 0
+                        ? user.video_links.map((link, i) => (
+                            <a key={i} href={link} target="_blank" rel="noopener noreferrer" style={{ marginRight: 8 }}>
+                              {link}
+                            </a>
+                          ))
+                        : ''}
                     </div>
-                  )}
-                </li>
-              ))
-            ) : (
-              <li>No users found.</li>
-            )}
-          </ul>
+                  </div>
+                ))
+              ) : (
+                <li>No users found.</li>
+              )}
+            </ul>
+          </>
         )}
       </section>
     </main>
