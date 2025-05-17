@@ -59,16 +59,31 @@ export default function LoginPage() {
       setMessage('Login successful!');
       console.log('Login success:', data);
 
-      // Step 2: Call createUser to ensure user row exists
-      const result = await createuser({ uid: data.user.id, email: data.user.email });
-      if (result && result.error) {
-        console.error('Error creating user row:', result.error);
-        setMessage('Error creating user profile row.');
-        // Optionally, return here or continue to profile page
+      // Step 2: Check if user exists in users table
+      const { data: userRows, error: userError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('uid', data.user.id)
+        .maybeSingle();
+
+      if (userError) {
+        setMessage('Error checking user profile row.');
+        return;
       }
 
-      // Redirect to profile page for editing
-      window.location.href = '/profile';
+      if (!userRows) {
+        // User does not exist, create and redirect to profile
+        const result = await createuser({ uid: data.user.id, email: data.user.email });
+        if (result && result.error) {
+          console.error('Error creating user row:', result.error);
+          setMessage('Error creating user profile row.');
+          return;
+        }
+        window.location.href = '/profile';
+      } else {
+        // User exists, redirect to index
+        window.location.href = '/';
+      }
     } catch (err) {
       setMessage('An unexpected error occurred. Please try again.');
       console.error('Unexpected error:', err);
