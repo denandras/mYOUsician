@@ -176,11 +176,10 @@ export default function Profile() {
     // Handle adding a new genre-instrument pair
     const handleAddGenreInstrument = async () => {
         if (!newGenre || !newInstrument) return;
+        const newPair = `${newGenre} ${newInstrument}`;
+        if (profile.genre_instrument?.includes(newPair)) return;
 
-        const updatedGenreInstrument = [
-            ...profile.genre_instrument,
-            { genre: newGenre, instrument: newInstrument },
-        ];
+        const updatedGenreInstrument = [...(profile.genre_instrument || []), newPair];
 
         setProfile((prev) => ({
             ...prev,
@@ -190,17 +189,15 @@ export default function Profile() {
         setNewGenre('');
         setNewInstrument('');
 
-        // Save the updated list immediately
+        // Save to DB
         try {
             await supabase
                 .from('users')
                 .update({ genre_instrument: updatedGenreInstrument })
                 .eq('uid', profile.uid);
-
-            setMessage('Genre-instrument list updated successfully!');
+            setMessage('Genre-instrument list updated!');
         } catch (err) {
-            console.error('Unexpected error saving genre-instrument list:', err);
-            setMessage('Unexpected error occurred.');
+            setMessage('Error updating genre-instrument list.');
         }
     };
 
@@ -643,19 +640,18 @@ export default function Profile() {
                             </button>
                         </div>
                         <ul>
-                            {profile.genre_instrument?.map((item, index) => (
-                                <li key={index}>
-                                    {item.genre} - {item.instrument}
-                                    <button
-                                        type="button"
-                                        className="delete-x"
-                                        title="Delete"
-                                        onClick={() => handleDeleteGenreInstrument(index)}
-                                    >
-                                        ×
-                                    </button>
-                                </li>
-                            ))}
+                            {Array.isArray(profile.genre_instrument) && profile.genre_instrument.length > 0 ? (
+                                profile.genre_instrument.map((item, index) => (
+                                    <li key={index}>
+                                        {item}
+                                        <button type="button" onClick={() => handleDeleteGenreInstrument(index)}>
+                                            ×
+                                        </button>
+                                    </li>
+                                ))
+                            ) : (
+                                <li>No genre-instrument pairs</li>
+                            )}
                         </ul>
                     </div>
 

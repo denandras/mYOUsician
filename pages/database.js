@@ -55,18 +55,11 @@ export default function Database() {
         .select('forename, surname, email, genre_instrument, social');
 
       if (selectedGenre && selectedInstrument) {
-        // Both: exact match object in array
-        query = query.contains('genre_instrument', [{ genre: selectedGenre, instrument: selectedInstrument }]);
-      } else if (selectedGenre) {
-        // Just genre: match any object with this genre
-        query = query.contains('genre_instrument', { genre: selectedGenre });
-      } else if (selectedInstrument) {
-        // Just instrument: match any object with this instrument
-        query = query.contains('genre_instrument', { instrument: selectedInstrument });
+        const searchString = `${selectedGenre} ${selectedInstrument}`;
+        query = query.contains('genre_instrument', [searchString]);
       }
 
       const { data, error } = await query;
-      console.log('Fetched users:', data, 'Error:', error);
       setUsers(data || []);
     } catch (err) {
       alert('Unexpected error fetching users.');
@@ -100,7 +93,7 @@ export default function Database() {
   };
 
   // Determine if search is enabled
-  const canSearch = true;
+  const canSearch = selectedGenre && selectedInstrument;
 
   return (
     <main className="database-page">
@@ -156,101 +149,66 @@ export default function Database() {
           </button>
         </div>
 
-        {/* Only show table if a search has been made */}
+        {/* Only show list if a search has been made */}
         {hasSearched && canSearch && !loading && (
-          <table className="user-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Instrument(s) & Genre(s)</th>
-                <th>Email</th>
-                <th>Social Links</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.length > 0 ? (
-                users.map((user, index) => (
-                  <tr key={index}>
-                    {/* Name field */}
-                    <td>
-                      {user.forename || user.surname
-                        ? `${user.forename || ''} ${user.surname || ''}`.trim()
-                        : 'N/A'}
-                    </td>
-                    {/* Instrument(s) & Genre(s) as comma-separated */}
-                    <td>
-                      {Array.isArray(user.genre_instrument) && user.genre_instrument.length > 0 ? (
-                        user.genre_instrument
-                          .map((item) => {
-                            let genreObj = item;
-                            if (typeof item === 'string') {
-                              try {
-                                genreObj = JSON.parse(item);
-                              } catch {
-                                return null;
-                              }
-                            }
-                            if (genreObj && genreObj.genre && genreObj.instrument) {
-                              return `${genreObj.instrument} (${genreObj.genre})`;
-                            }
-                            return null;
+          <ul className="user-list">
+            {users.length > 0 ? (
+              users.map((user, index) => (
+                <li key={index} className="user-list-item" style={{ marginBottom: '1.5em', borderBottom: '1px solid #eee', paddingBottom: '1em' }}>
+                  <div><strong>Name:</strong> {user.forename || user.surname ? `${user.forename || ''} ${user.surname || ''}`.trim() : 'N/A'}</div>
+                  <div>
+                    <strong>Instrument(s) & Genre(s):</strong>{' '}
+                    {Array.isArray(user.genre_instrument) && user.genre_instrument.length > 0
+                      ? user.genre_instrument.join(', ')
+                      : 'N/A'}
+                  </div>
+                  <div>
+                    <strong>Email:</strong>{' '}
+                    {user.email ? (
+                      <a href={`mailto:${user.email}`}>{user.email}</a>
+                    ) : 'N/A'}
+                  </div>
+                  <div>
+                    <strong>Social Links:</strong>{' '}
+                    {user.social ? (() => {
+                      try {
+                        const socialLinks = typeof user.social === 'string' ? JSON.parse(user.social) : user.social;
+                        return Array.isArray(socialLinks) ? (
+                          socialLinks.map((item, i) => {
+                            const icons = {
+                              Instagram: <span role="img" aria-label="Instagram">📸</span>,
+                              Facebook: <span role="img" aria-label="Facebook">📘</span>,
+                              TikTok: <span role="img" aria-label="TikTok">🎵</span>,
+                              X: <span role="img" aria-label="X">🐦</span>,
+                              LinkedIn: <span role="img" aria-label="LinkedIn">💼</span>,
+                            };
+                            return (
+                              <a
+                                key={i}
+                                href={item.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ marginRight: 8, fontSize: '1.2em' }}
+                                title={item.platform}
+                              >
+                                {icons[item.platform] || <span>{item.platform}</span>}
+                              </a>
+                            );
                           })
-                          .filter(Boolean)
-                          .join(', ')
-                      ) : (
-                        'N/A'
-                      )}
-                    </td>
-                    {/* Email */}
-                    <td>
-                      {user.email ? (
-                        <a href={`mailto:${user.email}`}>{user.email}</a>
-                      ) : 'N/A'}
-                    </td>
-                    {/* Social Links as icons */}
-                    <td>
-                      {user.social ? (() => {
-                        try {
-                          const socialLinks = typeof user.social === 'string' ? JSON.parse(user.social) : user.social;
-                          return Array.isArray(socialLinks) ? (
-                            socialLinks.map((item, i) => {
-                              const icons = {
-                                Instagram: <span role="img" aria-label="Instagram">📸</span>,
-                                Facebook: <span role="img" aria-label="Facebook">📘</span>,
-                                TikTok: <span role="img" aria-label="TikTok">🎵</span>,
-                                X: <span role="img" aria-label="X">🐦</span>,
-                                LinkedIn: <span role="img" aria-label="LinkedIn">💼</span>,
-                              };
-                              return (
-                                <a
-                                  key={i}
-                                  href={item.link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={{ marginRight: 8, fontSize: '1.2em' }}
-                                  title={item.platform}
-                                >
-                                  {icons[item.platform] || <span>{item.platform}</span>}
-                                </a>
-                              );
-                            })
-                          ) : (
-                            <div>Invalid format</div>
-                          );
-                        } catch (err) {
-                          return <div>Invalid JSON</div>;
-                        }
-                      })() : 'N/A'}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="4">No users found.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                        ) : (
+                          <span>Invalid format</span>
+                        );
+                      } catch (err) {
+                        return <span>Invalid JSON</span>;
+                      }
+                    })() : 'N/A'}
+                  </div>
+                </li>
+              ))
+            ) : (
+              <li>No users found.</li>
+            )}
+          </ul>
         )}
       </section>
     </main>
