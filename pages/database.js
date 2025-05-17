@@ -48,10 +48,6 @@ export default function Database() {
   // Fetch users from the database
   const fetchUsers = async () => {
     setHasSearched(true);
-    if (!selectedGenre && !selectedInstrument) {
-      setUsers([]);
-      return;
-    }
     setLoading(true);
     try {
       let query = supabase
@@ -59,22 +55,18 @@ export default function Database() {
         .select('forename, surname, email, genre_instrument, social');
 
       if (selectedGenre && selectedInstrument) {
-        query = query.contains('genre_instrument', { genre: selectedGenre, instrument: selectedInstrument });
+        // Both: exact match object in array
+        query = query.contains('genre_instrument', [{ genre: selectedGenre, instrument: selectedInstrument }]);
       } else if (selectedGenre) {
+        // Just genre: match any object with this genre
         query = query.contains('genre_instrument', { genre: selectedGenre });
       } else if (selectedInstrument) {
+        // Just instrument: match any object with this instrument
         query = query.contains('genre_instrument', { instrument: selectedInstrument });
       }
 
       const { data, error } = await query;
       console.log('Fetched users:', data, 'Error:', error);
-
-      if (error) {
-        alert('Error fetching users.');
-        setUsers([]);
-        return;
-      }
-
       setUsers(data || []);
     } catch (err) {
       alert('Unexpected error fetching users.');
@@ -108,7 +100,7 @@ export default function Database() {
   };
 
   // Determine if search is enabled
-  const canSearch = selectedGenre || selectedInstrument;
+  const canSearch = true;
 
   return (
     <main className="database-page">
@@ -210,7 +202,11 @@ export default function Database() {
                       )}
                     </td>
                     {/* Email */}
-                    <td>{user.email || 'N/A'}</td>
+                    <td>
+                      {user.email ? (
+                        <a href={`mailto:${user.email}`}>{user.email}</a>
+                      ) : 'N/A'}
+                    </td>
                     {/* Social Links as icons */}
                     <td>
                       {user.social ? (() => {
