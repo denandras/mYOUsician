@@ -12,6 +12,13 @@ export default function Database() {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false); // Track if search button was pressed
   const [currentUserEmail, setCurrentUserEmail] = useState(''); // Add this state at the top
+  const [sortMethod, setSortMethod] = useState('name'); // default to 'name'
+
+  // Sorting options
+  const sortOptions = [
+    { value: 'name', label: 'Name' },
+    { value: 'education', label: 'Education' }
+  ];
 
   // Fetch genres for the dropdown
   const fetchGenres = async () => {
@@ -78,7 +85,7 @@ export default function Database() {
           ? user.education.map(e =>
               typeof e === 'string'
                 ? (() => { try { return JSON.parse(e); } catch { return { name: e, place: '' }; } })()
-                : { name: e.name || e.degree || '', place: e.place || e.school || '' }
+                : { name: e.name || e.degree || '', place: e.place || e.school || '', id: e.id }
             )
           : [],
         occupation: Array.isArray(user.occupation)
@@ -89,7 +96,27 @@ export default function Database() {
           : (typeof user.video_links === 'string' ? (() => { try { return JSON.parse(user.video_links); } catch { return []; } })() : []),
       }));
       const filteredUsers = parsedUsers.filter(user => user.email !== currentUserEmail);
-      setUsers(filteredUsers);
+
+      // Sort users based on sortMethod
+      let sortedUsers = [...filteredUsers];
+      if (sortMethod === 'name') {
+        sortedUsers.sort((a, b) =>
+          ((a.forename || '') + (a.surname || '')).localeCompare((b.forename || '') + (b.surname || ''))
+        );
+      } else if (sortMethod === 'education') {
+        // Sort from highest education to lowest (highest id first)
+        sortedUsers.sort((a, b) => {
+          const getHighest = arr =>
+            Array.isArray(arr) && arr.length > 0
+              ? arr.reduce((acc, curr) => (curr && curr.id && (!acc || curr.id > acc.id) ? curr : acc), null)
+              : null;
+          const aEdu = getHighest(a.education);
+          const bEdu = getHighest(b.education);
+          return ((bEdu?.id || 0) - (aEdu?.id || 0)); // highest first
+        });
+      }
+
+      setUsers(sortedUsers);
     } catch (err) {
       alert('Unexpected error fetching users.');
       setUsers([]);
@@ -138,7 +165,7 @@ export default function Database() {
       <Header />
       <section className="database-container">
         <h1 className="database-title">User Database</h1>
-        <p className="database-description">Search and explore user data.</p>
+        <p className="database-description">Search musicians.</p>
 
         <div
           className="search-form"
@@ -186,12 +213,29 @@ export default function Database() {
             </select>
           </div>
 
+          {/* Dropdown for sorting */}
+          <div className="filter-container">
+            <label htmlFor="sort-method" className="filter-label">Sort by:</label>
+            <select
+              id="sort-method"
+              className="filter-dropdown"
+              value={sortMethod}
+              onChange={e => setSortMethod(e.target.value)}
+              required
+            >
+              <option value="" disabled>Select sorting method</option>
+              {sortOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+
           {/* Search button */}
           <div className="filter-container">
             <button
               className="search-button"
               onClick={fetchUsers}
-              disabled={!canSearch || loading}
+              disabled={!canSearch || loading || !sortMethod}
             >
               {loading ? 'Searching...' : 'Search'}
             </button>
@@ -294,7 +338,7 @@ export default function Database() {
               ))}
             </div>
           ) : (
-            <div>No users found.</div>
+            hasSearched && <div>No users found.</div>
           )}
         </section>
       </section>
