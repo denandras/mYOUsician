@@ -8,19 +8,9 @@ export default function Home() {
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-
-      if (error) {
-        console.error('Error fetching session:', error);
-        setIsSignedIn(false); // Treat as not signed in if there's an error
-        return;
-      }
-
-      // Use verifyUser to check if the user is signed in
-      const isVerified = await verifyUser(session);
-      setIsSignedIn(isVerified);
+      const isVerified = await verifyUser();
+      setIsSignedIn(!!isVerified);
     };
-
     checkUser();
   }, []);
 

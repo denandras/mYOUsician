@@ -3,21 +3,22 @@ import supabase from '../lib/supabase'; // Import the singleton Supabase client
 import verifyUser from '../lib/getuser'; // Import the verifyUser function
 import signOut from '../lib/signOut'; // Import the reusable signOut function
 import Header from '../components/Header';
+import { createuser } from '../lib/createuser';
 
 export default function Profile() {
     const [profile, setProfile] = useState({
         forename: '',
         surname: '',
-        location: { country: '', city: '' }, // Default value for location
-        email: '', // Email will be extracted from the session
+        location: { country: '', city: '' }, // jsonb
+        email: '',
         phone: '',
         bio: '',
         occupation: [],
         education: [],
-        genre_instrument: [], // Default value: empty array
+        genre_instrument: [],
         social: [],
-        certificates: [], // Initialize certificates as an empty array
-        video_links: [], // Initialize video_links as an empty array
+        certificates: [], // as array in state, but save as JSON string
+        video_links: [],  // as array in state, but save as JSON string
     });
 
     const [message, setMessage] = useState('');
@@ -29,7 +30,6 @@ export default function Profile() {
     // Add new states for social links, occupation, education, and awards
     const [newSocialLink, setNewSocialLink] = useState('');
     const [newOccupation, setNewOccupation] = useState('');
-    const [newAward, setNewAward] = useState('');
     const [newEducation, setNewEducation] = useState('');
 
     // Add new states for dropdowns and detailed inputs
@@ -59,109 +59,80 @@ export default function Profile() {
     // Fetch user data and email from session on component mount
     useEffect(() => {
         const fetchProfile = async () => {
+            setLoading(true);
             try {
-                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-                if (sessionError) {
-                    console.error('Error fetching session:', sessionError);
-                    setLoading(false); // Stop loading if there's an error
+                // Get the current authenticated user
+                const userSession = await verifyUser();
+                if (!userSession || !userSession.id) {
+                    setMessage('Could not load your profile. Please try refreshing the page or log in again.');
+                    setLoading(false);
                     return;
                 }
+                const userId = userSession.id;
+                const userEmail = userSession.email;
 
-                if (!session || !session.user) {
-                    console.error('No session or user found. Redirecting to login.');
-                    window.location.href = '/login';
-                    return;
-                }
-
-                const userId = session.user.id;
-                const userEmail = session.user.email; // Extract email from session
-
-                if (!userId) {
-                    console.error('User ID is undefined. Redirecting to login.');
-                    window.location.href = '/login';
-                    return;
-                }
-
-                // Fetch the user from the database
+                // Try to fetch the user's profile from the users table
                 const { data: user, error } = await supabase
                     .from('users')
                     .select('*')
                     .eq('uid', userId)
-                    .maybeSingle(); // Use maybeSingle() to handle no rows gracefully
+                    .maybeSingle();
 
-                if (error) {
-                    console.error('Error fetching user:', error);
-                    setLoading(false); // Stop loading if there's an error
+                // If error is 400 (no row found) or user is null, create the user row
+                if ((error && error.code === 'PGRST116') || !user) {
+                    // No profile found, call the function to create a new user row
+                    const result = await createuser({ uid: userId, email: userEmail });
+                    if (!result || result.error) {
+                        console.error('CreateUser error:', result.error); // <-- Add this line
+                        setMessage('Error creating your profile. Please contact the developer.');
+                        setLoading(false);
+                        return;
+                    }
+                    // Fetch the newly created profile as before
+                    const { data: newUser } = await supabase
+                        .from('users')
+                        .select('*')
+                        .eq('uid', userId)
+                        .maybeSingle();
+                    setProfile({
+                        ...newUser,
+                        email: userEmail,
+                        location: newUser.location || { country: '', city: '' },
+                        genre_instrument: [],
+                        certificates: [],
+                        video_links: [],
+                        social: [],
+                    });
+                    setLoading(false);
+                    setMessage('Welcome! Please complete your profile.');
                     return;
                 }
 
-                if (!user) {
-                    console.warn('No user found in the database. Creating a new profile.');
-
-                    // Create a new profile with default values
-                    const { data: newUser, error: insertError } = await supabase
-                        .from('users')
-                        .insert([{
-                            uid: userId,
-                            email: userEmail,
-                            forename: '',
-                            surname: '',
-                            location: { country: '', city: '' },
-                            phone: '',
-                            bio: '',
-                            occupation: [],
-                            education: [],
-                            genre_instrument: [], // Default empty array
-                            social: [],
-                            certificates: [], // Ensure certificates is an empty array
-                            video_links: [],
-                        }])
-                        .select()
-                        .single();
-
-                    if (insertError) {
-                        console.error('Error creating new profile:', insertError);
-                        setLoading(false); // Stop loading if there's an error
-                        return;
+                // If user profile exists, parse and set it
+                const parsedGenreInstrument = (user.genre_instrument || []).map(item => {
+                    try {
+                        return typeof item === 'string' ? JSON.parse(item) : item;
+                    } catch (err) {
+                        return { genre: '', instrument: '' };
                     }
+                });
 
-                    setProfile(newUser); // Set the newly created profile
-                } else {
-                    // Parse the genre_instrument field if it is stored as a JSON string
-                    const parsedGenreInstrument = (user.genre_instrument || []).map(item => {
-                        try {
-                            return typeof item === 'string' ? JSON.parse(item) : item;
-                        } catch (err) {
-                            console.error('Error parsing genre_instrument item:', item, err);
-                            return { genre: '', instrument: '' }; // Fallback to empty values
-                        }
-                    });
-
-                    const parsedCertificates = (user.certificates || []).map((item) => {
-                        try {
-                            return typeof item === 'string' ? JSON.parse(item) : item;
-                        } catch (err) {
-                            console.error('Error parsing certificate item:', item, err);
-                            return { certificate: '', organization: '' }; // Fallback to empty values
-                        }
-                    });
-
-                    const updatedUser = {
-                        ...user,
-                        email: userEmail, // Set email from session
-                        location: user.location || { country: '', city: '' },
-                        genre_instrument: parsedGenreInstrument || [], // Ensure genre_instrument is an array
-                        certificates: parsedCertificates || [], // Ensure certificates is an array
-                        video_links: user.video_links || [], // Ensure video_links is an array
-                        social: user.social || [], // Ensure social is an array
-                    };
-                    setProfile(updatedUser);
-                }
+                setProfile({
+                    ...user,
+                    email: userEmail,
+                    location: user.location || { country: '', city: '' },
+                    occupation: user.occupation || [],
+                    education: user.education || [],
+                    genre_instrument: user.genre_instrument || [],
+                    social: user.social || [],
+                    certificates: user.certificates || [],
+                    video_links: user.video_links || [],
+                });
             } catch (err) {
                 console.error('Unexpected error fetching profile:', err);
+                setMessage(`Unexpected error occurred: ${err.message || JSON.stringify(err)}`);
             } finally {
-                setLoading(false); // Stop loading once the process is complete
+                setLoading(false);
             }
         };
 
@@ -326,37 +297,6 @@ export default function Profile() {
         }
     };
 
-    // Handle adding a new award
-    const handleAddAward = async () => {
-        if (!newAward) return;
-
-        const updatedAwards = [...profile.awards, newAward];
-
-        setProfile((prev) => ({
-            ...prev,
-            awards: updatedAwards,
-        }));
-
-        setNewAward('');
-
-        try {
-            const { error } = await supabase
-                .from('users')
-                .update({ awards: updatedAwards })
-                .eq('uid', profile.uid);
-
-            if (error) {
-                console.error('Error saving awards:', error);
-                setMessage('Error saving awards.');
-            } else {
-                setMessage('Awards updated successfully!');
-            }
-        } catch (err) {
-            console.error('Unexpected error saving awards:', err);
-            setMessage('Unexpected error occurred.');
-        }
-    };
-
     // Handle adding a new education
     const handleAddEducation = async () => {
         if (!newSchool || !newDegree) return;
@@ -466,23 +406,30 @@ export default function Profile() {
 
     // Save profile data
     const saveProfile = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('users')
-                .update(profile)
-                .eq('uid', profile.uid);
+        // ...collect form data...
+        const payload = {
+            uid: profile.uid,
+            email: profile.email,
+            forename: profile.forename,
+            surname: profile.surname,
+            location: profile.location,
+            phone: profile.phone,
+            bio: profile.bio,
+            occupation: Array.isArray(profile.occupation) ? profile.occupation : [], // array
+            education: Array.isArray(profile.education) ? profile.education : [],   // array
+            genre_instrument: Array.isArray(profile.genre_instrument) ? profile.genre_instrument : [], // array
+            social: Array.isArray(profile.social) ? profile.social : [],            // array
+            certificates: JSON.stringify(profile.certificates ?? []), // text (JSON string)
+            video_links: JSON.stringify(profile.video_links ?? []),   // text (JSON string)
+        };
 
-            if (error) {
-                console.error('Error updating profile:', error);
-                setMessage('Error updating profile.');
-            } else {
-                setMessage('Profile updated successfully!');
-                window.location.reload(); // Refresh the page
-            }
-        } catch (err) {
-            console.error('Unexpected error updating profile:', err);
-            setMessage('Unexpected error occurred.');
+        let result;
+        if (profile.uid) {
+            result = await supabase.from('users').update(payload).eq('uid', profile.uid);
+        } else {
+            result = await supabase.from('users').insert([payload]);
         }
+        // ...handle result...
     };
 
     // Logout function using the reusable signOut function
@@ -497,38 +444,58 @@ export default function Profile() {
 
     // Danger Zone: Delete Profile
     const handleDeleteProfile = async () => {
-        if (deleteConfirmation !== 'delete my profile') {
-            setMessage('Please type "delete my profile" to confirm.');
+        if (!deleteConfirmation) {
+            setMessage('Please enter your password to confirm.');
             return;
         }
 
         try {
-            // Delete from the `users` table
-            const { error: deleteUserError } = await supabase
-                .from('users')
-                .delete()
-                .eq('uid', profile.uid);
+            setMessage('Deleting profile...');
+            // Get the current session and access token
+            const { data: { session } } = await supabase.auth.getSession();
+            const accessToken = session?.access_token || '';
 
-            if (deleteUserError) {
-                console.error('Error deleting user from users table:', deleteUserError);
-                setMessage('Error deleting profile.');
-                return;
-            }
+            const response = await fetch('https://qwmtnlqpwzkkrmnvusup.supabase.co/functions/v1/delete-user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify({
+                    uid: profile.uid,
+                    password: deleteConfirmation
+                }),
+            });
 
-            // Delete from Supabase Auth
-            const { error: authError } = await supabase.auth.admin.deleteUser(profile.uid);
+            const result = await response.json();
 
-            if (authError) {
-                console.error('Error deleting user from auth:', authError);
-                setMessage('Error deleting profile from authentication.');
+            // Always call verifyUser after deletion attempt
+            const userSession = await verifyUser();
+            if (!response.ok) {
+                console.error('Error from Edge Function:', result);
+                setMessage(`Error deleting profile: ${result.error || response.statusText}`);
+                // Optionally, handle if user is already logged out
+                if (!userSession) {
+                    window.location.href = '/login';
+                }
                 return;
             }
 
             setMessage('Profile deleted successfully.');
-            window.location.href = '/'; // Redirect to the homepage
+            // If user is no longer authenticated, redirect to login or home
+            if (!userSession) {
+                window.location.href = '/login';
+            } else {
+                window.location.href = '/';
+            }
         } catch (err) {
             console.error('Unexpected error deleting profile:', err);
-            setMessage('Unexpected error occurred while deleting profile.');
+            setMessage(`Unexpected error occurred: ${err.message || JSON.stringify(err)}`);
+            // Optionally, check user session here as well
+            const userSession = await verifyUser();
+            if (!userSession) {
+                window.location.href = '/login';
+            }
         }
     };
 
@@ -744,7 +711,7 @@ export default function Profile() {
                             </button>
                         </div>
                         <ul>
-                            {profile.certificates?.map((cert, index) => (
+                            {(Array.isArray(profile.certificates) ? profile.certificates : []).map((cert, index) => (
                                 <li key={index}>
                                     {cert.certificate} from {cert.organization}{' '}
                                     <button
@@ -773,7 +740,7 @@ export default function Profile() {
                             </button>
                         </div>
                         <ul>
-                            {profile.video_links?.map((link, index) => (
+                            {(Array.isArray(profile.video_links) ? profile.video_links : []).map((link, index) => (
                                 <li key={index}>
                                     <a href={link} target="_blank" rel="noopener noreferrer">
                                         {link}
@@ -800,8 +767,8 @@ export default function Profile() {
                         Deleting your profile is permanent and cannot be undone.
                     </p>
                     <input
-                        type="text"
-                        placeholder='Type "delete my profile"'
+                        type="password"
+                        placeholder="Enter your password to confirm"
                         value={deleteConfirmation}
                         onChange={(e) => setDeleteConfirmation(e.target.value)}
                         className="danger-input"

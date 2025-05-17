@@ -14,22 +14,12 @@ export default function SignupPage() {
   // Check if the user is already logged in
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-
-      if (error) {
-        console.error('Error fetching session:', error);
-        return;
-      }
-
-      // Use verifyUser to check if the user is logged in and handle redirection
-      const isVerified = await verifyUser(session);
-      if (isVerified) {
-        setUser(session.user); // Set the user state
-        // Redirect to profile page
+      const user = await verifyUser();
+      if (user) {
+        setUser(user);
         window.location.href = '/';
       }
     };
-
     checkUser();
   }, []);
 
@@ -37,78 +27,53 @@ export default function SignupPage() {
     e.preventDefault();
     setMessage('');
 
-    // Step 0: Validate password length
     if (password.length < 6) {
       setMessage('Password must be at least 6 characters long.');
       return;
     }
 
     try {
-      // Step 1: Attempt to log in the user
-      const { error: loginError } = await supabase.auth.signInWithPassword({
+      const { data, error: signupError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/confirm`,
+        },
       });
 
-      if (!loginError) {
-        // Login successful, user already exists
-        setMessage(
-          <>
-            This email is already registered. Please{' '}
-            <a href="/login" className="login-link">log in</a> instead.
-          </>
-        );
-
-        // Step 2: Sign out the user after checking
-        await signOut();
-        return;
-      }
-
-      // Step 3: Handle login errors
-      if (loginError.message.includes('Invalid login credentials')) {
-        setMessage(
-          <>
-            This email is already registered. Please{' '}
-            <a href="/login" className="login-link">log in</a> instead.
-          </>
-        );
-        return;
-      }
-
-      if (loginError.message.includes('User not found')) {
-        // Step 4: If no user exists, proceed with signup
-        const { data, error: signupError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/confirm`, // Redirect after email confirmation
-          },
-        });
-
-        if (signupError) {
-          // Handle specific error for existing user
-          if (signupError.message.includes('User already exists')) {
-            setMessage('User already exists. Please log in instead.');
-          } else if (signupError.message.includes('Invalid password')) {
-            setMessage('The password you entered is invalid. Please try again.');
-          } else {
-            setMessage(`Error: ${signupError.message}`);
-          }
-          console.error('Signup error:', signupError);
-          return;
+      if (signupError) {
+        if (signupError.message.includes('User already exists')) {
+          setMessage(
+            <>
+              This email is already registered. Please{' '}
+              <a href="/login" className="login-link">log in</a> instead.
+            </>
+          );
+        } else if (signupError.message.includes('For security purposes')) {
+          setMessage('You have requested signup too recently. Please wait a minute and check your email for a confirmation link.');
+        } else if (signupError.message.includes('Invalid password')) {
+          setMessage('The password you entered is invalid. Please try again.');
+        } else {
+          setMessage(`Error: ${signupError.message}`);
         }
-
-        // If signup is successful
-        setMessage('Signup successful! Please check your email to confirm your account.');
-        console.log('Signup success:', data);
+        console.error('Signup error:', signupError);
         return;
       }
 
-      // Handle unexpected login errors
-      setMessage(`Unexpected error: ${loginError.message}`);
-      console.error('Login error:', loginError);
+      // If user is already registered, Supabase may not throw an error but data.user will be null
+      if (!data.user) {
+        setMessage(
+          <>
+            This email is already registered. Please{' '}
+            <a href="/login" className="login-link">log in</a> instead.
+          </>
+        );
+        return;
+      }
+
+      setMessage('Signup successful! Please check your email to confirm your account.');
+      console.log('Signup success:', data);
     } catch (err) {
-      // Handle unexpected errors
       setMessage('An unexpected error occurred. Please try again.');
       console.error('Unexpected error:', err);
     }

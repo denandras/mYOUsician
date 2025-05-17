@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import supabase from '../lib/supabase';
 import Header from '../components/Header';
+import verifyUser from '../lib/getuser'; // Add this import if you want to check auth
 
 export default function Database() {
   const [users, setUsers] = useState([]);
@@ -86,7 +87,12 @@ export default function Database() {
   useEffect(() => {
     fetchGenres();
     fetchInstruments();
-    // Do NOT fetch users on mount
+    // Optionally, check auth here:
+    // const checkUser = async () => {
+    //   const user = await verifyUser();
+    //   // You can use user info if needed
+    // };
+    // checkUser();
   }, []);
 
   // Handle genre selection

@@ -1,43 +1,41 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Header from '../components/Header';
+import verifyUser from '../lib/getuser';
 
 export default function ConfirmPage() {
   const [message, setMessage] = useState('Confirming your email...');
   const [isConfirmed, setIsConfirmed] = useState(false);
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
+    const checkConfirmation = async () => {
+      // Check if the user is authenticated
+      const user = await verifyUser();
+      if (user) {
+        setMessage('Your email has been confirmed. You can now log in to your account.');
+        setIsConfirmed(true);
+        return;
+      }
 
-    if (!token) {
-      setMessage('Your email has already been confirmed or the confirmation link is invalid.');
-      return;
-    }
+      // If not authenticated, check for token in URL (redirected from email)
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
 
-    // Simulate an API call to confirm the email
-    const confirmEmail = async () => {
-      try {
-        // Replace this with your actual API call
-        const response = await fetch(`/api/confirm-email?token=${token}`);
-        if (response.ok) {
-          setMessage('Your email has been successfully confirmed. You can now log in to your account.');
-          setIsConfirmed(true);
-        } else {
-          setMessage('The confirmation link is invalid or has expired.');
-        }
-      } catch (error) {
-        console.error('Error confirming email:', error);
-        setMessage('An error occurred while confirming your email. Please try again later.');
+      if (token) {
+        setMessage('Your email has been successfully confirmed. You can now log in to your account.');
+        setIsConfirmed(true);
+      } else {
+        setMessage('Invalid or expired confirmation link. Please check your email or try again.');
+        setIsConfirmed(false);
       }
     };
 
-    confirmEmail();
+    checkConfirmation();
   }, []);
 
   return (
     <main className="confirm-page">
-      <Header /> {/* Add the Header component */}
+      <Header />
       <section className="confirm-container">
         <h1 className="confirm-title">{isConfirmed ? 'Email Confirmed' : 'Confirmation Error'}</h1>
         <p className="confirm-message">{message}</p>
