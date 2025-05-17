@@ -691,7 +691,11 @@ export default function Profile() {
                             id="phone"
                             type="text"
                             value={profile.phone}
-                            onChange={handleChange}
+                            onChange={e => {
+                                // Remove all spaces from the input
+                                const noSpaces = e.target.value.replace(/\s+/g, '');
+                                setProfile(prev => ({ ...prev, phone: noSpaces }));
+                            }}
                         />
                     </div>
                     <div className="form-group">

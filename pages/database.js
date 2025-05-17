@@ -11,6 +11,7 @@ export default function Database() {
   const [selectedInstrument, setSelectedInstrument] = useState('');
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false); // Track if search button was pressed
+  const [currentUserEmail, setCurrentUserEmail] = useState(''); // Add this state at the top
 
   // Fetch genres for the dropdown
   const fetchGenres = async () => {
@@ -52,7 +53,7 @@ export default function Database() {
     try {
       let query = supabase
         .from('users')
-        .select('forename, surname, email, genre_instrument, social');
+        .select('forename, surname, email, genre_instrument, social, certificates, education, occupation, video_links');
 
       if (selectedGenre && selectedInstrument) {
         const searchString = `${selectedGenre} ${selectedInstrument}`;
@@ -60,7 +61,35 @@ export default function Database() {
       }
 
       const { data, error } = await query;
-      setUsers(data || []);
+      // Parse fields that may be stored as JSON strings
+      const parsedUsers = (data || []).map(user => ({
+        ...user,
+        social: Array.isArray(user.social)
+          ? user.social
+          : (typeof user.social === 'string' ? (() => { try { return JSON.parse(user.social); } catch { return []; } })() : []),
+        certificates: Array.isArray(user.certificates)
+          ? user.certificates.map(cert =>
+              typeof cert === 'string'
+                ? (() => { try { return JSON.parse(cert); } catch { return cert; } })()
+                : cert
+            )
+          : [],
+        education: Array.isArray(user.education)
+          ? user.education.map(e =>
+              typeof e === 'string'
+                ? (() => { try { return JSON.parse(e); } catch { return { name: e, place: '' }; } })()
+                : { name: e.name || e.degree || '', place: e.place || e.school || '' }
+            )
+          : [],
+        occupation: Array.isArray(user.occupation)
+          ? user.occupation
+          : (typeof user.occupation === 'string' ? (() => { try { return JSON.parse(user.occupation); } catch { return []; } })() : []),
+        video_links: Array.isArray(user.video_links)
+          ? user.video_links
+          : (typeof user.video_links === 'string' ? (() => { try { return JSON.parse(user.video_links); } catch { return []; } })() : []),
+      }));
+      const filteredUsers = parsedUsers.filter(user => user.email !== currentUserEmail);
+      setUsers(filteredUsers);
     } catch (err) {
       alert('Unexpected error fetching users.');
       setUsers([]);
@@ -78,6 +107,15 @@ export default function Database() {
     //   // You can use user info if needed
     // };
     // checkUser();
+  }, []);
+
+  // Fetch current user email (example, adjust to your auth logic)
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUserEmail(user?.email || '');
+    };
+    fetchCurrentUser();
   }, []);
 
   // Handle genre selection
@@ -202,6 +240,41 @@ export default function Database() {
                       return null;
                     }
                   })()}
+                  {Array.isArray(user.education) && user.education.length > 0 && (
+                    <div>
+                      <strong>Education:</strong>{' '}
+                      {user.education.map((edu, i) =>
+                        typeof edu === 'object'
+                          ? `${edu.place}${edu.name ? ` – ${edu.name}` : ''}`
+                          : edu
+                      ).join(', ')}
+                    </div>
+                  )}
+                  {Array.isArray(user.occupation) && user.occupation.length > 0 && (
+                    <div>
+                      <strong>Occupation:</strong> {user.occupation.join(', ')}
+                    </div>
+                  )}
+                  {Array.isArray(user.certificates) && user.certificates.length > 0 && (
+                    <div>
+                      <strong>Certificates:</strong>{' '}
+                      {user.certificates.map((cert, i) =>
+                        typeof cert === 'object'
+                          ? `${cert.certificate || ''}${cert.organization ? ` from ${cert.organization}` : ''}`
+                          : cert
+                      ).join(', ')}
+                    </div>
+                  )}
+                  {Array.isArray(user.video_links) && user.video_links.length > 0 && (
+                    <div>
+                      <strong>Video Links:</strong>{' '}
+                      {user.video_links.map((link, i) => (
+                        <a key={i} href={link} target="_blank" rel="noopener noreferrer" style={{ marginRight: 8 }}>
+                          {link}
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </li>
               ))
             ) : (
