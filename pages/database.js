@@ -155,34 +155,34 @@ export default function Database() {
             {users.length > 0 ? (
               users.map((user, index) => (
                 <li key={index} className="user-list-item" style={{ marginBottom: '1.5em', borderBottom: '1px solid #eee', paddingBottom: '1em' }}>
-                  <div><strong>Name:</strong> {user.forename || user.surname ? `${user.forename || ''} ${user.surname || ''}`.trim() : 'N/A'}</div>
                   <div>
-                    <strong>Instrument(s) & Genre(s):</strong>{' '}
-                    {Array.isArray(user.genre_instrument) && user.genre_instrument.length > 0
-                      ? user.genre_instrument.join(', ')
-                      : 'N/A'}
+                    <strong>Name:</strong> {user.forename || user.surname ? `${user.forename || ''} ${user.surname || ''}`.trim() : 'N/A'}
                   </div>
-                  <div>
-                    <strong>Email:</strong>{' '}
-                    {user.email ? (
-                      <a href={`mailto:${user.email}`}>{user.email}</a>
-                    ) : 'N/A'}
-                  </div>
-                  <div>
-                    <strong>Social Links:</strong>{' '}
-                    {user.social ? (() => {
-                      try {
-                        const socialLinks = typeof user.social === 'string' ? JSON.parse(user.social) : user.social;
-                        return Array.isArray(socialLinks) ? (
-                          socialLinks.map((item, i) => {
-                            const icons = {
-                              Instagram: <span role="img" aria-label="Instagram">📸</span>,
-                              Facebook: <span role="img" aria-label="Facebook">📘</span>,
-                              TikTok: <span role="img" aria-label="TikTok">🎵</span>,
-                              X: <span role="img" aria-label="X">🐦</span>,
-                              LinkedIn: <span role="img" aria-label="LinkedIn">💼</span>,
-                            };
-                            return (
+                  {Array.isArray(user.genre_instrument) && user.genre_instrument.length > 0 && (
+                    <div>
+                      <strong>Instrument(s) & Genre(s):</strong> {user.genre_instrument.join(', ')}
+                    </div>
+                  )}
+                  {user.email && (
+                    <div>
+                      <strong>Email:</strong> <a href={`mailto:${user.email}`}>{user.email}</a>
+                    </div>
+                  )}
+                  {user.social && (() => {
+                    try {
+                      const socialLinks = typeof user.social === 'string' ? JSON.parse(user.social) : user.social;
+                      if (Array.isArray(socialLinks) && socialLinks.length > 0) {
+                        const icons = {
+                          Instagram: <span role="img" aria-label="Instagram">📸</span>,
+                          Facebook: <span role="img" aria-label="Facebook">📘</span>,
+                          TikTok: <span role="img" aria-label="TikTok">🎵</span>,
+                          X: <span role="img" aria-label="X">🐦</span>,
+                          LinkedIn: <span role="img" aria-label="LinkedIn">💼</span>,
+                        };
+                        return (
+                          <div>
+                            <strong>Social Links:</strong>{' '}
+                            {socialLinks.map((item, i) => (
                               <a
                                 key={i}
                                 href={item.link}
@@ -193,16 +193,15 @@ export default function Database() {
                               >
                                 {icons[item.platform] || <span>{item.platform}</span>}
                               </a>
-                            );
-                          })
-                        ) : (
-                          <span>Invalid format</span>
+                            ))}
+                          </div>
                         );
-                      } catch (err) {
-                        return <span>Invalid JSON</span>;
                       }
-                    })() : 'N/A'}
-                  </div>
+                      return null;
+                    } catch (err) {
+                      return null;
+                    }
+                  })()}
                 </li>
               ))
             ) : (
