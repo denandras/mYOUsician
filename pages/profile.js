@@ -57,6 +57,9 @@ export default function Profile() {
     // Dropdown options for education
     const educationOptions = ['High School', 'Bachelor\'s Degree', 'Master\'s Degree', 'PhD', 'Other'];
 
+    const [genres, setGenres] = useState([]);
+    const [instruments, setInstruments] = useState([]);
+
     // Fetch user data and email from session on component mount
     useEffect(() => {
         const fetchProfile = async () => {
@@ -138,6 +141,19 @@ export default function Profile() {
         };
 
         fetchProfile();
+    }, []);
+
+    useEffect(() => {
+        const fetchGenres = async () => {
+            const { data } = await supabase.from('genres').select('name');
+            setGenres(data || []);
+        };
+        const fetchInstruments = async () => {
+            const { data } = await supabase.from('instruments').select('name').order('name', { ascending: true });
+            setInstruments(data || []);
+        };
+        fetchGenres();
+        fetchInstruments();
     }, []);
 
     if (loading) {
@@ -604,18 +620,24 @@ export default function Profile() {
                     <div className="form-group">
                         <h3>Genre + Instrument:</h3>
                         <div className="input-container">
-                            <input
-                                type="text"
-                                placeholder="Genre"
+                            <select
                                 value={newGenre}
                                 onChange={(e) => setNewGenre(e.target.value)}
-                            />
-                            <input
-                                type="text"
-                                placeholder="Instrument"
+                            >
+                                <option value="">Select Genre</option>
+                                {genres.map((g, idx) => (
+                                    <option key={idx} value={g.name}>{g.name}</option>
+                                ))}
+                            </select>
+                            <select
                                 value={newInstrument}
                                 onChange={(e) => setNewInstrument(e.target.value)}
-                            />
+                            >
+                                <option value="">Select Instrument</option>
+                                {instruments.map((i, idx) => (
+                                    <option key={idx} value={i.name}>{i.name}</option>
+                                ))}
+                            </select>
                             <button type="button" onClick={handleAddGenreInstrument}>
                                 Add
                             </button>
@@ -624,8 +646,13 @@ export default function Profile() {
                             {profile.genre_instrument?.map((item, index) => (
                                 <li key={index}>
                                     {item.genre} - {item.instrument}
-                                    <button type="button" onClick={() => handleDeleteGenreInstrument(index)}>
-                                        Delete
+                                    <button
+                                        type="button"
+                                        className="delete-x"
+                                        title="Delete"
+                                        onClick={() => handleDeleteGenreInstrument(index)}
+                                    >
+                                        ×
                                     </button>
                                 </li>
                             ))}
@@ -643,7 +670,7 @@ export default function Profile() {
                                         (platform) => platform.name === e.target.value
                                     );
                                     setNewSocialPlatform(e.target.value);
-                                    setNewSocialLink(selectedPlatform ? selectedPlatform.prefix : ''); // Prefill the input
+                                    setNewSocialLink(selectedPlatform ? selectedPlatform.prefix : '');
                                 }}
                             >
                                 <option value="">Select Platform</option>
@@ -668,12 +695,14 @@ export default function Profile() {
                                 <li key={index}>
                                     <a href={link.link} target="_blank" rel="noopener noreferrer">
                                         {link.platform}: {link.link}
-                                    </a>{' '}
+                                    </a>
                                     <button
                                         type="button"
+                                        className="delete-x"
+                                        title="Delete"
                                         onClick={() => handleDeleteItem('social', index)}
                                     >
-                                        Delete
+                                        ×
                                     </button>
                                 </li>
                             ))}
@@ -703,12 +732,14 @@ export default function Profile() {
                         <ul>
                             {(Array.isArray(profile.certificates) ? profile.certificates : []).map((cert, index) => (
                                 <li key={index}>
-                                    {cert.certificate} from {cert.organization}{' '}
+                                    {cert.certificate} from {cert.organization}
                                     <button
                                         type="button"
+                                        className="delete-x"
+                                        title="Delete"
                                         onClick={() => handleDeleteItem('certificates', index)}
                                     >
-                                        Delete
+                                        ×
                                     </button>
                                 </li>
                             ))}
@@ -734,12 +765,14 @@ export default function Profile() {
                                 <li key={index}>
                                     <a href={link} target="_blank" rel="noopener noreferrer">
                                         {link}
-                                    </a>{' '}
+                                    </a>
                                     <button
                                         type="button"
+                                        className="delete-x"
+                                        title="Delete"
                                         onClick={() => handleDeleteItem('video_links', index)}
                                     >
-                                        Delete
+                                        ×
                                     </button>
                                 </li>
                             ))}
