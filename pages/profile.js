@@ -6,11 +6,13 @@ import Header from '../components/Header';
 import { createuser } from '../lib/createuser';
 import { deleteuser } from '../lib/deleteuser'; // Make sure this exists and is exported
 
+const geonamesUsername = process.env.NEXT_PUBLIC_GEONAMES_USERNAME;
+
 export default function Profile() {
     const [profile, setProfile] = useState({
         forename: '',
         surname: '',
-        location: { country: '', city: '' }, // jsonb
+        location: [], // as text[]
         email: '',
         phone: '',
         bio: '',
@@ -40,10 +42,11 @@ export default function Profile() {
     const [newCertificate, setNewCertificate] = useState('');
     const [newOccupationRole, setNewOccupationRole] = useState('');
     const [newOccupationCompany, setNewOccupationCompany] = useState('');
+    const [newOccupationOrg, setNewOccupationOrg] = useState('');
 
     // Add new states for certificates and video links
-    const [newCertificateOrganization, setNewCertificateOrganization] = useState('');
     const [newVideoLink, setNewVideoLink] = useState('');
+    const [newCertificateOrganization, setNewCertificateOrganization] = useState('');
 
     // Dropdown options for social platforms
     const socialPlatforms = [
@@ -55,10 +58,20 @@ export default function Profile() {
     ];
 
     // Dropdown options for education
-    const educationOptions = ['High School', 'Bachelor\'s Degree', 'Master\'s Degree', 'PhD', 'Other'];
 
     const [genres, setGenres] = useState([]);
     const [instruments, setInstruments] = useState([]);
+    const [educationOptions, setEducationOptions] = useState([]);
+    const [newLocation, setNewLocation] = useState('');
+    const [newCity, setNewCity] = useState('');
+    const [newCountry, setNewCountry] = useState('');
+    const [countries, setCountries] = useState([]);
+    const [cities, setCities] = useState([]);
+    const [selectedCountry, setSelectedCountry] = useState('');
+    const [selectedCity, setSelectedCity] = useState('');
+
+    const [educationPlaces, setEducationPlaces] = useState(profile.education_places || []);
+    const [newEducationPlace, setNewEducationPlace] = useState('');
 
     // Fetch user data and email from session on component mount
     useEffect(() => {
@@ -101,7 +114,7 @@ export default function Profile() {
                     setProfile({
                         ...newUser,
                         email: userEmail,
-                        location: newUser.location || { country: '', city: '' },
+                        location: newUser.location || [],
                         genre_instrument: [],
                         certificates: [],
                         video_links: [],
@@ -126,10 +139,22 @@ export default function Profile() {
                     email: userEmail,
                     location: user.location || { country: '', city: '' },
                     occupation: user.occupation || [],
-                    education: user.education || [],
+                    education: Array.isArray(user.education)
+                        ? user.education.map(e =>
+                            typeof e === 'string'
+                                ? (() => { try { return JSON.parse(e); } catch { return { name: e, place: '' }; } })()
+                                : { name: e.name || e.degree || '', place: e.place || e.school || '' }
+                        )
+                        : [],
                     genre_instrument: user.genre_instrument || [],
                     social: user.social || [],
-                    certificates: user.certificates || [],
+                    certificates: Array.isArray(user.certificates)
+                        ? user.certificates.map(cert =>
+                            typeof cert === 'string'
+                                ? (() => { try { return JSON.parse(cert); } catch { return cert; } })()
+                                : cert
+                        )
+                        : [],
                     video_links: user.video_links || [],
                 });
             } catch (err) {
@@ -152,9 +177,59 @@ export default function Profile() {
             const { data } = await supabase.from('instruments').select('name').order('name', { ascending: true });
             setInstruments(data || []);
         };
+        const fetchEducationOptions = async () => {
+            const { data } = await supabase.from('education').select('id, name, HUN');
+            setEducationOptions(data || []);
+        };
         fetchGenres();
         fetchInstruments();
+        fetchEducationOptions();
     }, []);
+
+    useEffect(() => {
+        if (!selectedCountry) {
+            setCities([]);
+            return;
+        }
+        const fetchCities = async () => {
+            const res = await fetch(
+                `http://api.geonames.org/searchJSON?formatted=true&country=${selectedCountry}&featureClass=P&maxRows=1000&username=${geonamesUsername}`
+            );
+            const data = await res.json();
+            setCities(data.geonames || []);
+        };
+        fetchCities();
+    }, [selectedCountry]);
+
+    useEffect(() => {
+        const fetchCountries = async () => {
+            const res = await fetch(`http://api.geonames.org/countryInfoJSON?username=${geonamesUsername}`);
+            const data = await res.json();
+            setCountries(data.geonames || []);
+        };
+        fetchCountries();
+    }, []);
+
+    useEffect(() => {
+        if (profile.location && profile.location[0]) {
+            setSelectedCountry(profile.location[0]);
+        }
+    }, [profile.location]);
+
+    useEffect(() => {
+        // When cities or profile.location change, set selectedCity if possible
+        if (
+            Array.isArray(profile.location) &&
+            profile.location.length === 2 &&
+            cities.length > 0
+        ) {
+            const cityCode = String(profile.location[1]);
+            const found = cities.find(city => String(city.geonameId) === cityCode);
+            if (found) {
+                setSelectedCity(cityCode);
+            }
+        }
+    }, [cities, profile.location]);
 
     if (loading) {
         // Render a loading indicator while data is being fetched
@@ -369,7 +444,10 @@ export default function Profile() {
         try {
             const { error } = await supabase
                 .from('users')
-                .update({ certificates: updatedCertificates })
+                .update({
+                    certificates: updatedCertificates,
+                    updated_at: new Date().toISOString()
+                })
                 .eq('uid', profile.uid);
 
             if (error) {
@@ -441,11 +519,11 @@ export default function Profile() {
             setMessage('Forename and Surname are required.');
             return;
         }
-        // ...rest of your code...
+        // Save selected country and city as location
         const payload = {
             forename: profile.forename,
             surname: profile.surname,
-            location: profile.location,
+            location: [selectedCountry, selectedCity],
             phone: profile.phone,
             bio: profile.bio,
             email: profile.email, // include email if you want to allow updating it
@@ -463,6 +541,10 @@ export default function Profile() {
             setMessage('Error saving personal data.');
         } else {
             setMessage('Personal data saved!');
+            setProfile(prev => ({
+                ...prev,
+                location: [selectedCountry, selectedCity],
+            }));
         }
     };
 
@@ -558,32 +640,40 @@ export default function Profile() {
                             required
                         />
                     </div>
+                    {/* Location Dropdowns */}
                     <div className="form-group">
-                        <label>Location:</label>
-                        <input
+                        <label htmlFor="country">Country:</label>
+                        <select
                             id="country"
-                            type="text"
-                            placeholder="Country"
-                            value={profile.location?.country || ''} // Null-safe access
-                            onChange={(e) =>
-                                setProfile((prev) => ({
-                                    ...prev,
-                                    location: { ...prev.location, country: e.target.value },
-                                }))
-                            }
-                        />
-                        <input
+                            value={selectedCountry}
+                            onChange={e => {
+                                setSelectedCountry(e.target.value);
+                                setSelectedCity('');
+                            }}
+                        >
+                            <option value="">Select Country</option>
+                            {countries.map(c => (
+                                <option key={c.geonameId} value={c.countryCode}>
+                                    {c.countryName}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="city">City:</label>
+                        <select
                             id="city"
-                            type="text"
-                            placeholder="City"
-                            value={profile.location?.city || ''} // Null-safe access
-                            onChange={(e) =>
-                                setProfile((prev) => ({
-                                    ...prev,
-                                    location: { ...prev.location, city: e.target.value },
-                                }))
-                            }
-                        />
+                            value={selectedCity}
+                            onChange={e => setSelectedCity(e.target.value)}
+                            disabled={!selectedCountry}
+                        >
+                            <option value="">Select City</option>
+                            {cities.map(city => (
+                                <option key={city.geonameId} value={city.geonameId}>
+                                    {city.name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <div className="form-group">
                         <label htmlFor="email">Email:</label>
@@ -640,7 +730,21 @@ export default function Profile() {
                                     <option key={idx} value={i.name}>{i.name}</option>
                                 ))}
                             </select>
-                            <button type="button" onClick={handleAddGenreInstrument}>
+                            <button type="button" onClick={async () => {
+                                if (!newGenre || !newInstrument) return;
+                                const newPair = `${newGenre} ${newInstrument}`;
+                                if (profile.genre_instrument?.includes(newPair)) return;
+                                const updatedGenreInstrument = [...(profile.genre_instrument || []), newPair];
+                                setProfile(prev => ({
+                                    ...prev,
+                                    genre_instrument: updatedGenreInstrument,
+                                }));
+                                setNewGenre('');
+                                setNewInstrument('');
+                                if (profile.uid) {
+                                    await supabase.from('users').update({ genre_instrument: updatedGenreInstrument }).eq('uid', profile.uid);
+                                }
+                            }}>
                                 Add
                             </button>
                         </div>
@@ -726,14 +830,31 @@ export default function Profile() {
                                 value={newCertificateOrganization}
                                 onChange={(e) => setNewCertificateOrganization(e.target.value)}
                             />
-                            <button type="button" onClick={handleAddCertificate}>
+                            <button type="button" onClick={async () => {
+                                if (!newCertificate || !newCertificateOrganization) return;
+                                const updatedCertificates = [
+                                    ...(Array.isArray(profile.certificates) ? profile.certificates : []),
+                                    { certificate: newCertificate, organization: newCertificateOrganization },
+                                ];
+                                setProfile(prev => ({
+                                    ...prev,
+                                    certificates: updatedCertificates,
+                                }));
+                                setNewCertificate('');
+                                setNewCertificateOrganization('');
+                                if (profile.uid) {
+                                    await supabase.from('users').update({ certificates: updatedCertificates }).eq('uid', profile.uid);
+                                }
+                            }}>
                                 Add
                             </button>
                         </div>
                         <ul>
                             {(Array.isArray(profile.certificates) ? profile.certificates : []).map((cert, index) => (
                                 <li key={index}>
-                                    {cert.certificate} from {cert.organization}
+                                    {typeof cert === 'object'
+                                        ? `${cert.certificate || ''}${cert.organization ? ` from ${cert.organization}` : ''}`
+                                        : cert}
                                     <button
                                         type="button"
                                         className="delete-x"
@@ -748,7 +869,7 @@ export default function Profile() {
                     </div>
 
                     {/* Video Links */}
-                    <div className="form-group">
+                    <div className="form-group"></div>
                         <h3>Video Links:</h3>
                         <div className="input-container">
                             <input
@@ -757,7 +878,18 @@ export default function Profile() {
                                 value={newVideoLink}
                                 onChange={(e) => setNewVideoLink(e.target.value)}
                             />
-                            <button type="button" onClick={handleAddVideoLink}>
+                            <button type="button" onClick={async () => {
+                                if (!newVideoLink.startsWith('http://') && !newVideoLink.startsWith('https://')) return;
+                                const updatedVideoLinks = [...profile.video_links, newVideoLink];
+                                setProfile(prev => ({
+                                    ...prev,
+                                    video_links: updatedVideoLinks,
+                                }));
+                                setNewVideoLink('');
+                                if (profile.uid) {
+                                    await supabase.from('users').update({ video_links: updatedVideoLinks }).eq('uid', profile.uid);
+                                }
+                            }}>
                                 Add
                             </button>
                         </div>
@@ -778,7 +910,128 @@ export default function Profile() {
                                 </li>
                             ))}
                         </ul>
+
+                    
+
+                    {/* Occupation */}
+                    <div className="form-group">
+                        <h3>Occupation:</h3>
+                        <div className="input-container">
+                            <input
+                                type="text"
+                                placeholder="Role (e.g. Trombonist)"
+                                value={newOccupationRole}
+                                onChange={(e) => setNewOccupationRole(e.target.value)}
+                            />
+                            <input
+                                type="text"
+                                placeholder="Organization (e.g. Philharmonic)"
+                                value={newOccupationOrg}
+                                onChange={(e) => setNewOccupationOrg(e.target.value)}
+                            />
+                            <button type="button" onClick={async () => {
+                                if (!newOccupationRole || !newOccupationOrg) return;
+                                const newEntry = `${newOccupationRole} at ${newOccupationOrg}`;
+                                const updated = [...(profile.occupation || []), newEntry];
+                                setProfile(prev => ({ ...prev, occupation: updated }));
+                                setNewOccupationRole('');
+                                setNewOccupationOrg('');
+                                if (profile.uid) {
+                                    await supabase.from('users').update({ occupation: updated }).eq('uid', profile.uid);
+                                }
+                            }}>
+                                Add
+                            </button>
+                        </div>
+                        <ul>
+                            {(Array.isArray(profile.occupation) ? profile.occupation : []).map((occ, idx) => (
+                                <li key={idx}>
+                                    {occ}
+                                    <button type="button" onClick={async () => {
+                                        const updated = profile.occupation.filter((_, i) => i !== idx);
+                                        setProfile(prev => ({ ...prev, occupation: updated }));
+                                        await supabase.from('users').update({
+                                            occupation: updated,
+                                            updated_at: new Date().toISOString()
+                                        }).eq('uid', profile.uid);
+                                    }}>×</button>
+                                </li>
+                            ))}
+                        </ul>
                     </div>
+
+                    {/* Education */}
+                    <div className="form-group">
+                        <h3>Education:</h3>
+                        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                            <input
+                                id="education-place"
+                                name="education-place"
+                                type="text"
+                                value={newEducationPlace}
+                                onChange={e => setNewEducationPlace(e.target.value)}
+                                placeholder="e.g. Liszt Academy"
+                            />
+                            <select
+                                id="education-level"
+                                name="education-level"
+                                value={newEducation}
+                                onChange={e => setNewEducation(e.target.value)}
+                            >
+                                <option value="">Select Education</option>
+                                {educationOptions.map(option => (
+                                    <option key={option.id} value={option.id}>
+                                        {option.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    if (!newEducation || !newEducationPlace.trim()) return;
+                                    const selected = educationOptions.find(opt => opt.id === parseInt(newEducation));
+                                    if (!selected) return;
+                                    const newEntry = {
+                                        name: selected.name,
+                                        place: newEducationPlace.trim()
+                                    };
+                                    const updated = [...(profile.education || []), newEntry];
+                                    setProfile(prev => ({ ...prev, education: updated }));
+                                    setNewEducation('');
+                                    setNewEducationPlace('');
+                                    if (profile.uid) {
+                                        await supabase.from('users').update({
+                                            education: updated,
+                                            updated_at: new Date().toISOString()
+                                        }).eq('uid', profile.uid);
+                                    }
+                                }}
+                            >
+                                Add
+                            </button>
+                        </div>
+                        <ul>
+                            {(Array.isArray(profile.education) ? profile.education : []).map((edu, idx) => (
+                                <li key={idx}>
+                                    {edu.place}{edu.name ? ` – ${edu.name}` : ''}
+                                    <button type="button" onClick={async () => {
+                                        const updated = profile.education.filter((_, i) => i !== idx);
+                                        setProfile(prev => ({ ...prev, education: updated }));
+                                        if (profile.uid) {
+                                            await supabase.from('users').update({
+                                                education: updated,
+                                                updated_at: new Date().toISOString()
+                                            }).eq('uid', profile.uid);
+                                        }
+                                    }}>×</button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    
+                    
+                    
+                    
                 </form>
                 <button type="button" onClick={handleLogout} className="logout-button">
                     Logout
