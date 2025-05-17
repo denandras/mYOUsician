@@ -140,78 +140,96 @@ export default function Database() {
         <h1 className="database-title">User Database</h1>
         <p className="database-description">Search and explore user data.</p>
 
-        {/* Dropdown for filtering by genre */}
-        <div className="filter-container">
-          <label htmlFor="genre-filter" className="filter-label">Filter by Genre:</label>
-          <select
-            id="genre-filter"
-            className="filter-dropdown"
-            value={selectedGenre}
-            onChange={handleGenreChange}
-          >
-            <option value="">Select Genre</option>
-            {genres.map((genre, index) => (
-              <option key={index} value={genre.name}>
-                {genre.name}
-              </option>
-            ))}
-          </select>
+        <div
+          className="search-form"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 16,
+            margin: '32px 0'
+          }}
+        >
+          {/* Dropdown for filtering by genre */}
+          <div className="filter-container">
+            <label htmlFor="genre-filter" className="filter-label">Filter by Genre:</label>
+            <select
+              id="genre-filter"
+              className="filter-dropdown"
+              value={selectedGenre}
+              onChange={handleGenreChange}
+            >
+              <option value="">Select Genre</option>
+              {genres.map((genre, index) => (
+                <option key={index} value={genre.name}>
+                  {genre.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Dropdown for filtering by instrument */}
+          <div className="filter-container">
+            <label htmlFor="instrument-filter" className="filter-label">Filter by Instrument:</label>
+            <select
+              id="instrument-filter"
+              className="filter-dropdown"
+              value={selectedInstrument}
+              onChange={handleInstrumentChange}
+            >
+              <option value="">Select Instrument</option>
+              {instruments.map((instrument, index) => (
+                <option key={index} value={instrument.name}>
+                  {instrument.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Search button */}
+          <div className="filter-container">
+            <button
+              className="search-button"
+              onClick={fetchUsers}
+              disabled={!canSearch || loading}
+            >
+              {loading ? 'Searching...' : 'Search'}
+            </button>
+          </div>
         </div>
 
-        {/* Dropdown for filtering by instrument */}
-        <div className="filter-container">
-          <label htmlFor="instrument-filter" className="filter-label">Filter by Instrument:</label>
-          <select
-            id="instrument-filter"
-            className="filter-dropdown"
-            value={selectedInstrument}
-            onChange={handleInstrumentChange}
-          >
-            <option value="">Select Instrument</option>
-            {instruments.map((instrument, index) => (
-              <option key={index} value={instrument.name}>
-                {instrument.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Search button */}
-        <div className="filter-container">
-          <button
-            className="search-button"
-            onClick={fetchUsers}
-            disabled={!canSearch || loading}
-          >
-            {loading ? 'Searching...' : 'Search'}
-          </button>
-        </div>
-
-        {/* Only show list if a search has been made */}
-        {hasSearched && canSearch && !loading && (
-          <>
-            <div className="user-list-header" style={{ display: 'flex', fontWeight: 'bold', borderBottom: '2px solid #ccc', padding: '0.5em 0' }}>
-              <div style={{ flex: 2 }}>Name</div>
-              <div style={{ flex: 2 }}>Instrument(s) & Genre(s)</div>
-              <div style={{ flex: 2 }}>Email</div>
-              <div style={{ flex: 2 }}>Social Links</div>
-              <div style={{ flex: 2 }}>Education</div>
-              <div style={{ flex: 2 }}>Occupation</div>
-              <div style={{ flex: 2 }}>Certificates</div>
-              <div style={{ flex: 2 }}>Video Links</div>
-            </div>
-            <ul className="user-list" style={{ listStyle: 'none', padding: 0 }}>
-              {users.length > 0 ? (
-                users.map((user, index) => (
-                  <div key={index} className="user-list-row" style={{ display: 'flex', borderBottom: '1px solid #eee', padding: '0.5em 0' }}>
-                    <div style={{ flex: 2 }}>{user.forename || user.surname ? `${user.forename || ''} ${user.surname || ''}`.trim() : 'N/A'}</div>
-                    <div style={{ flex: 2 }}>{Array.isArray(user.genre_instrument) && user.genre_instrument.length > 0 ? user.genre_instrument.join(', ') : ''}</div>
-                    <div style={{ flex: 2 }}>
-                      {user.email
-                        ? <a href={`mailto:${user.email}`}>Email</a>
-                        : ''}
+        {/* Results Section */}
+        <section className="user-results">
+          {users.length > 0 ? (
+            <div className="user-card-list">
+              {users.map((user, index) => (
+                <div key={index} className="user-card">
+                  {/* Name */}
+                  <div className="user-card-name" style={{ fontWeight: 'bold', fontSize: '1.2em', marginBottom: 8 }}>
+                    {user.forename || user.surname ? `${user.forename || ''} ${user.surname || ''}`.trim() : 'N/A'}
+                  </div>
+                  {/* Two columns */}
+                  <div className="user-card-columns" style={{ display: 'flex', gap: 24 }}>
+                    {/* Left column */}
+                    <div className="user-card-col-left" style={{ flex: 1 }}>
+                      {Array.isArray(user.genre_instrument) && user.genre_instrument.length > 0 && (
+                        <div>{user.genre_instrument.join(', ')}</div>
+                      )}
+                      {Array.isArray(user.occupation) && user.occupation.length > 0 && (
+                        <div style={{ marginTop: 8 }}>{user.occupation.join(', ')}</div>
+                      )}
+                      {Array.isArray(user.education) && user.education.length > 0 && (
+                        <div style={{ marginTop: 8 }}>
+                          {user.education.map((edu, i) =>
+                            typeof edu === 'object'
+                              ? `${edu.place}${edu.name ? ` – ${edu.name}` : ''}`
+                              : edu
+                          ).join(', ')}
+                        </div>
+                      )}
                     </div>
-                    <div style={{ flex: 2 }}>
+                    {/* Right column */}
+                    <div className="user-card-col-right" style={{ flex: 1 }}>
                       {user.social && (() => {
                         try {
                           const socialLinks = typeof user.social === 'string' ? JSON.parse(user.social) : user.social;
@@ -223,47 +241,41 @@ export default function Database() {
                               X: <span role="img" aria-label="X">🐦</span>,
                               LinkedIn: <span role="img" aria-label="LinkedIn">💼</span>,
                             };
-                            return socialLinks.map((item, i) => (
-                              <a
-                                key={i}
-                                href={item.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{ marginRight: 8, fontSize: '1.2em' }}
-                                title={item.platform}
-                              >
-                                {icons[item.platform] || <span>{item.platform}</span>}
-                              </a>
-                            ));
+                            return (
+                              <div>
+                                {socialLinks.map((item, i) => (
+                                  <a
+                                    key={i}
+                                    href={item.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title={item.platform}
+                                    style={{ marginRight: 8, fontSize: '1.2em' }}
+                                  >
+                                    {icons[item.platform] || <span>{item.platform}</span>}
+                                  </a>
+                                ))}
+                              </div>
+                            );
                           }
                           return null;
                         } catch (err) {
                           return null;
                         }
                       })()}
-                    </div>
-                    <div style={{ flex: 2 }}>
-                      {Array.isArray(user.education) && user.education.length > 0
-                        ? user.education.map((edu, i) =>
-                            typeof edu === 'object'
-                              ? `${edu.place}${edu.name ? ` – ${edu.name}` : ''}`
-                              : edu
-                          ).join(', ')
-                        : ''}
-                    </div>
-                    <div style={{ flex: 2 }}>{Array.isArray(user.occupation) && user.occupation.length > 0 ? user.occupation.join(', ') : ''}</div>
-                    <div style={{ flex: 2 }}>
-                      {Array.isArray(user.certificates) && user.certificates.length > 0
-                        ? user.certificates.map((cert, i) =>
-                            typeof cert === 'object'
-                              ? `${cert.certificate || ''}${cert.organization ? ` from ${cert.organization}` : ''}`
-                              : cert
-                          ).join(', ')
-                        : ''}
-                    </div>
-                    <div style={{ flex: 2 }}>
-                      {Array.isArray(user.video_links) && user.video_links.length > 0
-                        ? user.video_links.map((link, i) => (
+                      {user.email && (
+                        <div style={{ marginTop: 8 }}>
+                          <a href={`mailto:${user.email}`}>Email</a>
+                        </div>
+                      )}
+                      {user.phone && (
+                        <div style={{ marginTop: 8 }}>
+                          {user.phone}
+                        </div>
+                      )}
+                      {Array.isArray(user.video_links) && user.video_links.length > 0 && (
+                        <div style={{ marginTop: 8 }}>
+                          {user.video_links.map((link, i) => (
                             <a
                               key={i}
                               href={link}
@@ -273,17 +285,18 @@ export default function Database() {
                             >
                               {`Video ${i + 1}`}
                             </a>
-                          ))
-                        : ''}
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
-                ))
-              ) : (
-                <li>No users found.</li>
-              )}
-            </ul>
-          </>
-        )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div>No users found.</div>
+          )}
+        </section>
       </section>
     </main>
   );
