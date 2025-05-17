@@ -4,7 +4,7 @@ import supabase from '../lib/supabase'; // Import the singleton Supabase client
 import verifyUser from '../lib/getuser'; // Import the verifyUser function
 import signOut from '../lib/signOut'; // Import the reusable signOut function
 import Header from '../components/Header';
-import createUser from '../lib/createuser'; // Add this import
+import { createuser } from '../lib/createuser'; // Add this import
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -60,7 +60,7 @@ export default function LoginPage() {
       console.log('Login success:', data);
 
       // Step 2: Call createUser to ensure user row exists
-      const result = await createUser();
+      const result = await createuser({ uid: data.user.id, email: data.user.email });
       if (result && result.error) {
         console.error('Error creating user row:', result.error);
         setMessage('Error creating user profile row.');
