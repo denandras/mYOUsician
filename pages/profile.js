@@ -437,7 +437,11 @@ export default function Profile() {
 
     // Only save personal data fields (forename, surname, location, phone, bio, email)
     const savePersonalData = async () => {
-        // Do not include uid in the update payload!
+        if (!profile.forename.trim() || !profile.surname.trim()) {
+            setMessage('Forename and Surname are required.');
+            return;
+        }
+        // ...rest of your code...
         const payload = {
             forename: profile.forename,
             surname: profile.surname,
@@ -456,7 +460,6 @@ export default function Profile() {
         }
 
         if (result.error) {
-            console.log(result);
             setMessage('Error saving personal data.');
         } else {
             setMessage('Personal data saved!');
@@ -542,6 +545,7 @@ export default function Profile() {
                             type="text"
                             value={profile.forename}
                             onChange={handleChange}
+                            required
                         />
                     </div>
                     <div className="form-group">
@@ -551,6 +555,7 @@ export default function Profile() {
                             type="text"
                             value={profile.surname}
                             onChange={handleChange}
+                            required
                         />
                     </div>
                     <div className="form-group">
