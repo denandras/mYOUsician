@@ -4,6 +4,7 @@ import verifyUser from '../lib/getuser'; // Import the verifyUser function
 import signOut from '../lib/signOut'; // Import the reusable signOut function
 import Header from '../components/Header';
 import { createuser } from '../lib/createuser';
+import { deleteuser } from '../lib/deleteuser'; // Make sure this exists and is exported
 
 export default function Profile() {
     const [profile, setProfile] = useState({
@@ -407,21 +408,10 @@ export default function Profile() {
     // Save profile data
     const saveProfile = async () => {
         // ...collect form data...
-        const payload = {
-            uid: profile.uid,
-            email: profile.email,
-            forename: profile.forename,
-            surname: profile.surname,
-            location: profile.location,
-            phone: profile.phone,
-            bio: profile.bio,
-            occupation: Array.isArray(profile.occupation) ? profile.occupation : [], // array
-            education: Array.isArray(profile.education) ? profile.education : [],   // array
-            genre_instrument: Array.isArray(profile.genre_instrument) ? profile.genre_instrument : [], // array
-            social: Array.isArray(profile.social) ? profile.social : [],            // array
-            certificates: JSON.stringify(profile.certificates ?? []), // text (JSON string)
-            video_links: JSON.stringify(profile.video_links ?? []),   // text (JSON string)
-        };
+        const payload = { forename: profile.forename };
+
+        console.log('Payload for update:', payload);
+        console.log('Profile UID:', profile.uid);
 
         let result;
         if (profile.uid) {
@@ -430,6 +420,34 @@ export default function Profile() {
             result = await supabase.from('users').insert([payload]);
         }
         // ...handle result...
+    };
+
+    // Only save personal data fields (forename, surname, location, phone, bio, email)
+    const savePersonalData = async () => {
+        // Do not include uid in the update payload!
+        const payload = {
+            forename: profile.forename,
+            surname: profile.surname,
+            location: profile.location,
+            phone: profile.phone,
+            bio: profile.bio,
+            email: profile.email, // include email if you want to allow updating it
+        };
+
+        let result;
+        if (profile.uid) {
+            result = await supabase.from('users').update(payload).eq('uid', profile.uid);
+        } else {
+            // For insert, you need uid and email
+            result = await supabase.from('users').insert([{ ...payload, uid: profile.uid, email: profile.email }]);
+        }
+
+        if (result.error) {
+            console.log(result);
+            setMessage('Error saving personal data.');
+        } else {
+            setMessage('Personal data saved!');
+        }
     };
 
     // Logout function using the reusable signOut function
@@ -443,7 +461,9 @@ export default function Profile() {
     };
 
     // Danger Zone: Delete Profile
-    const handleDeleteProfile = async () => {
+    const handleDeleteProfile = async (e) => {
+        e.preventDefault(); // Prevent form reload
+
         if (!deleteConfirmation) {
             setMessage('Please enter your password to confirm.');
             return;
@@ -451,51 +471,21 @@ export default function Profile() {
 
         try {
             setMessage('Deleting profile...');
-            // Get the current session and access token
-            const { data: { session } } = await supabase.auth.getSession();
-            const accessToken = session?.access_token || '';
-
-            const response = await fetch('https://qwmtnlqpwzkkrmnvusup.supabase.co/functions/v1/delete-user', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,
-                },
-                body: JSON.stringify({
-                    uid: profile.uid,
-                    password: deleteConfirmation
-                }),
+            const result = await deleteuser({
+                uid: profile.uid,
+                email: profile.email,
+                password: deleteConfirmation
             });
 
-            const result = await response.json();
-
-            // Always call verifyUser after deletion attempt
-            const userSession = await verifyUser();
-            if (!response.ok) {
-                console.error('Error from Edge Function:', result);
-                setMessage(`Error deleting profile: ${result.error || response.statusText}`);
-                // Optionally, handle if user is already logged out
-                if (!userSession) {
-                    window.location.href = '/login';
-                }
+            if (result.error) {
+                setMessage(`Error deleting profile: ${result.error}`);
                 return;
             }
 
             setMessage('Profile deleted successfully.');
-            // If user is no longer authenticated, redirect to login or home
-            if (!userSession) {
-                window.location.href = '/login';
-            } else {
-                window.location.href = '/';
-            }
+            window.location.href = '/login';
         } catch (err) {
-            console.error('Unexpected error deleting profile:', err);
             setMessage(`Unexpected error occurred: ${err.message || JSON.stringify(err)}`);
-            // Optionally, check user session here as well
-            const userSession = await verifyUser();
-            if (!userSession) {
-                window.location.href = '/login';
-            }
         }
     };
 
@@ -606,8 +596,8 @@ export default function Profile() {
                     </div>
 
                     {/* Save Profile Button */}
-                    <button type="button" onClick={saveProfile}>
-                        Save Profile
+                    <button type="button" onClick={savePersonalData}>
+                        Save Personal Data
                     </button>
 
                     {/* Genre + Instrument */}
@@ -775,7 +765,7 @@ export default function Profile() {
                     />
                     <button
                         type="button"
-                        onClick={handleDeleteProfile}
+                        onClick={(e) => handleDeleteProfile(e)}
                         className="danger-button"
                     >
                         Delete My Profile
