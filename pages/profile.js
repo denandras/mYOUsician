@@ -52,13 +52,22 @@ export default function Profile() {
     const [newGenreInstrumentRole, setNewGenreInstrumentRole] = useState('');
 
     // Dropdown options for social platforms
-    const socialPlatforms = [
-        { name: 'Instagram', prefix: 'https://instagram.com/' },
-        { name: 'Facebook', prefix: 'https://facebook.com/' },
-        { name: 'TikTok', prefix: 'https://tiktok.com/' },
-        { name: 'X', prefix: 'https://twitter.com/' },
-        { name: 'LinkedIn', prefix: 'https://linkedin.com/' },
-    ];
+    const [socialPlatforms, setSocialPlatforms] = useState([]);
+
+    useEffect(() => {
+        const fetchSocialPlatforms = async () => {
+            const { data, error } = await supabase
+                .from('social')
+                .select('id, name, link_prefix');
+            if (error) {
+                console.error('Error fetching social platforms:', error);
+                setSocialPlatforms([]);
+            } else {
+                setSocialPlatforms(data || []);
+            }
+        };
+        fetchSocialPlatforms();
+    }, []);
 
     // Dropdown options for education
 
@@ -71,6 +80,7 @@ export default function Profile() {
     const [countries, setCountries] = useState([]);
     const [cities, setCities] = useState([]);
     const [selectedCountry, setSelectedCountry] = useState('');
+
     const [selectedCity, setSelectedCity] = useState('');
 
     const [educationPlaces, setEducationPlaces] = useState(profile.education_places || []);
@@ -814,12 +824,12 @@ export default function Profile() {
                                         (platform) => platform.name === e.target.value
                                     );
                                     setNewSocialPlatform(e.target.value);
-                                    setNewSocialLink(selectedPlatform ? selectedPlatform.prefix : '');
+                                    setNewSocialLink(selectedPlatform ? selectedPlatform.link_prefix : '');
                                 }}
                             >
                                 <option value="">Select Platform</option>
-                                {socialPlatforms.map((platform, index) => (
-                                    <option key={index} value={platform.name}>
+                                {socialPlatforms.map((platform) => (
+                                    <option key={platform.id} value={platform.name}>
                                         {platform.name}
                                     </option>
                                 ))}
