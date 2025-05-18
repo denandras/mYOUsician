@@ -5,25 +5,6 @@ import signOut from '../lib/signOut'; // Import the reusable signOut function
 import Header from '../components/Header';
 import { createuser } from '../lib/createuser';
 import { deleteuser } from '../lib/deleteuser'; // Make sure this exists and is exported
-import useProfileOptions from '../lib/useProfileOptions';
-
-// Import extracted section components
-import PersonalDataSection from '../components/PersonalDataSection';
-import GenreInstrumentSection from '../components/GenreInstrumentSection';
-import SocialLinksSection from '../components/SocialLinksSection';
-import CertificatesSection from '../components/CertificatesSection';
-import VideoLinksSection from '../components/VideoLinksSection';
-import OccupationSection from '../components/OccupationSection';
-import EducationSection from '../components/EducationSection';
-
-import {
-  updateUserField,
-  updateUserFields,
-  validateSocialLink,
-  validateVideoLink,
-  formatGenreInstrument,
-  capitalize,
-} from '../lib/profileUtils';
 
 const geonamesUsername = process.env.NEXT_PUBLIC_GEONAMES_USERNAME;
 
@@ -78,23 +59,19 @@ export default function Profile() {
 
     // Dropdown options for education
 
+    const [genres, setGenres] = useState([]);
+    const [instruments, setInstruments] = useState([]);
+    const [educationOptions, setEducationOptions] = useState([]);
     const [newLocation, setNewLocation] = useState('');
     const [newCity, setNewCity] = useState('');
     const [newCountry, setNewCountry] = useState('');
+    const [countries, setCountries] = useState([]);
+    const [cities, setCities] = useState([]);
     const [selectedCountry, setSelectedCountry] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
 
     const [educationPlaces, setEducationPlaces] = useState(profile.education_places || []);
     const [newEducationPlace, setNewEducationPlace] = useState('');
-
-    const {
-      genres,
-      instruments,
-      educationOptions,
-      countries,
-      cities,
-      setCities,
-    } = useProfileOptions(selectedCountry);
 
     // Fetch user data and email from session on component mount
     useEffect(() => {
@@ -192,6 +169,28 @@ export default function Profile() {
     }, []);
 
     useEffect(() => {
+        const fetchGenres = async () => {
+            const { data } = await supabase.from('genres').select('name');
+            setGenres(data || []);
+        };
+        const fetchInstruments = async () => {
+            const { data } = await supabase
+                .from('instruments')
+                .select('name, category')
+                .order('category', { ascending: true })
+                .order('name', { ascending: true });
+            setInstruments(data || []);
+        };
+        const fetchEducationOptions = async () => {
+            const { data } = await supabase.from('education').select('id, name, HUN');
+            setEducationOptions(data || []);
+        };
+        fetchGenres();
+        fetchInstruments();
+        fetchEducationOptions();
+    }, []);
+
+    useEffect(() => {
         if (!selectedCountry) {
             setCities([]);
             return;
@@ -205,6 +204,15 @@ export default function Profile() {
         };
         fetchCities();
     }, [selectedCountry]);
+
+    useEffect(() => {
+        const fetchCountries = async () => {
+            const res = await fetch(`http://api.geonames.org/countryInfoJSON?username=${geonamesUsername}`);
+            const data = await res.json();
+            setCountries(data.geonames || []);
+        };
+        fetchCountries();
+    }, []);
 
     useEffect(() => {
         if (profile.location && profile.location[0]) {
@@ -247,7 +255,7 @@ export default function Profile() {
     // Handle adding a new genre-instrument pair
     const handleAddGenreInstrument = async () => {
         if (!newGenre || !newInstrument) return;
-        const newPair = formatGenreInstrument(newGenre, newInstrument);
+        const newPair = `${newGenre} ${newInstrument}`;
         if (profile.genre_instrument?.includes(newPair)) return;
 
         const updatedGenreInstrument = [...(profile.genre_instrument || []), newPair];
@@ -262,7 +270,10 @@ export default function Profile() {
 
         // Save to DB
         try {
-            await updateUserField(profile.uid, 'genre_instrument', updatedGenreInstrument);
+            await supabase
+                .from('users')
+                .update({ genre_instrument: updatedGenreInstrument, updated_at: new Date().toISOString() })
+                .eq('uid', profile.uid);
             setMessage('Genre-instrument list updated!');
         } catch (err) {
             setMessage('Error updating genre-instrument list.');
@@ -280,8 +291,17 @@ export default function Profile() {
 
         // Save the updated list immediately
         try {
-            await updateUserField(profile.uid, 'genre_instrument', updatedGenreInstrument);
-            setMessage('Genre-instrument list updated successfully!');
+            const { error } = await supabase
+                .from('users')
+                .update({ genre_instrument: updatedGenreInstrument, updated_at: new Date().toISOString() })
+                .eq('uid', profile.uid);
+
+            if (error) {
+                console.error('Error saving genre-instrument list:', error);
+                setMessage('Error saving genre-instrument list.');
+            } else {
+                setMessage('Genre-instrument list updated successfully!');
+            }
         } catch (err) {
             console.error('Unexpected error saving genre-instrument list:', err);
             setMessage('Unexpected error occurred.');
@@ -299,7 +319,7 @@ export default function Profile() {
             (platform) => platform.name === newSocialPlatform
         );
 
-        if (!validateSocialLink(newSocialLink, selectedPlatform.prefix)) {
+        if (!newSocialLink.startsWith(selectedPlatform.prefix)) {
             setMessage(`Invalid link. Must start with ${selectedPlatform.prefix}`);
             return;
         }
@@ -318,8 +338,17 @@ export default function Profile() {
         setNewSocialLink('');
 
         try {
-            await updateUserField(profile.uid, 'social', updatedSocialLinks);
-            setMessage('Social links updated successfully!');
+            const { error } = await supabase
+                .from('users')
+                .update({ social: updatedSocialLinks, updated_at: new Date().toISOString() })
+                .eq('uid', profile.uid);
+
+            if (error) {
+                console.error('Error saving social links:', error);
+                setMessage('Error saving social links.');
+            } else {
+                setMessage('Social links updated successfully!');
+            }
         } catch (err) {
             console.error('Unexpected error saving social links:', err);
             setMessage('Unexpected error occurred.');
@@ -344,8 +373,17 @@ export default function Profile() {
         setNewOccupationCompany('');
 
         try {
-            await updateUserField(profile.uid, 'occupation', updatedOccupations);
-            setMessage('Occupations updated successfully!');
+            const { error } = await supabase
+                .from('users')
+                .update({ occupation: updatedOccupations, updated_at: new Date().toISOString() })
+                .eq('uid', profile.uid);
+
+            if (error) {
+                console.error('Error saving occupations:', error);
+                setMessage('Error saving occupations.');
+            } else {
+                setMessage('Occupations updated successfully!');
+            }
         } catch (err) {
             console.error('Unexpected error saving occupations:', err);
             setMessage('Unexpected error occurred.');
@@ -370,8 +408,17 @@ export default function Profile() {
         setNewDegree('');
 
         try {
-            await updateUserField(profile.uid, 'education', updatedEducation);
-            setMessage('Education updated successfully!');
+            const { error } = await supabase
+                .from('users')
+                .update({ education: updatedEducation, updated_at: new Date().toISOString() }) // <-- fixed
+                .eq('uid', profile.uid);
+
+            if (error) {
+                console.error('Error saving education:', error);
+                setMessage('Error saving education.');
+            } else {
+                setMessage('Education updated successfully!');
+            }
         } catch (err) {
             console.error('Unexpected error saving education:', err);
             setMessage('Unexpected error occurred.');
@@ -399,8 +446,20 @@ export default function Profile() {
         setNewCertificateOrganization('');
 
         try {
-            await updateUserField(profile.uid, 'certificates', updatedCertificates);
-            setMessage('Certificates updated successfully!');
+            const { error } = await supabase
+                .from('users')
+                .update({
+                    certificates: updatedCertificates,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('uid', profile.uid);
+
+            if (error) {
+                console.error('Error saving certificates:', error);
+                setMessage('Error saving certificates.');
+            } else {
+                setMessage('Certificates updated successfully!');
+            }
         } catch (err) {
             console.error('Unexpected error saving certificates:', err);
             setMessage('Unexpected error occurred.');
@@ -409,7 +468,7 @@ export default function Profile() {
 
     // Handle adding a new video link
     const handleAddVideoLink = async () => {
-        if (!validateVideoLink(newVideoLink)) {
+        if (!newVideoLink.startsWith('http://') && !newVideoLink.startsWith('https://')) {
             setMessage('Please enter a valid video link.');
             return;
         }
@@ -424,8 +483,17 @@ export default function Profile() {
         setNewVideoLink('');
 
         try {
-            await updateUserField(profile.uid, 'video_links', updatedVideoLinks);
-            setMessage('Video links updated successfully!');
+            const { error } = await supabase
+                .from('users')
+                .update({ video_links: updatedVideoLinks, updated_at: new Date().toISOString() })
+                .eq('uid', profile.uid);
+
+            if (error) {
+                console.error('Error saving video links:', error);
+                setMessage('Error saving video links.');
+            } else {
+                setMessage('Video links updated successfully!');
+            }
         } catch (err) {
             console.error('Unexpected error saving video links:', err);
             setMessage('Unexpected error occurred.');
@@ -535,8 +603,17 @@ export default function Profile() {
         }));
 
         try {
-            await updateUserField(profile.uid, field, updatedList);
-            setMessage(`${capitalize(field)} updated successfully!`);
+            const { error } = await supabase
+                .from('users')
+                .update({ [field]: updatedList, updated_at: new Date().toISOString() })
+                .eq('uid', profile.uid);
+
+            if (error) {
+                console.error(`Error deleting item from ${field}:`, error);
+                setMessage(`Error deleting item from ${field}.`);
+            } else {
+                setMessage(`${field.charAt(0).toUpperCase() + field.slice(1)} updated successfully!`);
+            }
         } catch (err) {
             console.error(`Unexpected error deleting item from ${field}:`, err);
             setMessage('Unexpected error occurred.');
@@ -545,81 +622,449 @@ export default function Profile() {
 
     return (
         <main className="profile-page">
-            <Header />
+            <Header /> {/* Add the Header component */}
             <section className="profile-container">
                 <h1 className="profile-title">Profile Editor</h1>
                 {message && <p className="profile-message">{message}</p>}
                 <form className="profile-form">
-                    <PersonalDataSection
-                        profile={profile}
-                        countries={countries}
-                        cities={cities}
-                        selectedCountry={selectedCountry}
-                        setSelectedCountry={setSelectedCountry}
-                        selectedCity={selectedCity}
-                        setSelectedCity={setSelectedCity}
-                        handleChange={handleChange}
-                        savePersonalData={savePersonalData}
-                    />
-                    <GenreInstrumentSection
-                        genres={genres}
-                        instruments={instruments}
-                        profile={profile}
-                        newGenre={newGenre}
-                        setNewGenre={setNewGenre}
-                        newInstrument={newInstrument}
-                        setNewInstrument={setNewInstrument}
-                        handleAddGenreInstrument={handleAddGenreInstrument}
-                        handleDeleteGenreInstrument={handleDeleteGenreInstrument}
-                    />
-                    <SocialLinksSection
-                        socialPlatforms={socialPlatforms}
-                        profile={profile}
-                        newSocialPlatform={newSocialPlatform}
-                        setNewSocialPlatform={setNewSocialPlatform}
-                        newSocialLink={newSocialLink}
-                        setNewSocialLink={setNewSocialLink}
-                        handleAddSocialLink={handleAddSocialLink}
-                        handleDeleteItem={handleDeleteItem}
-                    />
-                    <CertificatesSection
-                        profile={profile}
-                        newCertificate={newCertificate}
-                        setNewCertificate={setNewCertificate}
-                        newCertificateOrganization={newCertificateOrganization}
-                        setNewCertificateOrganization={setNewCertificateOrganization}
-                        handleAddCertificate={handleAddCertificate}
-                        handleDeleteItem={handleDeleteItem}
-                    />
-                    <VideoLinksSection
-                        profile={profile}
-                        newVideoLink={newVideoLink}
-                        setNewVideoLink={setNewVideoLink}
-                        handleAddVideoLink={handleAddVideoLink}
-                        handleDeleteItem={handleDeleteItem}
-                    />
-                    <OccupationSection
-                        profile={profile}
-                        newOccupationRole={newOccupationRole}
-                        setNewOccupationRole={setNewOccupationRole}
-                        newOccupationCompany={newOccupationOrg}
-                        setNewOccupationCompany={setNewOccupationOrg}
-                        handleAddOccupation={handleAddOccupation}
-                        handleDeleteItem={handleDeleteItem}
-                    />
-                    <EducationSection
-                        profile={profile}
-                        newSchool={newSchool}
-                        setNewSchool={setNewSchool}
-                        newDegree={newDegree}
-                        setNewDegree={setNewDegree}
-                        handleAddEducation={handleAddEducation}
-                        handleDeleteItem={handleDeleteItem}
-                    />
+                    <div className="form-group">
+                        <label htmlFor="forename">Forename:</label>
+                        <input
+                            id="forename"
+                            type="text"
+                            value={profile.forename}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="surname">Surname:</label>
+                        <input
+                            id="surname"
+                            type="text"
+                            value={profile.surname}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+                    {/* Location Dropdowns */}
+                    <div className="form-group">
+                        <label htmlFor="country">Country:</label>
+                        <select
+                            id="country"
+                            value={selectedCountry}
+                            onChange={e => {
+                                setSelectedCountry(e.target.value);
+                                setSelectedCity('');
+                            }}
+                        >
+                            <option value="">Select Country</option>
+                            {countries.map(c => (
+                                <option key={c.geonameId} value={c.countryCode}>
+                                    {c.countryName}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="city">City:</label>
+                        <select
+                            id="city"
+                            value={selectedCity}
+                            onChange={e => setSelectedCity(e.target.value)}
+                            disabled={!selectedCountry}
+                        >
+                            <option value="">Select City</option>
+                            {cities.map(city => (
+                                <option key={city.geonameId} value={city.geonameId}>
+                                    {city.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="email">Email:</label>
+                        <input
+                            id="email"
+                            type="email"
+                            value={profile.email}
+                            onChange={handleChange}
+                            disabled // Disable editing of the email field
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="phone">Phone:</label>
+                        <input
+                            id="phone"
+                            type="text"
+                            value={profile.phone}
+                            onChange={e => {
+                                // Remove all spaces from the input
+                                const noSpaces = e.target.value.replace(/\s+/g, '');
+                                setProfile(prev => ({ ...prev, phone: noSpaces }));
+                            }}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="bio">Bio:</label>
+                        <textarea
+                            id="bio"
+                            value={profile.bio}
+                            onChange={handleChange}
+                        />
+                    </div>
+
+                    {/* Save Profile Button */}
+                    <button type="button" onClick={savePersonalData}>
+                        Save Personal Data
+                    </button>
+
+                    {/* Genre + Instrument */}
+                    <div className="form-group">
+                        <h3>Genre + Instrument:</h3>
+                        <div className="input-container">
+                            <select
+                                value={newGenre}
+                                onChange={(e) => setNewGenre(e.target.value)}
+                            >
+                                <option value="">Select Genre</option>
+                                {genres.map((g, idx) => (
+                                    <option key={idx} value={g.name}>{g.name}</option>
+                                ))}
+                            </select>
+                            <select
+                                value={newInstrument}
+                                onChange={(e) => setNewInstrument(e.target.value)}
+                            >
+                                <option value="">Select Instrument</option>
+                                {(() => {
+                                    // Group instruments by category
+                                    const grouped = instruments.reduce((acc, inst) => {
+                                        if (!acc[inst.category]) acc[inst.category] = [];
+                                        acc[inst.category].push(inst);
+                                        return acc;
+                                    }, {});
+                                    // Render optgroups sorted by category name, and instruments sorted by name
+                                    return Object.keys(grouped).sort().map(category => (
+                                        <optgroup key={category} label={category}>
+                                            {grouped[category]
+                                                .sort((a, b) => a.name.localeCompare(b.name))
+                                                .map(inst => (
+                                                    <option key={inst.name} value={inst.name}>
+                                                        {inst.name}
+                                                    </option>
+                                                ))}
+                                        </optgroup>
+                                    ));
+                                })()}
+                            </select>
+                            <button type="button" onClick={async () => {
+                                if (!newGenre || !newInstrument) return;
+                                const newPair = `${newGenre} ${newInstrument}`;
+                                if (profile.genre_instrument?.includes(newPair)) return;
+                                const updatedGenreInstrument = [...(profile.genre_instrument || []), newPair];
+                                setProfile(prev => ({
+                                    ...prev,
+                                    genre_instrument: updatedGenreInstrument,
+                                }));
+                                setNewGenre('');
+                                setNewInstrument('');
+                                if (profile.uid) {
+                                    await supabase.from('users').update({ genre_instrument: updatedGenreInstrument, updated_at: new Date().toISOString() }).eq('uid', profile.uid);
+                                }
+                            }}>
+                                Add
+                            </button>
+                        </div>
+                        <ul>
+                            {Array.isArray(profile.genre_instrument) && profile.genre_instrument.length > 0 ? (
+                                profile.genre_instrument.map((item, index) => (
+                                    <li key={index}>
+                                        {item}
+                                        <button type="button" onClick={() => handleDeleteGenreInstrument(index)}>
+                                            ×
+                                        </button>
+                                    </li>
+                                ))
+                            ) : (
+                                <li>No genre-instrument pairs</li>
+                            )}
+                        </ul>
+                    </div>
+
+                    {/* Social Links */}
+                    <div className="form-group">
+                        <h3>Social Links:</h3>
+                        <div className="input-container">
+                            <select
+                                value={newSocialPlatform}
+                                onChange={(e) => {
+                                    const selectedPlatform = socialPlatforms.find(
+                                        (platform) => platform.name === e.target.value
+                                    );
+                                    setNewSocialPlatform(e.target.value);
+                                    setNewSocialLink(selectedPlatform ? selectedPlatform.prefix : '');
+                                }}
+                            >
+                                <option value="">Select Platform</option>
+                                {socialPlatforms.map((platform, index) => (
+                                    <option key={index} value={platform.name}>
+                                        {platform.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <input
+                                type="text"
+                                placeholder="Add a social link"
+                                value={newSocialLink}
+                                onChange={(e) => setNewSocialLink(e.target.value)}
+                            />
+                            <button type="button" onClick={handleAddSocialLink}>
+                                Add
+                            </button>
+                        </div>
+                        <ul>
+                            {profile.social?.map((link, index) => (
+                                <li key={index}>
+                                    <a href={link.link} target="_blank" rel="noopener noreferrer">
+                                        {link.platform}: {link.link}
+                                    </a>
+                                    <button
+                                        type="button"
+                                        className="delete-x"
+                                        title="Delete"
+                                        onClick={() => handleDeleteItem('social', index)}
+                                    >
+                                        ×
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* Certificates */}
+                    <div className="form-group">
+                        <h3>Certificates:</h3>
+                        <div className="input-container">
+                            <input
+                                type="text"
+                                placeholder="Certificate"
+                                value={newCertificate}
+                                onChange={(e) => setNewCertificate(e.target.value)}
+                            />
+                            <input
+                                type="text"
+                                placeholder="Organization"
+                                value={newCertificateOrganization}
+                                onChange={(e) => setNewCertificateOrganization(e.target.value)}
+                            />
+                            <button type="button" onClick={async () => {
+                                if (!newCertificate || !newCertificateOrganization) return;
+                                const updatedCertificates = [
+                                    ...(Array.isArray(profile.certificates) ? profile.certificates : []),
+                                    { certificate: newCertificate, organization: newCertificateOrganization },
+                                ];
+                                setProfile(prev => ({
+                                    ...prev,
+                                    certificates: updatedCertificates,
+                                }));
+                                setNewCertificate('');
+                                setNewCertificateOrganization('');
+                                if (profile.uid) {
+                                    await supabase.from('users').update({ certificates: updatedCertificates, updated_at: new Date().toISOString() }).eq('uid', profile.uid);
+                                }
+                            }}>
+                                Add
+                            </button>
+                        </div>
+                        <ul>
+                            {(Array.isArray(profile.certificates) ? profile.certificates : []).map((cert, index) => (
+                                <li key={index}>
+                                    {typeof cert === 'object'
+                                        ? `${cert.certificate || ''}${cert.organization ? ` from ${cert.organization}` : ''}`
+                                        : cert}
+                                    <button
+                                        type="button"
+                                        className="delete-x"
+                                        title="Delete"
+                                        onClick={() => handleDeleteItem('certificates', index)}
+                                    >
+                                        ×
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* Video Links */}
+                    <div className="form-group"></div>
+                        <h3>Video Links:</h3>
+                        <div className="input-container">
+                            <input
+                                type="text"
+                                placeholder="Add a video link"
+                                value={newVideoLink}
+                                onChange={(e) => setNewVideoLink(e.target.value)}
+                            />
+                            <button type="button" onClick={async () => {
+                                if (!newVideoLink.startsWith('http://') && !newVideoLink.startsWith('https://')) return;
+                                const updatedVideoLinks = [...profile.video_links, newVideoLink];
+                                setProfile(prev => ({
+                                    ...prev,
+                                    video_links: updatedVideoLinks,
+                                }));
+                                setNewVideoLink('');
+                                if (profile.uid) {
+                                    await supabase.from('users').update({ video_links: updatedVideoLinks, updated_at: new Date().toISOString() }).eq('uid', profile.uid);
+                                }
+                            }}>
+                                Add
+                            </button>
+                        </div>
+                        <ul>
+                            {(Array.isArray(profile.video_links) ? profile.video_links : []).map((link, index) => (
+                                <li key={index}>
+                                    <a href={link} target="_blank" rel="noopener noreferrer">
+                                        {link}
+                                    </a>
+                                    <button
+                                        type="button"
+                                        className="delete-x"
+                                        title="Delete"
+                                        onClick={() => handleDeleteItem('video_links', index)}
+                                    >
+                                        ×
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+
+                    
+
+                    {/* Occupation */}
+                    <div className="form-group">
+                        <h3>Occupation:</h3>
+                        <div className="input-container">
+                            <input
+                                type="text"
+                                placeholder="Role (e.g. Trombonist)"
+                                value={newOccupationRole}
+                                onChange={(e) => setNewOccupationRole(e.target.value)}
+                            />
+                            <input
+                                type="text"
+                                placeholder="Organization (e.g. Philharmonic)"
+                                value={newOccupationOrg}
+                                onChange={(e) => setNewOccupationOrg(e.target.value)}
+                            />
+                            <button type="button" onClick={async () => {
+                                if (!newOccupationRole || !newOccupationOrg) return;
+                                const newEntry = `${newOccupationRole} at ${newOccupationOrg}`;
+                                const updated = [...(profile.occupation || []), newEntry];
+                                setProfile(prev => ({ ...prev, occupation: updated }));
+                                setNewOccupationRole('');
+                                setNewOccupationOrg('');
+                                if (profile.uid) {
+                                    await supabase.from('users').update({ occupation: updated, updated_at: new Date().toISOString() }).eq('uid', profile.uid);
+                                }
+                            }}>
+                                Add
+                            </button>
+                        </div>
+                        <ul>
+                            {(Array.isArray(profile.occupation) ? profile.occupation : []).map((occ, idx) => (
+                                <li key={idx}>
+                                    {occ}
+                                    <button type="button" onClick={async () => {
+                                        const updated = profile.occupation.filter((_, i) => i !== idx);
+                                        setProfile(prev => ({ ...prev, occupation: updated }));
+                                        await supabase.from('users').update({
+                                            occupation: updated,
+                                            updated_at: new Date().toISOString()
+                                        }).eq('uid', profile.uid);
+                                    }}>×</button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* Education */}
+                    <div className="form-group">
+                        <h3>Education:</h3>
+                        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                            <input
+                                id="education-place"
+                                name="education-place"
+                                type="text"
+                                value={newEducationPlace}
+                                onChange={e => setNewEducationPlace(e.target.value)}
+                                placeholder="e.g. Liszt Academy"
+                            />
+                            <select
+                                id="education-level"
+                                name="education-level"
+                                value={newEducation}
+                                onChange={e => setNewEducation(e.target.value)}
+                            >
+                                <option value="">Select Education</option>
+                                {educationOptions.map(option => (
+                                    <option key={option.id} value={option.id}>
+                                        {option.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    if (!newEducation || !newEducationPlace.trim()) return;
+                                    const selected = educationOptions.find(opt => opt.id === parseInt(newEducation));
+                                    if (!selected) return;
+                                    const newEntry = {
+                                        name: selected.name,
+                                        place: newEducationPlace.trim()
+                                    };
+                                    const updated = [...(profile.education || []), newEntry];
+                                    setProfile(prev => ({ ...prev, education: updated }));
+                                    setNewEducation('');
+                                    setNewEducationPlace('');
+                                    if (profile.uid) {
+                                        await supabase.from('users').update({
+                                            education: updated,
+                                            updated_at: new Date().toISOString()
+                                        }).eq('uid', profile.uid);
+                                    }
+                                }}
+                            >
+                                Add
+                            </button>
+                        </div>
+                        <ul>
+                            {(Array.isArray(profile.education) ? profile.education : []).map((edu, idx) => (
+                                <li key={idx}>
+                                    {edu.place}{edu.name ? ` – ${edu.name}` : ''}
+                                    <button type="button" onClick={async () => {
+                                        const updated = profile.education.filter((_, i) => i !== idx);
+                                        setProfile(prev => ({ ...prev, education: updated }));
+                                        if (profile.uid) {
+                                            await supabase.from('users').update({
+                                                education: updated,
+                                                updated_at: new Date().toISOString()
+                                            }).eq('uid', profile.uid);
+                                        }
+                                    }}>×</button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    
+                    
+                    
+                    
                 </form>
                 <button type="button" onClick={handleLogout} className="logout-button">
                     Logout
                 </button>
+
                 {/* Danger Zone */}
                 <section className="danger-zone">
                     <h2 className="danger-title">Danger Zone</h2>
@@ -635,7 +1080,7 @@ export default function Profile() {
                     />
                     <button
                         type="button"
-                        onClick={handleDeleteProfile}
+                        onClick={(e) => handleDeleteProfile(e)}
                         className="danger-button"
                     >
                         Delete My Profile
