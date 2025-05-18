@@ -5,6 +5,7 @@ import signOut from '../lib/signOut'; // Import the reusable signOut function
 import Header from '../components/Header';
 import { createuser } from '../lib/createuser';
 import { deleteuser } from '../lib/deleteuser'; // Make sure this exists and is exported
+import useProfileOptions from '../lib/useProfileOptions';
 
 // Import extracted section components
 import PersonalDataSection from '../components/PersonalDataSection';
@@ -77,19 +78,23 @@ export default function Profile() {
 
     // Dropdown options for education
 
-    const [genres, setGenres] = useState([]);
-    const [instruments, setInstruments] = useState([]);
-    const [educationOptions, setEducationOptions] = useState([]);
     const [newLocation, setNewLocation] = useState('');
     const [newCity, setNewCity] = useState('');
     const [newCountry, setNewCountry] = useState('');
-    const [countries, setCountries] = useState([]);
-    const [cities, setCities] = useState([]);
     const [selectedCountry, setSelectedCountry] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
 
     const [educationPlaces, setEducationPlaces] = useState(profile.education_places || []);
     const [newEducationPlace, setNewEducationPlace] = useState('');
+
+    const {
+      genres,
+      instruments,
+      educationOptions,
+      countries,
+      cities,
+      setCities,
+    } = useProfileOptions(selectedCountry);
 
     // Fetch user data and email from session on component mount
     useEffect(() => {
@@ -187,28 +192,6 @@ export default function Profile() {
     }, []);
 
     useEffect(() => {
-        const fetchGenres = async () => {
-            const { data } = await supabase.from('genres').select('name');
-            setGenres(data || []);
-        };
-        const fetchInstruments = async () => {
-            const { data } = await supabase
-                .from('instruments')
-                .select('name, category')
-                .order('category', { ascending: true })
-                .order('name', { ascending: true });
-            setInstruments(data || []);
-        };
-        const fetchEducationOptions = async () => {
-            const { data } = await supabase.from('education').select('id, name, HUN');
-            setEducationOptions(data || []);
-        };
-        fetchGenres();
-        fetchInstruments();
-        fetchEducationOptions();
-    }, []);
-
-    useEffect(() => {
         if (!selectedCountry) {
             setCities([]);
             return;
@@ -222,15 +205,6 @@ export default function Profile() {
         };
         fetchCities();
     }, [selectedCountry]);
-
-    useEffect(() => {
-        const fetchCountries = async () => {
-            const res = await fetch(`http://api.geonames.org/countryInfoJSON?username=${geonamesUsername}`);
-            const data = await res.json();
-            setCountries(data.geonames || []);
-        };
-        fetchCountries();
-    }, []);
 
     useEffect(() => {
         if (profile.location && profile.location[0]) {
@@ -635,11 +609,10 @@ export default function Profile() {
                     />
                     <EducationSection
                         profile={profile}
-                        educationOptions={educationOptions}
-                        newEducation={newEducation}
-                        setNewEducation={setNewEducation}
-                        newEducationPlace={newEducationPlace}
-                        setNewEducationPlace={setNewEducationPlace}
+                        newSchool={newSchool}
+                        setNewSchool={setNewSchool}
+                        newDegree={newDegree}
+                        setNewDegree={setNewDegree}
                         handleAddEducation={handleAddEducation}
                         handleDeleteItem={handleDeleteItem}
                     />
