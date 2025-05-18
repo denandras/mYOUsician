@@ -272,7 +272,7 @@ export default function Profile() {
         try {
             await supabase
                 .from('users')
-                .update({ genre_instrument: updatedGenreInstrument })
+                .update({ genre_instrument: updatedGenreInstrument, updated_at: new Date().toISOString() })
                 .eq('uid', profile.uid);
             setMessage('Genre-instrument list updated!');
         } catch (err) {
@@ -293,7 +293,7 @@ export default function Profile() {
         try {
             const { error } = await supabase
                 .from('users')
-                .update({ genre_instrument: updatedGenreInstrument })
+                .update({ genre_instrument: updatedGenreInstrument, updated_at: new Date().toISOString() })
                 .eq('uid', profile.uid);
 
             if (error) {
@@ -340,7 +340,7 @@ export default function Profile() {
         try {
             const { error } = await supabase
                 .from('users')
-                .update({ social: updatedSocialLinks })
+                .update({ social: updatedSocialLinks, updated_at: new Date().toISOString() })
                 .eq('uid', profile.uid);
 
             if (error) {
@@ -375,7 +375,7 @@ export default function Profile() {
         try {
             const { error } = await supabase
                 .from('users')
-                .update({ occupation: updatedOccupations })
+                .update({ occupation: updatedOccupations, updated_at: new Date().toISOString() })
                 .eq('uid', profile.uid);
 
             if (error) {
@@ -410,7 +410,7 @@ export default function Profile() {
         try {
             const { error } = await supabase
                 .from('users')
-                .update({ education: updatedEducation })
+                .update({ education: updatedEducation, updated_at: new Date().toISOString() }) // <-- fixed
                 .eq('uid', profile.uid);
 
             if (error) {
@@ -485,7 +485,7 @@ export default function Profile() {
         try {
             const { error } = await supabase
                 .from('users')
-                .update({ video_links: updatedVideoLinks })
+                .update({ video_links: updatedVideoLinks, updated_at: new Date().toISOString() })
                 .eq('uid', profile.uid);
 
             if (error) {
@@ -535,7 +535,10 @@ export default function Profile() {
 
         let result;
         if (profile.uid) {
-            result = await supabase.from('users').update(payload).eq('uid', profile.uid);
+            result = await supabase.from('users').update({
+                ...payload,
+                updated_at: new Date().toISOString()
+            }).eq('uid', profile.uid);
         } else {
             // For insert, you need uid and email
             result = await supabase.from('users').insert([{ ...payload, uid: profile.uid, email: profile.email }]);
@@ -602,7 +605,7 @@ export default function Profile() {
         try {
             const { error } = await supabase
                 .from('users')
-                .update({ [field]: updatedList })
+                .update({ [field]: updatedList, updated_at: new Date().toISOString() })
                 .eq('uid', profile.uid);
 
             if (error) {
@@ -767,7 +770,7 @@ export default function Profile() {
                                 setNewGenre('');
                                 setNewInstrument('');
                                 if (profile.uid) {
-                                    await supabase.from('users').update({ genre_instrument: updatedGenreInstrument }).eq('uid', profile.uid);
+                                    await supabase.from('users').update({ genre_instrument: updatedGenreInstrument, updated_at: new Date().toISOString() }).eq('uid', profile.uid);
                                 }
                             }}>
                                 Add
@@ -868,7 +871,7 @@ export default function Profile() {
                                 setNewCertificate('');
                                 setNewCertificateOrganization('');
                                 if (profile.uid) {
-                                    await supabase.from('users').update({ certificates: updatedCertificates }).eq('uid', profile.uid);
+                                    await supabase.from('users').update({ certificates: updatedCertificates, updated_at: new Date().toISOString() }).eq('uid', profile.uid);
                                 }
                             }}>
                                 Add
@@ -912,7 +915,7 @@ export default function Profile() {
                                 }));
                                 setNewVideoLink('');
                                 if (profile.uid) {
-                                    await supabase.from('users').update({ video_links: updatedVideoLinks }).eq('uid', profile.uid);
+                                    await supabase.from('users').update({ video_links: updatedVideoLinks, updated_at: new Date().toISOString() }).eq('uid', profile.uid);
                                 }
                             }}>
                                 Add
@@ -962,7 +965,7 @@ export default function Profile() {
                                 setNewOccupationRole('');
                                 setNewOccupationOrg('');
                                 if (profile.uid) {
-                                    await supabase.from('users').update({ occupation: updated }).eq('uid', profile.uid);
+                                    await supabase.from('users').update({ occupation: updated, updated_at: new Date().toISOString() }).eq('uid', profile.uid);
                                 }
                             }}>
                                 Add
