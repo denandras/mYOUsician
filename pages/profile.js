@@ -5,6 +5,8 @@ import signOut from '../lib/signOut'; // Import the reusable signOut function
 import Header from '../components/Header';
 import { createuser } from '../lib/createuser';
 import { deleteuser } from '../lib/deleteuser'; // Make sure this exists and is exported
+import uploadPicture from '../lib/uploadPicture'; // Add this import
+import { uploadProfileImage, getProfileImageUrl } from '../lib/uploadPicture';
 
 const geonamesUsername = process.env.NEXT_PUBLIC_GEONAMES_USERNAME;
 
@@ -54,6 +56,9 @@ export default function Profile() {
     // Dropdown options for social platforms
     const [socialPlatforms, setSocialPlatforms] = useState([]);
 
+    const [profileImageUrl, setProfileImageUrl] = useState('');
+    const [uploading, setUploading] = useState(false);
+
     useEffect(() => {
         const fetchSocialPlatforms = async () => {
             const { data, error } = await supabase
@@ -69,6 +74,44 @@ export default function Profile() {
         fetchSocialPlatforms();
     }, []);
 
+    // Fetch profile image if exists (optional, if you store the URL in profile)
+    useEffect(() => {
+        if (profile.profile_image_url) {
+            setProfileImageUrl(profile.profile_image_url);
+        }
+    }, [profile.profile_image_url]);
+
+    useEffect(() => {
+        if (profile.profile_link) {
+            setProfileImageUrl(profile.profile_link);
+        }
+    }, [profile.profile_link]);
+
+    // Handle image upload
+    const handleProfileImageUpload = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        setUploading(true);
+
+        try {
+            const path = await uploadProfileImage(file, profile.uid);
+            const url = getProfileImageUrl(path);
+            console.log("Profile image URL being saved:", url); // <-- Add this line
+            setProfileImageUrl(url);
+            await supabase
+                .from('users')
+                .update({ profile_link: url, updated_at: new Date().toISOString() })
+                .eq('uid', profile.uid);
+            setProfile(prev => ({ ...prev, profile_link: url }));
+            setMessage('Profile image updated!');
+        } catch (err) {
+            console.error('Upload error:', err);
+            setMessage('Unexpected error uploading image: ' + (err.message || JSON.stringify(err)));
+        } finally {
+            setUploading(false);
+        }
+    };
+
     // Dropdown options for education
 
     const [genres, setGenres] = useState([]);
@@ -76,7 +119,7 @@ export default function Profile() {
     const [educationOptions, setEducationOptions] = useState([]);
     const [newLocation, setNewLocation] = useState('');
     const [newCity, setNewCity] = useState('');
-    const [newCountry, setNewCountry] = useState('');
+    const [newCountry, setNewCountry] = useState([]);
     const [countries, setCountries] = useState([]);
     const [cities, setCities] = useState([]);
     const [selectedCountry, setSelectedCountry] = useState('');
@@ -638,6 +681,55 @@ export default function Profile() {
             <Header /> {/* Add the Header component */}
             <section className="profile-container">
                 <h1 className="profile-title">Profile Editor</h1>
+                {/* Profile Image Circle */}
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
+                    <label
+                        htmlFor="profile-image-upload"
+                        style={{
+                            width: 120,
+                            height: 120,
+                            borderRadius: '50%',
+                            border: '2px dashed #bbb',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            overflow: 'hidden',
+                            cursor: 'pointer',
+                            background: '#fafafa',
+                            position: 'relative',
+                        }}
+                        title="Click to upload profile picture"
+                    >
+                        {profileImageUrl ? (
+                            <img
+                                src={profileImageUrl}
+                                alt="Profile"
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                        ) : (
+                            <span style={{ color: '#bbb', fontSize: 32 }}>+</span>
+                        )}
+                        <input
+                            id="profile-image-upload"
+                            type="file"
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                            onChange={handleProfileImageUpload}
+                            disabled={uploading}
+                        />
+                        {uploading && (
+                            <div style={{
+                                position: 'absolute',
+                                top: 0, left: 0, width: '100%', height: '100%',
+                                background: 'rgba(255,255,255,0.7)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: 18, color: '#888'
+                            }}>
+                                Uploading...
+                            </div>
+                        )}
+                    </label>
+                </div>
                 {message && <p className="profile-message">{message}</p>}
                 <form className="profile-form">
                     <div className="form-group">
