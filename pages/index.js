@@ -25,15 +25,14 @@ export default function Home() {
       <main className="home-page">
         <Header /> {/* Add the Header component */}
         <section className="home-container">
-          <h1 className="home-title">Welcome to mYOUsician</h1>
-          <p className="home-description">Welcome back! Explore your profile or the database.</p>
+          <h1 className="home-title">Welcome back to mYOUsician!</h1>
           <nav className="home-navigation">
-            <p>
-              Go to your <a href="/profile" className="home-link">Profile</a>
-            </p>
-            <p>
-              Check out the <a href="/database" className="home-link">Database</a>
-            </p>
+            <button onClick={() => window.location.href = '/profile'} className="cta-button">
+              Edit profile
+            </button>
+            <button onClick={() => window.location.href = '/database'} className="cta-button">
+              Browse Database
+            </button>
           </nav>
         </section>
       </main>
@@ -42,17 +41,21 @@ export default function Home() {
     // Render content for users who are not signed in
     return (
       <main className="home-page">
+        <Header /> {/* Add the Header component */}
         <section className="home-container">
-          <h1 className="home-title">Welcome to mYOUsician.</h1>
-          <div className='home-description'>
-            <p>A database of musicians, for musicians. Find your next collaborator, or just browse!</p>
+          <h1 className="home-title">Welcome to mYOUsician</h1>
+          <div className="home-description">
+            <p><em>A database of musicians, for musicians.</em></p>
           </div>
           <nav className="home-navigation">
+            <button onClick={() => window.location.href = '/database'} className="cta-button">
+              Browse the Database
+            </button>
             <button onClick={() => window.location.href = '/signup'} className="cta-button">
-              Sign up &#187;
+              Create a Profile
             </button>
             <p className="small-text">
-              &nbsp;Already have an account? <a href="/login" className="home-link">Log in</a>
+              Already have an account? <a href="/login" className="home-link">Log in</a>
             </p>
           </nav>
         </section>
