@@ -40,7 +40,7 @@ export default function Header() {
     const success = await signOut(); // Call the reusable signOut function
     if (success) {
       setIsLoggedIn(false); // Update state after logging out
-      window.location.href = '/login'; // Redirect to login page
+      window.location.href = '/'; // Redirect to home page instead of login
     } else {
       console.error('Error logging out. Please try again.');
     }
