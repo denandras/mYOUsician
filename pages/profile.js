@@ -15,6 +15,15 @@ import VideoLinksSection from '../components/VideoLinksSection';
 import OccupationSection from '../components/OccupationSection';
 import EducationSection from '../components/EducationSection';
 
+import {
+  updateUserField,
+  updateUserFields,
+  validateSocialLink,
+  validateVideoLink,
+  formatGenreInstrument,
+  capitalize,
+} from '../lib/profileUtils';
+
 const geonamesUsername = process.env.NEXT_PUBLIC_GEONAMES_USERNAME;
 
 export default function Profile() {
@@ -264,7 +273,7 @@ export default function Profile() {
     // Handle adding a new genre-instrument pair
     const handleAddGenreInstrument = async () => {
         if (!newGenre || !newInstrument) return;
-        const newPair = `${newGenre} ${newInstrument}`;
+        const newPair = formatGenreInstrument(newGenre, newInstrument);
         if (profile.genre_instrument?.includes(newPair)) return;
 
         const updatedGenreInstrument = [...(profile.genre_instrument || []), newPair];
@@ -279,10 +288,7 @@ export default function Profile() {
 
         // Save to DB
         try {
-            await supabase
-                .from('users')
-                .update({ genre_instrument: updatedGenreInstrument, updated_at: new Date().toISOString() })
-                .eq('uid', profile.uid);
+            await updateUserField(profile.uid, 'genre_instrument', updatedGenreInstrument);
             setMessage('Genre-instrument list updated!');
         } catch (err) {
             setMessage('Error updating genre-instrument list.');
@@ -300,17 +306,8 @@ export default function Profile() {
 
         // Save the updated list immediately
         try {
-            const { error } = await supabase
-                .from('users')
-                .update({ genre_instrument: updatedGenreInstrument, updated_at: new Date().toISOString() })
-                .eq('uid', profile.uid);
-
-            if (error) {
-                console.error('Error saving genre-instrument list:', error);
-                setMessage('Error saving genre-instrument list.');
-            } else {
-                setMessage('Genre-instrument list updated successfully!');
-            }
+            await updateUserField(profile.uid, 'genre_instrument', updatedGenreInstrument);
+            setMessage('Genre-instrument list updated successfully!');
         } catch (err) {
             console.error('Unexpected error saving genre-instrument list:', err);
             setMessage('Unexpected error occurred.');
@@ -328,7 +325,7 @@ export default function Profile() {
             (platform) => platform.name === newSocialPlatform
         );
 
-        if (!newSocialLink.startsWith(selectedPlatform.prefix)) {
+        if (!validateSocialLink(newSocialLink, selectedPlatform.prefix)) {
             setMessage(`Invalid link. Must start with ${selectedPlatform.prefix}`);
             return;
         }
@@ -347,17 +344,8 @@ export default function Profile() {
         setNewSocialLink('');
 
         try {
-            const { error } = await supabase
-                .from('users')
-                .update({ social: updatedSocialLinks, updated_at: new Date().toISOString() })
-                .eq('uid', profile.uid);
-
-            if (error) {
-                console.error('Error saving social links:', error);
-                setMessage('Error saving social links.');
-            } else {
-                setMessage('Social links updated successfully!');
-            }
+            await updateUserField(profile.uid, 'social', updatedSocialLinks);
+            setMessage('Social links updated successfully!');
         } catch (err) {
             console.error('Unexpected error saving social links:', err);
             setMessage('Unexpected error occurred.');
@@ -382,17 +370,8 @@ export default function Profile() {
         setNewOccupationCompany('');
 
         try {
-            const { error } = await supabase
-                .from('users')
-                .update({ occupation: updatedOccupations, updated_at: new Date().toISOString() })
-                .eq('uid', profile.uid);
-
-            if (error) {
-                console.error('Error saving occupations:', error);
-                setMessage('Error saving occupations.');
-            } else {
-                setMessage('Occupations updated successfully!');
-            }
+            await updateUserField(profile.uid, 'occupation', updatedOccupations);
+            setMessage('Occupations updated successfully!');
         } catch (err) {
             console.error('Unexpected error saving occupations:', err);
             setMessage('Unexpected error occurred.');
@@ -417,17 +396,8 @@ export default function Profile() {
         setNewDegree('');
 
         try {
-            const { error } = await supabase
-                .from('users')
-                .update({ education: updatedEducation, updated_at: new Date().toISOString() }) // <-- fixed
-                .eq('uid', profile.uid);
-
-            if (error) {
-                console.error('Error saving education:', error);
-                setMessage('Error saving education.');
-            } else {
-                setMessage('Education updated successfully!');
-            }
+            await updateUserField(profile.uid, 'education', updatedEducation);
+            setMessage('Education updated successfully!');
         } catch (err) {
             console.error('Unexpected error saving education:', err);
             setMessage('Unexpected error occurred.');
@@ -455,20 +425,8 @@ export default function Profile() {
         setNewCertificateOrganization('');
 
         try {
-            const { error } = await supabase
-                .from('users')
-                .update({
-                    certificates: updatedCertificates,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('uid', profile.uid);
-
-            if (error) {
-                console.error('Error saving certificates:', error);
-                setMessage('Error saving certificates.');
-            } else {
-                setMessage('Certificates updated successfully!');
-            }
+            await updateUserField(profile.uid, 'certificates', updatedCertificates);
+            setMessage('Certificates updated successfully!');
         } catch (err) {
             console.error('Unexpected error saving certificates:', err);
             setMessage('Unexpected error occurred.');
@@ -477,7 +435,7 @@ export default function Profile() {
 
     // Handle adding a new video link
     const handleAddVideoLink = async () => {
-        if (!newVideoLink.startsWith('http://') && !newVideoLink.startsWith('https://')) {
+        if (!validateVideoLink(newVideoLink)) {
             setMessage('Please enter a valid video link.');
             return;
         }
@@ -492,17 +450,8 @@ export default function Profile() {
         setNewVideoLink('');
 
         try {
-            const { error } = await supabase
-                .from('users')
-                .update({ video_links: updatedVideoLinks, updated_at: new Date().toISOString() })
-                .eq('uid', profile.uid);
-
-            if (error) {
-                console.error('Error saving video links:', error);
-                setMessage('Error saving video links.');
-            } else {
-                setMessage('Video links updated successfully!');
-            }
+            await updateUserField(profile.uid, 'video_links', updatedVideoLinks);
+            setMessage('Video links updated successfully!');
         } catch (err) {
             console.error('Unexpected error saving video links:', err);
             setMessage('Unexpected error occurred.');
@@ -612,17 +561,8 @@ export default function Profile() {
         }));
 
         try {
-            const { error } = await supabase
-                .from('users')
-                .update({ [field]: updatedList, updated_at: new Date().toISOString() })
-                .eq('uid', profile.uid);
-
-            if (error) {
-                console.error(`Error deleting item from ${field}:`, error);
-                setMessage(`Error deleting item from ${field}.`);
-            } else {
-                setMessage(`${field.charAt(0).toUpperCase() + field.slice(1)} updated successfully!`);
-            }
+            await updateUserField(profile.uid, field, updatedList);
+            setMessage(`${capitalize(field)} updated successfully!`);
         } catch (err) {
             console.error(`Unexpected error deleting item from ${field}:`, err);
             setMessage('Unexpected error occurred.');
