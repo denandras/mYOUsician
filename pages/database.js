@@ -13,6 +13,7 @@ export default function Database() {
   const [hasSearched, setHasSearched] = useState(false); // Track if search button was pressed
   const [currentUserEmail, setCurrentUserEmail] = useState(''); // Add this state at the top
   const [sortMethod, setSortMethod] = useState('name'); // default to 'name'
+  const [selectedRole, setSelectedRole] = useState('');
 
   // Sorting options
   const sortOptions = [
@@ -64,8 +65,10 @@ export default function Database() {
         .select('forename, surname, email, genre_instrument, social, certificates, education, occupation, video_links');
 
       if (selectedGenre && selectedInstrument) {
-        const searchString = `${selectedGenre} ${selectedInstrument}`;
-        console.log('Searching for:', searchString);
+        let searchString = `${selectedGenre} ${selectedInstrument}`;
+        if (selectedRole) {
+          searchString += ` (${selectedRole})`;
+        }
         query = query.contains('genre_instrument', [searchString]);
       }
 
@@ -173,22 +176,22 @@ export default function Database() {
           className="search-form"
           style={{
             display: 'flex',
-            flexDirection: 'column',
+            flexDirection: 'row', // <-- make it a row
             alignItems: 'center',
             gap: 16,
             margin: '32px 0'
           }}
         >
-          {/* Dropdown for filtering by genre */}
+          {/* Genre dropdown */}
           <div className="filter-container">
-            <label htmlFor="genre-filter" className="filter-label">Filter by Genre:</label>
+            <label htmlFor="genre-filter" className="filter-label">Genre:</label>
             <select
               id="genre-filter"
               className="filter-dropdown"
               value={selectedGenre}
               onChange={handleGenreChange}
             >
-              <option value="">Select Genre</option>
+              <option value="">select</option>
               {genres.map((genre, index) => (
                 <option key={index} value={genre.name}>
                   {genre.name}
@@ -197,18 +200,17 @@ export default function Database() {
             </select>
           </div>
 
-          {/* Dropdown for filtering by instrument */}
+          {/* Instrument dropdown */}
           <div className="filter-container">
-            <label htmlFor="instrument-filter" className="filter-label">Filter by Instrument:</label>
+            <label htmlFor="instrument-filter" className="filter-label">Instrument:</label>
             <select
               id="instrument-filter"
               className="filter-dropdown"
               value={selectedInstrument}
               onChange={handleInstrumentChange}
             >
-              <option value="">Select Instrument</option>
+              <option value="">select</option>
               {(() => {
-                // Group by category
                 const grouped = instruments.reduce((acc, inst) => {
                   if (!acc[inst.category]) acc[inst.category] = [];
                   acc[inst.category].push(inst);
@@ -229,7 +231,22 @@ export default function Database() {
             </select>
           </div>
 
-          {/* Dropdown for sorting */}
+          {/* Role dropdown */}
+          <div className="filter-container">
+            <label htmlFor="role-filter" className="filter-label">Role:</label>
+            <select
+              id="role-filter"
+              className="filter-dropdown"
+              value={selectedRole}
+              onChange={e => setSelectedRole(e.target.value)}
+            >
+              <option value="">select</option>
+              <option value="artist">artist</option>
+              <option value="teacher">teacher</option>
+            </select>
+          </div>
+
+          {/* Sort dropdown */}
           <div className="filter-container">
             <label htmlFor="sort-method" className="filter-label">Sort by:</label>
             <select

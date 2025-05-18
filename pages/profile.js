@@ -48,6 +48,9 @@ export default function Profile() {
     const [newVideoLink, setNewVideoLink] = useState('');
     const [newCertificateOrganization, setNewCertificateOrganization] = useState('');
 
+    // Add new state for genre-instrument role
+    const [newGenreInstrumentRole, setNewGenreInstrumentRole] = useState('');
+
     // Dropdown options for social platforms
     const socialPlatforms = [
         { name: 'Instagram', prefix: 'https://instagram.com/' },
@@ -738,13 +741,11 @@ export default function Profile() {
                             >
                                 <option value="">Select Instrument</option>
                                 {(() => {
-                                    // Group instruments by category
                                     const grouped = instruments.reduce((acc, inst) => {
                                         if (!acc[inst.category]) acc[inst.category] = [];
                                         acc[inst.category].push(inst);
                                         return acc;
                                     }, {});
-                                    // Render optgroups sorted by category name, and instruments sorted by name
                                     return Object.keys(grouped).sort().map(category => (
                                         <optgroup key={category} label={category}>
                                             {grouped[category]
@@ -758,9 +759,18 @@ export default function Profile() {
                                     ));
                                 })()}
                             </select>
+                            {/* Add this Role dropdown */}
+                            <select
+                                value={newGenreInstrumentRole}
+                                onChange={e => setNewGenreInstrumentRole(e.target.value)}
+                            >
+                                <option value="">Select Role</option>
+                                <option value="artist">Artist</option>
+                                <option value="teacher">Teacher</option>
+                            </select>
                             <button type="button" onClick={async () => {
-                                if (!newGenre || !newInstrument) return;
-                                const newPair = `${newGenre} ${newInstrument}`;
+                                if (!newGenre || !newInstrument || !newGenreInstrumentRole) return;
+                                const newPair = `${newGenre} ${newInstrument} (${newGenreInstrumentRole})`;
                                 if (profile.genre_instrument?.includes(newPair)) return;
                                 const updatedGenreInstrument = [...(profile.genre_instrument || []), newPair];
                                 setProfile(prev => ({
@@ -769,6 +779,7 @@ export default function Profile() {
                                 }));
                                 setNewGenre('');
                                 setNewInstrument('');
+                                setNewGenreInstrumentRole('');
                                 if (profile.uid) {
                                     await supabase.from('users').update({ genre_instrument: updatedGenreInstrument, updated_at: new Date().toISOString() }).eq('uid', profile.uid);
                                 }
@@ -787,7 +798,7 @@ export default function Profile() {
                                     </li>
                                 ))
                             ) : (
-                                <li>No genre-instrument pairs</li>
+                                <li>Add your first instrtument!</li>
                             )}
                         </ul>
                     </div>
