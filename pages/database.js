@@ -172,99 +172,92 @@ export default function Database() {
         <h1 className="database-title">User Database</h1>
         <p className="database-description">Search musicians.</p>
 
-        <div
-          className="search-form"
-          style={{
-            display: 'flex',
-            flexDirection: 'row', // <-- make it a row
-            alignItems: 'center',
-            gap: 16,
-            margin: '32px 0'
-          }}
-        >
-          {/* Genre dropdown */}
-          <div className="filter-container">
-            <label htmlFor="genre-filter" className="filter-label">Genre:</label>
-            <select
-              id="genre-filter"
-              className="filter-dropdown"
-              value={selectedGenre}
-              onChange={handleGenreChange}
-            >
-              <option value="">select</option>
-              {genres.map((genre, index) => (
-                <option key={index} value={genre.name}>
-                  {genre.name}
-                </option>
-              ))}
-            </select>
+        <div className="search-form">
+          {/* First row: Genre + Instrument + Type */}
+          <div className="search-row search-row-main">
+            <div className="filter-container">
+              <label htmlFor="genre-filter" className="filter-label">Genre:</label>
+              <select
+                id="genre-filter"
+                className="filter-dropdown"
+                value={selectedGenre}
+                onChange={handleGenreChange}
+              >
+                <option value="">select</option>
+                {genres.map((genre, index) => (
+                  <option key={index} value={genre.name}>
+                    {genre.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-container">
+              <label htmlFor="instrument-filter" className="filter-label">Instrument:</label>
+              <select
+                id="instrument-filter"
+                className="filter-dropdown"
+                value={selectedInstrument}
+                onChange={handleInstrumentChange}
+              >
+                <option value="">select</option>
+                {(() => {
+                  const grouped = instruments.reduce((acc, inst) => {
+                    if (!acc[inst.category]) acc[inst.category] = [];
+                    acc[inst.category].push(inst);
+                    return acc;
+                  }, {});
+                  return Object.keys(grouped).sort().map(category => (
+                    <optgroup key={category} label={category}>
+                      {grouped[category]
+                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .map(inst => (
+                          <option key={inst.name} value={inst.name}>
+                            {inst.name}
+                          </option>
+                        ))}
+                    </optgroup>
+                  ));
+                })()}
+              </select>
+            </div>
+
+            <div className="filter-container">
+              <label htmlFor="type-filter" className="filter-label">Type:</label>
+              <select
+                id="type-filter"
+                className="filter-dropdown"
+                value={selectedRole}
+                onChange={e => setSelectedRole(e.target.value)}
+              >
+                <option value="">select</option>
+                <option value="artist">artist</option>
+                <option value="teacher">teacher</option>
+              </select>
+            </div>
           </div>
 
-          {/* Instrument dropdown */}
-          <div className="filter-container">
-            <label htmlFor="instrument-filter" className="filter-label">Instrument:</label>
-            <select
-              id="instrument-filter"
-              className="filter-dropdown"
-              value={selectedInstrument}
-              onChange={handleInstrumentChange}
-            >
-              <option value="">select</option>
-              {(() => {
-                const grouped = instruments.reduce((acc, inst) => {
-                  if (!acc[inst.category]) acc[inst.category] = [];
-                  acc[inst.category].push(inst);
-                  return acc;
-                }, {});
-                return Object.keys(grouped).sort().map(category => (
-                  <optgroup key={category} label={category}>
-                    {grouped[category]
-                      .sort((a, b) => a.name.localeCompare(b.name))
-                      .map(inst => (
-                        <option key={inst.name} value={inst.name}>
-                          {inst.name}
-                        </option>
-                      ))}
-                  </optgroup>
-                ));
-              })()}
-            </select>
+          {/* Second row: Sort by */}
+          <div className="search-row search-row-sort">
+            <div className="filter-container">
+              <label htmlFor="sort-method" className="filter-label">Sort by:</label>
+              <select
+                id="sort-method"
+                className="filter-dropdown"
+                value={sortMethod}
+                onChange={e => setSortMethod(e.target.value)}
+                required
+              >
+                <option value="" disabled>Select sorting method</option>
+                {sortOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          {/* Role dropdown */}
-          <div className="filter-container">
-            <label htmlFor="role-filter" className="filter-label">Role:</label>
-            <select
-              id="role-filter"
-              className="filter-dropdown"
-              value={selectedRole}
-              onChange={e => setSelectedRole(e.target.value)}
-            >
-              <option value="">select</option>
-              <option value="artist">artist</option>
-              <option value="teacher">teacher</option>
-            </select>
-          </div>
-
-          {/* Sort dropdown */}
-          <div className="filter-container">
-            <label htmlFor="sort-method" className="filter-label">Sort by:</label>
-            <select
-              id="sort-method"
-              className="filter-dropdown"
-              value={sortMethod}
-              onChange={e => setSortMethod(e.target.value)}
-              required
-            >
-              <option value="" disabled>Select sorting method</option>
-              {sortOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Search button */}
-          <div className="filter-container">
+          {/* Third row: Search button */}
+          <div className="search-row search-row-button">
             <button
               className="search-button"
               onClick={fetchUsers}
