@@ -300,16 +300,17 @@ export default function Database() {
                     </div>
                     {/* Right column */}
                     <div className="user-card-col-right" style={{ flex: 1 }}>
+                      {/* Social icons */}
                       {user.social && (() => {
                         try {
                           const socialLinks = typeof user.social === 'string' ? JSON.parse(user.social) : user.social;
                           if (Array.isArray(socialLinks) && socialLinks.length > 0) {
-                            const icons = {
-                              Instagram: <span role="img" aria-label="Instagram">📸</span>,
-                              Facebook: <span role="img" aria-label="Facebook">📘</span>,
-                              TikTok: <span role="img" aria-label="TikTok">🎵</span>,
-                              X: <span role="img" aria-label="X">🐦</span>,
-                              LinkedIn: <span role="img" aria-label="LinkedIn">💼</span>,
+                            const iconMap = {
+                              Instagram: '/assets/social/instagram.png',
+                              Facebook: '/assets/social/facebook.png',
+                              TikTok: '/assets/social/tiktok.png',
+                              X: '/assets/social/x.png',
+                              LinkedIn: '/assets/social/linkedin.png',
                             };
                             return (
                               <div>
@@ -320,9 +321,13 @@ export default function Database() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     title={item.platform}
-                                    style={{ marginRight: 8, fontSize: '1.2em' }}
+                                    style={{ marginRight: 8, display: 'inline-block', verticalAlign: 'middle' }}
                                   >
-                                    {icons[item.platform] || <span>{item.platform}</span>}
+                                    <img
+                                      src={iconMap[item.platform] || '/assets/social/default.svg'}
+                                      alt={item.platform}
+                                      style={{ width: 24, height: 24, verticalAlign: 'middle' }}
+                                    />
                                   </a>
                                 ))}
                               </div>
@@ -333,16 +338,28 @@ export default function Database() {
                           return null;
                         }
                       })()}
+
+                      {/* Email icon */}
                       {user.email && (
                         <div style={{ marginTop: 8 }}>
-                          <a href={`mailto:${user.email}`}>Email</a>
+                          <a href={`mailto:${user.email}`} title="Email" style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+                            <img
+                              src="/assets/social/email.png"
+                              alt="Email"
+                              style={{ width: 24, height: 24, verticalAlign: 'middle', marginRight: 4 }}
+                            />
+                          </a>
                         </div>
                       )}
+
+                      {/* Phone */}
                       {user.phone && (
                         <div style={{ marginTop: 8 }}>
                           {user.phone}
                         </div>
                       )}
+
+                      {/* Video links with YouTube icon */}
                       {Array.isArray(user.video_links) && user.video_links.length > 0 && (
                         <div style={{ marginTop: 8 }}>
                           {user.video_links.map((link, i) => (
@@ -351,9 +368,14 @@ export default function Database() {
                               href={link}
                               target="_blank"
                               rel="noopener noreferrer"
-                              style={{ marginRight: 8 }}
+                              style={{ marginRight: 8, display: 'inline-block', verticalAlign: 'middle' }}
+                              title={`Video ${i + 1}`}
                             >
-                              {`Video ${i + 1}`}
+                              <img
+                                src="/assets/social/youtube.png"
+                                alt={`Video ${i + 1}`}
+                                style={{ width: 24, height: 24, verticalAlign: 'middle', marginRight: 4 }}
+                              />
                             </a>
                           ))}
                         </div>
