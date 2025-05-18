@@ -32,6 +32,31 @@ export default function SignupPage() {
       return;
     }
 
+    // Try to log in first
+    const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (loginData?.user) {
+      // User exists and password is correct
+      await supabase.auth.signOut(); // Clear session/cookies
+      setMessage(
+        <>
+          This email is already registered. Please{' '}
+          <a href="/login" className="login-link">log in</a> instead.
+        </>
+      );
+      return;
+    }
+
+    // If loginError is "Invalid login credentials", proceed to sign up
+    if (loginError && loginError.message !== 'Invalid login credentials') {
+      setMessage(`Error: ${loginError.message}`);
+      return;
+    }
+
+    // Proceed with signup as before
     try {
       const { data, error: signupError } = await supabase.auth.signUp({
         email,
@@ -60,12 +85,11 @@ export default function SignupPage() {
         return;
       }
 
-      // If user is already registered, Supabase may not throw an error but data.user will be null
       if (!data.user) {
         setMessage(
           <>
-            This email is already registered. Please{' '}
-            <a href="/login" className="login-link">log in</a> instead.
+            This email is already registered or pending confirmation. Please{' '}
+            <a href="/login" className="login-link">log in</a> or check your email for a confirmation link.
           </>
         );
         return;
