@@ -252,20 +252,32 @@ export default function Profile() {
             return;
         }
         const fetchCities = async () => {
-            const res = await fetch(
-                `https://api.geonames.org/searchJSON?formatted=true&country=${selectedCountry}&featureClass=P&maxRows=1000&username=${geonamesUsername}`
-            );
-            const data = await res.json();
-            setCities(data.geonames || []);
+            try {
+                const res = await fetch(`/api/geonames?endpoint=searchJSON&formatted=true&country=${selectedCountry}&featureClass=P&maxRows=1000`);
+                if (!res.ok) {
+                    throw new Error(`Error fetching cities: ${res.statusText}`);
+                }
+                const data = await res.json();
+                setCities(data.geonames || []);
+            } catch (err) {
+                console.error('Error fetching cities:', err);
+            }
         };
         fetchCities();
     }, [selectedCountry]);
 
     useEffect(() => {
         const fetchCountries = async () => {
-            const res = await fetch(`https://api.geonames.org/countryInfoJSON?username=${geonamesUsername}`);
-            const data = await res.json();
-            setCountries(data.geonames || []);
+            try {
+                const res = await fetch(`/api/geonames?endpoint=countryInfoJSON`);
+                if (!res.ok) {
+                    throw new Error(`Error fetching countries: ${res.statusText}`);
+                }
+                const data = await res.json();
+                setCountries(data.geonames || []);
+            } catch (err) {
+                console.error('Error fetching countries:', err);
+            }
         };
         fetchCountries();
     }, []);
