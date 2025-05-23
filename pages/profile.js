@@ -10,6 +10,8 @@ import { uploadProfileImage, getProfileImageUrl } from '../lib/uploadPicture';
 
 const geonamesUsername = process.env.NEXT_PUBLIC_GEONAMES_USERNAME;
 
+console.log(process.env.NEXT_PUBLIC_GEONAMES_USERNAME);
+
 export default function Profile() {
     const [profile, setProfile] = useState({
         forename: '',
