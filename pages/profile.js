@@ -10,8 +10,6 @@ import { uploadProfileImage, getProfileImageUrl } from '../lib/uploadPicture';
 
 const geonamesUsername = process.env.NEXT_PUBLIC_GEONAMES_USERNAME;
 
-console.log(process.env.NEXT_PUBLIC_GEONAMES_USERNAME);
-
 export default function Profile() {
     const [profile, setProfile] = useState({
         forename: '',
@@ -255,7 +253,7 @@ export default function Profile() {
         }
         const fetchCities = async () => {
             const res = await fetch(
-                `http://api.geonames.org/searchJSON?formatted=true&country=${selectedCountry}&featureClass=P&maxRows=1000&username=${geonamesUsername}`
+                `https://api.geonames.org/searchJSON?formatted=true&country=${selectedCountry}&featureClass=P&maxRows=1000&username=${geonamesUsername}`
             );
             const data = await res.json();
             setCities(data.geonames || []);
@@ -265,7 +263,7 @@ export default function Profile() {
 
     useEffect(() => {
         const fetchCountries = async () => {
-            const res = await fetch(`http://api.geonames.org/countryInfoJSON?username=${geonamesUsername}`);
+            const res = await fetch(`https://api.geonames.org/countryInfoJSON?username=${geonamesUsername}`);
             const data = await res.json();
             setCountries(data.geonames || []);
         };
