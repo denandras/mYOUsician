@@ -4,11 +4,8 @@ import verifyUser from '../lib/getuser'; // Import the verifyUser function
 import signOut from '../lib/signOut'; // Import the reusable signOut function
 import Header from '../components/Header';
 import { createuser } from '../lib/createuser';
-import { deleteuser } from '../lib/deleteuser'; // Make sure this exists and is exported
 import uploadPicture from '../lib/uploadPicture'; // Add this import
 import { uploadProfileImage, getProfileImageUrl } from '../lib/uploadPicture';
-
-const geonamesUsername = process.env.NEXT_PUBLIC_GEONAMES_USERNAME;
 
 export default function Profile() {
     const [profile, setProfile] = useState({
@@ -573,9 +570,6 @@ export default function Profile() {
         // ...collect form data...
         const payload = { forename: profile.forename };
 
-        console.log('Payload for update:', payload);
-        console.log('Profile UID:', profile.uid);
-
         let result;
         if (profile.uid) {
             result = await supabase.from('users').update(payload).eq('uid', profile.uid);
@@ -633,9 +627,9 @@ export default function Profile() {
         }
     };
 
-    // Danger Zone: Delete Profile
+    // Danger Zone: Delete Profile with password confirmation and re-authentication
     const handleDeleteProfile = async (e) => {
-        e.preventDefault(); // Prevent form reload
+        e.preventDefault();
 
         if (!deleteConfirmation) {
             setMessage('Please enter your password to confirm.');
@@ -643,20 +637,46 @@ export default function Profile() {
         }
 
         try {
-            setMessage('Deleting profile...');
-            const result = await deleteuser({
-                uid: profile.uid,
+            setMessage('Re-authenticating...');
+
+            // Re-authenticate user with email and password
+            const { data, error } = await supabase.auth.signInWithPassword({
                 email: profile.email,
-                password: deleteConfirmation
+                password: deleteConfirmation,
             });
 
-            if (result.error) {
-                setMessage(`Error deleting profile: ${result.error}`);
+            if (error) {
+                setMessage('Password incorrect. Please try again.');
                 return;
             }
 
-            setMessage('Profile deleted successfully.');
-            window.location.href = '/login';
+            // Double-check UID matches
+            if (!data.user || data.user.id !== profile.uid) {
+                setMessage('Authentication failed. Please try again.');
+                return;
+            }
+
+            // Delete user from RLS-enabled users table
+            const { error: deleteUserError } = await supabase
+                .from('users')
+                .delete()
+                .eq('uid', profile.uid);
+
+            if (deleteUserError) {
+                setMessage(`Error deleting profile: ${deleteUserError.message}`);
+                return;
+            }
+
+            setMessage('Profile deleted successfully. Signing out...');
+
+            // Sign the user out
+            const { error: signOutError } = await supabase.auth.signOut();
+            if (signOutError) {
+                setMessage('Profile deleted, but there was an issue signing you out. Please refresh the page.');
+            } else {
+                // Optionally redirect
+                window.location.href = '/';
+            }
         } catch (err) {
             setMessage(`Unexpected error occurred: ${err.message || JSON.stringify(err)}`);
         }
@@ -1181,10 +1201,6 @@ export default function Profile() {
                             ))}
                         </ul>
                     </div>
-                    
-                    
-                    
-                    
                 </form>
                 <button type="button" onClick={handleLogout} className="logout-button">
                     Logout
@@ -1205,8 +1221,9 @@ export default function Profile() {
                     />
                     <button
                         type="button"
-                        onClick={(e) => handleDeleteProfile(e)}
                         className="danger-button"
+                        onClick={handleDeleteProfile}
+                        disabled={!deleteConfirmation}
                     >
                         Delete My Profile
                     </button>
