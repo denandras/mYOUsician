@@ -216,14 +216,16 @@ export default function UserSettingsPage() {
 
     // Load cities for a specific country with enhanced error handling
     const loadCitiesForCountry = useCallback(async (countryCode: string) => {
+        // Check if service is available first
         if (locationServiceStatus === 'unavailable') {
+            return; // Don't proceed if service is unavailable
+        }
+        
+        // If cities already loaded, don't load again
+        if (locationData.cities[countryCode]) {
             return;
         }
-
-        if (locationData.cities[countryCode]) {
-            return; // Already loaded
-        }
-
+    
         setLoadingLocations(true);
         
         const cacheKey = `geonames_cities_${countryCode}`;
@@ -254,7 +256,7 @@ export default function UserSettingsPage() {
             }
 
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout for cities
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
 
             const response = await fetch(
                 `http://api.geonames.org/searchJSON?country=${countryCode}&featureClass=P&maxRows=1000&orderby=population&username=${GEONAMES_USERNAME}`,
@@ -307,7 +309,7 @@ export default function UserSettingsPage() {
         } finally {
             setLoadingLocations(false);
         }
-    }, [locationServiceStatus, locationData.cities]);
+    }, []);
 
     const loadProfile = useCallback(async () => {
         try {
@@ -429,7 +431,7 @@ export default function UserSettingsPage() {
         } catch (err) {
             console.error('Error loading profile:', err);
         }
-    }, [user?.id, loadCitiesForCountry]);
+    }, [user?.id, loadCitiesForCountry]); // Now safe to include loadCitiesForCountry since it has no dependencies
 
     const saveProfile = async () => {
         setProfileLoading(true);
@@ -715,7 +717,7 @@ export default function UserSettingsPage() {
         if (user?.id) {
             loadProfile();
         }
-    }, [user?.id, loadReferenceData, loadLocationData, loadProfile]);
+    }, [user?.id]); // Remove function dependencies to prevent infinite loops
 
     return (
         <div className="space-y-6 p-6">
