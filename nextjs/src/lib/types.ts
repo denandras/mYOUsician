@@ -67,6 +67,173 @@ export type Database = {
         }
         Relationships: []
       }
+      instruments: {
+        Row: {
+          id: string
+          name: string
+          name_HUN: string | null
+          category: string
+          category_HUN: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          name_HUN?: string | null
+          category: string
+          category_HUN?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          name_HUN?: string | null
+          category?: string
+          category_HUN?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      genres: {
+        Row: {
+          id: string
+          name: string
+          name_HUN: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          name_HUN?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          name_HUN?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      social: {
+        Row: {
+          id: string
+          name: string
+          base_url: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          base_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          base_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      education: {
+        Row: {
+          id: string
+          name: string
+          name_HUN: string | null
+          rank: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          name_HUN?: string | null
+          rank?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          name_HUN?: string | null
+          rank?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      musician_profiles: {
+        Row: {
+          id: string
+          email: string | null
+          forename: string | null
+          surname: string | null
+          location: Json | null
+          phone: string | null
+          bio: string | null
+          occupation: string[] | null
+          education: string[] | null
+          certificates: string[] | null
+          genre_instrument: Json[] | null
+          video_links: string[] | null
+          social: Json | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          email?: string | null
+          forename?: string | null
+          surname?: string | null
+          location?: Json | null
+          phone?: string | null
+          bio?: string | null
+          occupation?: string[] | null
+          education?: string[] | null
+          certificates?: string[] | null
+          genre_instrument?: Json[] | null
+          video_links?: string[] | null
+          social?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string | null
+          forename?: string | null
+          surname?: string | null
+          location?: Json | null
+          phone?: string | null
+          bio?: string | null
+          occupation?: string[] | null
+          education?: string[] | null
+          certificates?: string[] | null
+          genre_instrument?: Json[] | null
+          video_links?: string[] | null
+          social?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "musician_profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
