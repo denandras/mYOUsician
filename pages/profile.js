@@ -627,58 +627,43 @@ export default function Profile() {
         }
     };
 
-    // Danger Zone: Delete Profile with password confirmation and re-authentication
-    const handleDeleteProfile = async (e) => {
-        e.preventDefault();
-
-        if (!deleteConfirmation) {
-            setMessage('Please enter your password to confirm.');
-            return;
-        }
-
+    // Minimal Danger Zone: Delete Profile button (session-based, no password confirmation)
+    const handleDeleteProfile = async () => {
+        setMessage('');
         try {
-            setMessage('Re-authenticating...');
-
-            // Re-authenticate user with email and password
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: profile.email,
-                password: deleteConfirmation,
-            });
-
-            if (error) {
-                setMessage('Password incorrect. Please try again.');
+            // Get current session and user
+            const { data: { session }, error } = await supabase.auth.getSession();
+            if (error || !session?.user?.id) {
+                setMessage('No active session found. Please log in again.');
                 return;
             }
 
-            // Double-check UID matches
-            if (!data.user || data.user.id !== profile.uid) {
-                setMessage('Authentication failed. Please try again.');
-                return;
-            }
+            // Precheck: log session user id and profile.uid
+            console.log('Session user id:', session.user.id);
+            console.log('Profile.uid:', profile.uid);
 
-            // Delete user from RLS-enabled users table
+            // Optionally, fetch the user row to verify existence and ownership
+            const { data: userRow, error: fetchError } = await supabase
+                .from('users')
+                .select('uid')
+                .eq('uid', session.user.id)
+                .maybeSingle();
+            console.log('Fetched user row:', userRow, 'Fetch error:', fetchError);
+
+            // Delete user from RLS-enabled users table based on session user id
             const { error: deleteUserError } = await supabase
                 .from('users')
                 .delete()
-                .eq('uid', profile.uid);
+                .eq('uid', session.user.id);
 
             if (deleteUserError) {
-                setMessage(`Error deleting profile: ${deleteUserError.message}`);
-                return;
-            }
-
-            setMessage('Profile deleted successfully. Signing out...');
-
-            // Sign the user out
-            const { error: signOutError } = await supabase.auth.signOut();
-            if (signOutError) {
-                setMessage('Profile deleted, but there was an issue signing you out. Please refresh the page.');
+                console.error(deleteUserError);
+                setMessage('Delete failed: ' + deleteUserError.message);
             } else {
-                // Optionally redirect
-                window.location.href = '/';
+                setMessage('Profile deleted!');
             }
         } catch (err) {
-            setMessage(`Unexpected error occurred: ${err.message || JSON.stringify(err)}`);
+            setMessage(`Unexpected error: ${err.message || JSON.stringify(err)}`);
         }
     };
 
@@ -1212,18 +1197,10 @@ export default function Profile() {
                     <p className="danger-description">
                         Deleting your profile is permanent and cannot be undone.
                     </p>
-                    <input
-                        type="password"
-                        placeholder="Enter your password to confirm"
-                        value={deleteConfirmation}
-                        onChange={(e) => setDeleteConfirmation(e.target.value)}
-                        className="danger-input"
-                    />
                     <button
                         type="button"
                         className="danger-button"
                         onClick={handleDeleteProfile}
-                        disabled={!deleteConfirmation}
                     >
                         Delete My Profile
                     </button>

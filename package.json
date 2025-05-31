@@ -9,11 +9,9 @@
     "dependencies": {
         "@supabase/auth-helpers-nextjs": "^0.10.0",
         "@supabase/supabase-js": "^2.49.8",
-        "bcryptjs": "^3.0.2",
         "imagekit": "^6.0.0",
         "next": "^14.2.28",
         "react": "^18.2.0",
-        "react-dom": "^18.2.0",
-        "supabase": "^2.22.12"
+        "react-dom": "^18.2.0"
     }
 }
