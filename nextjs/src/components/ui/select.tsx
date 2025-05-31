@@ -22,13 +22,12 @@ const Select = React.forwardRef<
 
   // Extract options from nested children (inside SelectContent)
   const extractOptions = (children: React.ReactNode): React.ReactNode[] => {
-    const options: React.ReactNode[] = [];
-    
-    React.Children.forEach(children, child => {
+    const options: React.ReactNode[] = [];    React.Children.forEach(children, child => {
       if (React.isValidElement(child)) {
         if (child.type === SelectContent) {
           // Extract options from SelectContent
-          React.Children.forEach(child.props.children, contentChild => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          React.Children.forEach((child.props as any).children, contentChild => {
             if (React.isValidElement(contentChild) && contentChild.type === SelectItem) {
               options.push(contentChild);
             }
@@ -43,12 +42,12 @@ const Select = React.forwardRef<
     return options;
   };
 
-  const options = extractOptions(children);
-  // Extract placeholder from SelectValue if present
+  const options = extractOptions(children);  // Extract placeholder from SelectValue if present
   let placeholder = "Select";
   React.Children.forEach(children, child => {
     if (React.isValidElement(child) && child.type === SelectValue) {
-      placeholder = child.props.placeholder || placeholder;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      placeholder = (child.props as any).placeholder || placeholder;
     }
   });
 
@@ -74,6 +73,7 @@ Select.displayName = "Select"
 const SelectTrigger = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 >(({ className, children, ...props }, ref) => {
   // This component doesn't render anything - it's just for API compatibility
   return null;
@@ -85,7 +85,8 @@ const SelectValue = React.forwardRef<
   React.HTMLAttributes<HTMLSpanElement> & {
     placeholder?: string
   }
->(({ placeholder, ...props }, ref) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+>(({ placeholder: _placeholder, ..._props }, _ref) => {
   // This component doesn't render anything - it's just for API compatibility
   return null;
 })
@@ -94,7 +95,8 @@ SelectValue.displayName = "SelectValue"
 const SelectContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
->(({ children, ...props }, ref) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+>(({ children: _children, ..._props }, _ref) => {
   // This component doesn't render anything - just passes through children for extraction
   return null;
 })

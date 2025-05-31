@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -9,10 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { createSPASassClient } from '@/lib/supabase/client';
-import { Key, User, CheckCircle, MapPin, Briefcase, Music, Plus, Trash2, Loader2, AlertTriangle } from 'lucide-react';
+import { Key, User, CheckCircle, MapPin, Briefcase, Music, Plus, Trash2, AlertTriangle } from 'lucide-react';
 import { MFASetup } from '@/components/MFASetup';
 import { Database } from '@/lib/types';
-import { useRouter } from 'next/navigation';
 
 // Use the generated types directly
 type Instrument = Database['public']['Tables']['instruments']['Row'];
@@ -34,7 +33,6 @@ interface LocationData {
 
 export default function UserSettingsPage() {
     const { user } = useGlobal();
-    const router = useRouter();
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -78,16 +76,8 @@ export default function UserSettingsPage() {
 
 
 
-    useEffect(() => {
-        loadReferenceData();
-        loadLocationData();
-        if (user?.id) {
-            loadProfile();
-        }
-    }, [user?.id]);
-
     // Load reference data from Supabase with localStorage caching
-    const loadReferenceData = async () => {
+    const loadReferenceData = useCallback(async () => {
         const cacheKey = 'musician_reference_data';
         const cacheExpiry = 24 * 60 * 60 * 1000; // 24 hours
         
@@ -139,10 +129,10 @@ export default function UserSettingsPage() {
         } catch (err) {
             console.error('Error loading reference data:', err);
         }
-    };
+    }, []);
 
     // Enhanced location data loading with better error handling
-    const loadLocationData = async () => {
+    const loadLocationData = useCallback(async () => {
         setLocationServiceStatus('loading');
         const cacheKey = 'geonames_countries';
         const cacheExpiry = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -205,7 +195,7 @@ export default function UserSettingsPage() {
                 timestamp: Date.now()
             }));
 
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Error loading countries from API:', err);
             
             // If we have cached data, use it as fallback
@@ -222,10 +212,10 @@ export default function UserSettingsPage() {
                 setLocationData({ countries: [], cities: {} });
             }
         }
-    };
+    }, []);
 
     // Load cities for a specific country with enhanced error handling
-    const loadCitiesForCountry = async (countryCode: string) => {
+    const loadCitiesForCountry = useCallback(async (countryCode: string) => {
         if (locationServiceStatus === 'unavailable') {
             return;
         }
@@ -296,7 +286,7 @@ export default function UserSettingsPage() {
                 timestamp: Date.now()
             }));
 
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Error loading cities:', err);
             
             // If we have cached data, use it as fallback
@@ -317,22 +307,26 @@ export default function UserSettingsPage() {
         } finally {
             setLoadingLocations(false);
         }
-    };
+    }, [locationServiceStatus, locationData.cities]);
 
-    const loadProfile = async () => {
+    const loadProfile = useCallback(async () => {
         try {
             const supabase = await createSPASassClient();
             const client = supabase.getSupabaseClient();
             
-            const { data, error } = await client
+            if (!user?.id) {
+                throw new Error('User ID is required');
+            }
+
+            const { data } = await client
                 .from('musician_profiles')
                 .select('*')
-                .eq('id', user?.id)
+                .eq('id', user.id)
                 .single();
 
             if (data) {
                 // Helper function to properly parse array fields
-                const parseArrayField = (field: any): string[] => {
+                const parseArrayField = (field: unknown): string[] => {
                     if (!field) return [''];
                     
                     // If it's already an array
@@ -369,7 +363,7 @@ export default function UserSettingsPage() {
                 };
 
                 // Helper function to parse education field
-                const parseEducationField = (field: any) => {
+                const parseEducationField = (field: unknown) => {
                     if (!field) return [{ type: '', school: '' }];
                     
                     if (Array.isArray(field)) {
@@ -399,35 +393,43 @@ export default function UserSettingsPage() {
                     return [{ type: '', school: '' }];
                 };
 
-                const locationData = data.location || { country: '', countryCode: '', city: '' };
+                const locationData = typeof data.location === 'object' && data.location !== null && !Array.isArray(data.location)
+                    ? data.location as { country?: string; countryCode?: string; city?: string }
+                    : { country: '', countryCode: '', city: '' };
                 
                 const profileData = {
                     forename: data.forename || '',
                     surname: data.surname || '',
-                    location: locationData,
+                    location: {
+                        country: locationData.country || '',
+                        countryCode: locationData.countryCode || '',
+                        city: locationData.city || ''
+                    },
                     phone: data.phone || '',
                     bio: data.bio || '',
                     occupation: parseArrayField(data.occupation),
                     education: parseEducationField(data.education),
-                    certificates: data.certificates?.length ? data.certificates : [''],
-                    genre_instrument: data.genre_instrument?.length 
-                        ? data.genre_instrument 
+                    certificates: Array.isArray(data.certificates) && data.certificates.length ? data.certificates : [''],
+                    genre_instrument: Array.isArray(data.genre_instrument) && data.genre_instrument.length 
+                        ? data.genre_instrument as Array<{ genre: string; instrument: string; category: string }>
                         : [{ genre: '', instrument: '', category: '' }],
-                    video_links: data.video_links?.length ? data.video_links : [''],
-                    social: data.social || {}
+                    video_links: Array.isArray(data.video_links) && data.video_links.length ? data.video_links : [''],
+                    social: typeof data.social === 'object' && data.social !== null && !Array.isArray(data.social) 
+                        ? data.social as Record<string, string>
+                        : {}
                 };
 
                 setProfile(profileData); // Set initial state for comparison
 
                 // Load cities for the selected country if available
-                if (locationData.countryCode) {
-                    loadCitiesForCountry(locationData.countryCode);
+                if (profileData.location.countryCode) {
+                    loadCitiesForCountry(profileData.location.countryCode);
                 }
             }
         } catch (err) {
             console.error('Error loading profile:', err);
         }
-    };
+    }, [user?.id, loadCitiesForCountry]);
 
     const saveProfile = async () => {
         setProfileLoading(true);
@@ -477,31 +479,54 @@ export default function UserSettingsPage() {
                 ),
                 video_links: profile.video_links.filter(item => item && item.trim()),
                 social: Object.fromEntries(
-                    Object.entries(profile.social).filter(([_, value]) => value && value.trim())
+                    Object.entries(profile.social).filter(([, value]) => value && value.trim())
                 )
             };
 
             // Ensure arrays have at least empty array instead of null
-            if (cleanedProfile.occupation.length === 0) cleanedProfile.occupation = null;
-            if (cleanedProfile.education.length === 0) cleanedProfile.education = null;
+            if (cleanedProfile.occupation.length === 0) {
+                cleanedProfile.occupation = [];
+            }
+            if (cleanedProfile.education.length === 0) {
+                cleanedProfile.education = [];
+            }
+
+            if (!user?.id || !user?.email) {
+                throw new Error('User ID and email are required');
+            }
 
             console.log('Saving cleaned profile:', cleanedProfile);
 
             const { error } = await client
                 .from('musician_profiles')
                 .upsert({
-                    id: user?.id,
-                    email: user?.email,
-                    ...cleanedProfile,
-                    updated_at: new Date().toISOString()
+                    id: user.id,
+                    email: user.email,
+                    forename: cleanedProfile.forename,
+                    surname: cleanedProfile.surname,
+                    location: cleanedProfile.location,
+                    phone: cleanedProfile.phone,
+                    bio: cleanedProfile.bio,
+                    occupation: cleanedProfile.occupation,
+                    // Convert education objects to strings for database storage
+                    education: cleanedProfile.education.map(edu => 
+                        edu.school && edu.type 
+                            ? `${edu.type} at ${edu.school}` 
+                            : edu.school || edu.type || ''
+                    ).filter(Boolean),
+                    certificates: cleanedProfile.certificates,
+                    genre_instrument: cleanedProfile.genre_instrument,
+                    video_links: cleanedProfile.video_links,
+                    social: cleanedProfile.social
                 });
 
             if (error) throw error;
             
             setSuccess('Profile updated successfully');
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Error saving profile:', err);
-            setError(err.message || 'Failed to save profile');
+            const errorMessage = err instanceof Error ? err.message : 'Failed to save profile';
+            setError(errorMessage);
         } finally {
             setProfileLoading(false);
         }
@@ -548,21 +573,21 @@ export default function UserSettingsPage() {
     const addArrayItem = (field: string) => {
         setProfile(prev => ({
             ...prev,
-            [field]: [...prev[field as keyof typeof prev] as any[], '']
+            [field]: [...(prev[field as keyof typeof prev] as string[]), '']
         }));
     };
 
     const removeArrayItem = (field: string, index: number) => {
         setProfile(prev => ({
             ...prev,
-            [field]: (prev[field as keyof typeof prev] as any[]).filter((_, i) => i !== index)
+            [field]: (prev[field as keyof typeof prev] as string[]).filter((_, i) => i !== index)
         }));
     };
 
     const updateArrayItem = (field: string, index: number, value: string) => {
         setProfile(prev => ({
             ...prev,
-            [field]: (prev[field as keyof typeof prev] as any[]).map((item, i) => 
+            [field]: (prev[field as keyof typeof prev] as string[]).map((item, i) => 
                 i === index ? value : item
             )
         }));
@@ -682,6 +707,15 @@ export default function UserSettingsPage() {
         if (loadingLocations) return "Loading cities...";
         return "Select city";
     };
+
+    // Load data when component mounts or user changes
+    useEffect(() => {
+        loadReferenceData();
+        loadLocationData();
+        if (user?.id) {
+            loadProfile();
+        }
+    }, [user?.id, loadReferenceData, loadLocationData, loadProfile]);
 
     return (
         <div className="space-y-6 p-6">
