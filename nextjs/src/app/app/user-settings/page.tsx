@@ -86,7 +86,6 @@ export default function UserSettingsPage() {
         if (cached) {
             const { data, timestamp } = JSON.parse(cached);
             if (Date.now() - timestamp < cacheExpiry) {
-                console.log('Using cached reference data:', data);
                 setReferenceData(data);
                 return;
             }
@@ -103,13 +102,6 @@ export default function UserSettingsPage() {
                 client.from('education').select('*').order('rank', { nullsFirst: false }) // Order by rank, nulls last
             ]);
 
-            console.log('API responses:', {
-                instruments: instrumentsRes,
-                genres: genresRes,
-                social: socialRes,
-                education: educationRes
-            });
-
             const newReferenceData = {
                 instruments: instrumentsRes.data || [],
                 genres: genresRes.data || [],
@@ -117,7 +109,6 @@ export default function UserSettingsPage() {
                 education_types: educationRes.data || []
             };
 
-            console.log('Setting reference data:', newReferenceData);
             setReferenceData(newReferenceData);
 
             // Cache to localStorage
@@ -164,7 +155,7 @@ export default function UserSettingsPage() {
             const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
             const response = await fetch(
-                `http://api.geonames.org/countryInfoJSON?username=${GEONAMES_USERNAME}`,
+                `https://secure.geonames.org/countryInfoJSON?username=${GEONAMES_USERNAME}`,
                 { signal: controller.signal }
             );
             
@@ -259,7 +250,7 @@ export default function UserSettingsPage() {
             const timeoutId = setTimeout(() => controller.abort(), 15000);
 
             const response = await fetch(
-                `http://api.geonames.org/searchJSON?country=${countryCode}&featureClass=P&maxRows=1000&orderby=population&username=${GEONAMES_USERNAME}`,
+                `https://secure.geonames.org/searchJSON?country=${countryCode}&featureClass=P&maxRows=1000&orderby=population&username=${GEONAMES_USERNAME}`,
                 { signal: controller.signal }
             );
             
@@ -370,24 +361,51 @@ export default function UserSettingsPage() {
                     
                     if (Array.isArray(field)) {
                         // Check if it's array of objects (new format)
-                        if (field.length > 0 && typeof field[0] === 'object' && field[0].type !== undefined) {
+                        if (field.length > 0 && typeof field[0] === 'object' && field[0] !== null && 'type' in field[0]) {
                             return field;
                         }
-                        // Convert old format (array of strings) to new format
-                        return field.map(item => ({ type: item, school: '' }));
+                        // Handle array of strings (could be old format like "Bachelor's at University" or new simple strings)
+                        return field.map(item => {
+                            if (typeof item === 'string') {
+                                // Check if it's in "type at school" format
+                                const atIndex = item.lastIndexOf(' at ');
+                                if (atIndex > 0) {
+                                    return {
+                                        type: item.substring(0, atIndex),
+                                        school: item.substring(atIndex + 4)
+                                    };
+                                }
+                                // Otherwise treat as just type
+                                return { type: item, school: '' };
+                            }
+                            return { type: '', school: '' };
+                        });
                     }
                     
                     if (typeof field === 'string') {
                         try {
                             const parsed = JSON.parse(field);
                             if (Array.isArray(parsed)) {
-                                if (parsed.length > 0 && typeof parsed[0] === 'object') {
-                                    return parsed;
-                                }
-                                return parsed.map(item => ({ type: item, school: '' }));
+                                return parseEducationField(parsed); // Recursively parse the array
                             }
-                            return [{ type: field, school: '' }];
+                            // If it's a single string, parse like above
+                            const atIndex = parsed.lastIndexOf(' at ');
+                            if (atIndex > 0) {
+                                return [{
+                                    type: parsed.substring(0, atIndex),
+                                    school: parsed.substring(atIndex + 4)
+                                }];
+                            }
+                            return [{ type: parsed, school: '' }];
                         } catch {
+                            // If JSON parsing fails, treat as plain string
+                            const atIndex = field.lastIndexOf(' at ');
+                            if (atIndex > 0) {
+                                return [{
+                                    type: field.substring(0, atIndex),
+                                    school: field.substring(atIndex + 4)
+                                }];
+                            }
                             return [{ type: field, school: '' }];
                         }
                     }
@@ -497,8 +515,6 @@ export default function UserSettingsPage() {
                 throw new Error('User ID and email are required');
             }
 
-            console.log('Saving cleaned profile:', cleanedProfile);
-
             const { error } = await client
                 .from('musician_profiles')
                 .upsert({
@@ -511,11 +527,16 @@ export default function UserSettingsPage() {
                     bio: cleanedProfile.bio,
                     occupation: cleanedProfile.occupation,
                     // Convert education objects to strings for database storage
-                    education: cleanedProfile.education.map(edu => 
-                        edu.school && edu.type 
-                            ? `${edu.type} at ${edu.school}` 
-                            : edu.school || edu.type || ''
-                    ).filter(Boolean),
+                    education: cleanedProfile.education.map(edu => {
+                        if (edu.type && edu.school) {
+                            return `${edu.type} at ${edu.school}`;
+                        } else if (edu.type) {
+                            return edu.type;
+                        } else if (edu.school) {
+                            return edu.school;
+                        }
+                        return '';
+                    }).filter(Boolean),
                     certificates: cleanedProfile.certificates,
                     genre_instrument: cleanedProfile.genre_instrument,
                     video_links: cleanedProfile.video_links,
@@ -972,7 +993,6 @@ export default function UserSettingsPage() {
                                                         {(() => {
                                                             const sortedEducation = referenceData.education_types
                                                                 .sort((a, b) => (a.rank || 999) - (b.rank || 999));
-                                                            console.log('Education types sorted:', sortedEducation);
                                                             return sortedEducation.map(edu => (
                                                                 <SelectItem key={edu.id} value={edu.name}>
                                                                     {edu.name}
