@@ -880,7 +880,7 @@ export default function UserSettingsPage() {
                                 disabled={profileLoading}
                                 className="w-full"
                             >
-                                {profileLoading ? 'Saving...' : 'Save Personal Data'}
+                                {profileLoading ? 'Saving...' : 'Save'}
                             </Button>
                         </CardContent>
                     </Card>
@@ -1076,7 +1076,7 @@ export default function UserSettingsPage() {
                                 disabled={profileLoading}
                                 className="w-full"
                             >
-                                {profileLoading ? 'Saving...' : 'Save About Information'}
+                                {profileLoading ? 'Saving...' : 'Save'}
                             </Button>
                         </CardContent>
                     </Card>
@@ -1269,7 +1269,7 @@ export default function UserSettingsPage() {
                                 disabled={profileLoading}
                                 className="w-full"
                             >
-                                {profileLoading ? 'Saving...' : 'Save Artistic Profile'}
+                                {profileLoading ? 'Saving...' : 'Save'}
                             </Button>
                         </CardContent>
                     </Card>
