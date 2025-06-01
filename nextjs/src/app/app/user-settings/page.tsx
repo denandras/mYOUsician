@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { createSPASassClient } from '@/lib/supabase/client';
-import { Key, User, CheckCircle, MapPin, Briefcase, Music, Plus, Trash2, AlertTriangle } from 'lucide-react';
+import { Key, User, CheckCircle, Briefcase, Music, Plus, Trash2, AlertTriangle } from 'lucide-react';
 import { MFASetup } from '@/components/MFASetup';
 import { Database } from '@/lib/types';
 
@@ -769,33 +769,6 @@ export default function UserSettingsPage() {
                 </p>
             </div>
 
-            {/* User Data Display */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <User className="h-5 w-5" />
-                        User Information
-                    </CardTitle>
-                    <CardDescription>Your account details</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div>
-                            <Label className="text-sm font-medium text-gray-500">User ID</Label>
-                            <p className="mt-1 text-sm font-mono bg-gray-50 p-2 rounded border">
-                                {user?.id || 'Not available'}
-                            </p>
-                        </div>
-                        <div>
-                            <Label className="text-sm font-medium text-gray-500">Email</Label>
-                            <p className="mt-1 text-sm bg-gray-50 p-2 rounded border">
-                                {user?.email || 'Not available'}
-                            </p>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
             {/* Rest of your existing alerts */}
             {error && (
                 <Alert variant="destructive">
@@ -824,7 +797,7 @@ export default function UserSettingsPage() {
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
-                                <MapPin className="h-5 w-5" />
+                                <User className="h-5 w-5" />
                                 Personal Data
                             </CardTitle>
                             <CardDescription>Your personal information</CardDescription>
@@ -905,15 +878,26 @@ export default function UserSettingsPage() {
                                 </div>
                             </div>
 
-                            <div>
-                                <Label htmlFor="phone">Phone</Label>
-                                <Input
-                                    id="phone"
-                                    value={profile.phone}
-                                    onChange={(e) => setProfile(prev => ({ 
-                                        ...prev, phone: e.target.value 
-                                    }))}
-                                />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <Label htmlFor="email">Email</Label>
+                                    <Input
+                                        id="email"
+                                        value={user?.email || ''}
+                                        disabled
+                                        className="bg-gray-50"
+                                    />
+                                </div>
+                                <div>
+                                    <Label htmlFor="phone">Phone</Label>
+                                    <Input
+                                        id="phone"
+                                        value={profile.phone}
+                                        onChange={(e) => setProfile(prev => ({ 
+                                            ...prev, phone: e.target.value 
+                                        }))}
+                                    />
+                                </div>
                             </div>
 
                             <Button
@@ -1143,94 +1127,99 @@ export default function UserSettingsPage() {
                                     const hasData = item.genre || item.instrument || item.category;
                                     
                                     return (
-                                        <div key={index} className="grid grid-cols-4 gap-2 mt-2">
-                                            <Select
-                                                value={item.genre}
-                                                onValueChange={(value) => updateGenreInstrument(index, 'genre', value)}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Genre" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {referenceData.genres && Array.isArray(referenceData.genres) 
-                                                        ? referenceData.genres.map(genre => (
-                                                            <SelectItem key={genre.id} value={genre.name}>
-                                                                {genre.name}
-                                                            </SelectItem>
-                                                        ))
-                                                        : null
-                                                    }
-                                                </SelectContent>
-                                            </Select>
-                                            
-                                            <Select
-                                                value={item.instrument}
-                                                onValueChange={(value) => updateGenreInstrument(index, 'instrument', value)}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Instrument" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {Object.keys(instrumentsByCategory).length > 0 ? (
-                                                        Object.keys(instrumentsByCategory).sort().flatMap(category => [
-                                                            <SelectItem key={category + '-label'} value={category + '-label'} disabled className="font-semibold text-muted-foreground cursor-default opacity-100 select-none pointer-events-none" style={{ pointerEvents: 'none' }}>
-                                                                ---[{category}]---
-                                                            </SelectItem>,
-                                                            ...instrumentsByCategory[category]
-                                                                .sort((a, b) => a.name.localeCompare(b.name))
-                                                                .map(instrument => (
-                                                                    <SelectItem key={instrument.id} value={instrument.name}>
-                                                                        {instrument.name}
+                                        <div key={index} className="mt-2">
+                                            <div className="flex gap-2 items-center">
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 flex-1">
+                                                    <Select
+                                                        value={item.genre}
+                                                        onValueChange={(value) => updateGenreInstrument(index, 'genre', value)}
+                                                    >
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Genre" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {referenceData.genres && Array.isArray(referenceData.genres) 
+                                                                ? referenceData.genres.map(genre => (
+                                                                    <SelectItem key={genre.id} value={genre.name}>
+                                                                        {genre.name}
                                                                     </SelectItem>
                                                                 ))
-                                                        ])
-                                                    ) : (
-                                                        referenceData.instruments && Array.isArray(referenceData.instruments)
-                                                            ? referenceData.instruments.map(instrument => (
-                                                                <SelectItem key={instrument.id} value={instrument.name}>
-                                                                    {instrument.name}
-                                                                </SelectItem>
-                                                            ))
-                                                            : null
-                                                    )}
-                                                </SelectContent>
-                                            </Select>
+                                                                : null
+                                                            }
+                                                        </SelectContent>
+                                                    </Select>
+                                                    
+                                                    <Select
+                                                        value={item.instrument}
+                                                        onValueChange={(value) => updateGenreInstrument(index, 'instrument', value)}
+                                                    >
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Instrument" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {Object.keys(instrumentsByCategory).length > 0 ? (
+                                                                Object.keys(instrumentsByCategory).sort().flatMap(category => [
+                                                                    <SelectItem key={category + '-label'} value={category + '-label'} disabled className="font-semibold text-muted-foreground cursor-default opacity-100 select-none pointer-events-none" style={{ pointerEvents: 'none' }}>
+                                                                        ---[{category}]---
+                                                                    </SelectItem>,
+                                                                    ...instrumentsByCategory[category]
+                                                                        .sort((a, b) => a.name.localeCompare(b.name))
+                                                                        .map(instrument => (
+                                                                            <SelectItem key={instrument.id} value={instrument.name}>
+                                                                                {instrument.name}
+                                                                            </SelectItem>
+                                                                        ))
+                                                                ])
+                                                            ) : (
+                                                                referenceData.instruments && Array.isArray(referenceData.instruments)
+                                                                    ? referenceData.instruments.map(instrument => (
+                                                                        <SelectItem key={instrument.id} value={instrument.name}>
+                                                                            {instrument.name}
+                                                                        </SelectItem>
+                                                                    ))
+                                                                    : null
+                                                            )}
+                                                        </SelectContent>
+                                                    </Select>
 
-                                            <Select
-                                                value={item.category}
-                                                onValueChange={(value) => updateGenreInstrument(index, 'category', value)}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Category" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="artist">artist</SelectItem>
-                                                    <SelectItem value="teacher">teacher</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-
-                                            {/* Single trash can that clears data or removes row */}
-                                            {(hasData || profile.genre_instrument.length > 1) && (
-                                                <Button
-                                                    type="button"
-                                                    variant="delete"
-                                                    size="icon"
-                                                    onClick={() => {
-                                                        if (hasData) {
-                                                            // If there's data, clear it first
-                                                            updateGenreInstrument(index, 'genre', '');
-                                                            updateGenreInstrument(index, 'instrument', '');
-                                                            updateGenreInstrument(index, 'category', '');
-                                                        } else if (profile.genre_instrument.length > 1) {
-                                                            // If no data and multiple rows, remove the row
-                                                            removeGenreInstrument(index);
-                                                        }
-                                                    }}
-                                                    title={hasData ? "Clear this row" : "Delete this row"}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            )}
+                                                    <Select
+                                                        value={item.category}
+                                                        onValueChange={(value) => updateGenreInstrument(index, 'category', value)}
+                                                    >
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Category" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="artist">artist</SelectItem>
+                                                            <SelectItem value="teacher">teacher</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                
+                                                {/* Delete button positioned next to the selects */}
+                                                {(hasData || profile.genre_instrument.length > 1) && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="delete"
+                                                        size="icon"
+                                                        onClick={() => {
+                                                            if (hasData) {
+                                                                // If there's data, clear it first
+                                                                updateGenreInstrument(index, 'genre', '');
+                                                                updateGenreInstrument(index, 'instrument', '');
+                                                                updateGenreInstrument(index, 'category', '');
+                                                            } else if (profile.genre_instrument.length > 1) {
+                                                                // If no data and multiple rows, remove the row
+                                                                removeGenreInstrument(index);
+                                                            }
+                                                        }}
+                                                        title={hasData ? "Clear this row" : "Delete this row"}
+                                                        className="shrink-0"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                )}
+                                            </div>
                                         </div>
                                     );
                                 })}
