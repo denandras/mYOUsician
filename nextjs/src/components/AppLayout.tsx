@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {usePathname, useRouter} from 'next/navigation';
 import {
@@ -21,12 +21,30 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const [mounted, setMounted] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
+    const userDropdownRef = useRef<HTMLDivElement>(null);
 
     const { user, loading } = useGlobal();
 
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    // Handle click outside user dropdown
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
+                setUserDropdownOpen(false);
+            }
+        };
+
+        if (isUserDropdownOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isUserDropdownOpen]);
 
     const handleLogout = async () => {
         try {
@@ -117,7 +135,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         <Menu className="h-6 w-6"/>
                     </button>
 
-                    <div className="relative ml-auto">
+                    <div className="relative ml-auto" ref={userDropdownRef}>
                         <button
                             onClick={() => setUserDropdownOpen(!isUserDropdownOpen)}
                             className="flex items-center space-x-2 text-sm text-gray-700 hover:text-gray-900"
