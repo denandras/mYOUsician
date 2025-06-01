@@ -75,15 +75,6 @@ export default function Home() {
                   Documentation
                 </Link>
 
-                <Link
-                    href="https://github.com/Razikus/supabase-nextjs-template"
-                    className="bg-primary-800 text-white px-4 py-2 rounded-lg hover:bg-primary-900 transition-colors"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                  Grab This Template
-                </Link>
-
                 <AuthAwareButtons variant="nav" />
               </div>
             </div>
