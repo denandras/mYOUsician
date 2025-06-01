@@ -478,7 +478,7 @@ export default function UserSettingsPage() {
             const invalidSocialLinks = [];
             for (const [platformName, url] of Object.entries(profile.social)) {
                 if (url && !validateSocialUrl(platformName, url)) {
-                    const platform = referenceData.social_platforms.find(
+                    const platform = referenceData.social_platforms?.find(
                         p => p.name.toLowerCase() === platformName.toLowerCase()
                     );
                     invalidSocialLinks.push(`${platform?.name || platformName}: must start with ${platform?.base_url}`);
@@ -692,6 +692,11 @@ export default function UserSettingsPage() {
     const validateSocialUrl = (platformName: string, url: string): boolean => {
         if (!url.trim()) return true; // Empty URLs are allowed
         
+        // Safety check for social_platforms availability
+        if (!referenceData.social_platforms || !Array.isArray(referenceData.social_platforms)) {
+            return true; // Allow any URL if reference data is not loaded
+        }
+        
         const platform = referenceData.social_platforms.find(
             p => p.name.toLowerCase() === platformName.toLowerCase()
         );
@@ -713,6 +718,11 @@ export default function UserSettingsPage() {
             'tiktok',
             'x'
         ];
+        
+        // Safety check to ensure social_platforms is available and is an array
+        if (!referenceData.social_platforms || !Array.isArray(referenceData.social_platforms)) {
+            return [];
+        }
         
         return [...referenceData.social_platforms].sort((a, b) => {
             const aIndex = desiredOrder.indexOf(a.name.toLowerCase());
@@ -753,7 +763,7 @@ export default function UserSettingsPage() {
     return (
         <div className="space-y-6 p-6">
             <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tight">User Settings</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Profile Editor</h1>
                 <p className="text-muted-foreground">
                     Manage your account settings and musician profile
                 </p>
@@ -1001,6 +1011,10 @@ export default function UserSettingsPage() {
                                                     </SelectTrigger>
                                                     <SelectContent>
                                                         {(() => {
+                                                            // Safety check for education_types availability
+                                                            if (!referenceData.education_types || !Array.isArray(referenceData.education_types)) {
+                                                                return null;
+                                                            }
                                                             const sortedEducation = referenceData.education_types
                                                                 .sort((a, b) => (a.rank || 999) - (b.rank || 999));
                                                             return sortedEducation.map(edu => (
@@ -1136,11 +1150,14 @@ export default function UserSettingsPage() {
                                                     <SelectValue placeholder="Genre" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {referenceData.genres.map(genre => (
-                                                        <SelectItem key={genre.id} value={genre.name}>
-                                                            {genre.name}
-                                                        </SelectItem>
-                                                    ))}
+                                                    {referenceData.genres && Array.isArray(referenceData.genres) 
+                                                        ? referenceData.genres.map(genre => (
+                                                            <SelectItem key={genre.id} value={genre.name}>
+                                                                {genre.name}
+                                                            </SelectItem>
+                                                        ))
+                                                        : null
+                                                    }
                                                 </SelectContent>
                                             </Select>
                                             
@@ -1166,11 +1183,13 @@ export default function UserSettingsPage() {
                                                                 ))
                                                         ])
                                                     ) : (
-                                                        referenceData.instruments.map(instrument => (
-                                                            <SelectItem key={instrument.id} value={instrument.name}>
-                                                                {instrument.name}
-                                                            </SelectItem>
-                                                        ))
+                                                        referenceData.instruments && Array.isArray(referenceData.instruments)
+                                                            ? referenceData.instruments.map(instrument => (
+                                                                <SelectItem key={instrument.id} value={instrument.name}>
+                                                                    {instrument.name}
+                                                                </SelectItem>
+                                                            ))
+                                                            : null
                                                     )}
                                                 </SelectContent>
                                             </Select>

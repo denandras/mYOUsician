@@ -9,7 +9,8 @@ import {
     X,
     ChevronDown,
     LogOut,
-    Key, Files, LucideListTodo, Database,
+    Key,
+    Database,
 } from 'lucide-react';
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
@@ -51,9 +52,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const navigation = [
         { name: 'Homepage', href: '/app', icon: Home },
         { name: 'Database', href: '/app/database', icon: Database },
-        { name: 'Example Storage', href: '/app/storage', icon: Files },
-        { name: 'Example Table', href: '/app/table', icon: LucideListTodo },
-        { name: 'User Settings', href: '/app/user-settings', icon: User },
+        { name: 'Profile Editor', href: '/app/user-settings', icon: User },
     ];
 
     const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
