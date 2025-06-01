@@ -242,9 +242,8 @@ export default function DatabasePage() {
                 setLoading(false);
                 return;
             }
-            
-            console.log('Successfully retrieved all profiles, now filtering...');            // Filter in JavaScript to avoid complex SQL queries
-            let filteredData = (allProfiles || []).filter((profile: any) => {
+              console.log('Successfully retrieved all profiles, now filtering...');            // Filter in JavaScript to avoid complex SQL queries
+            const filteredData = (allProfiles || []).filter((profile: any) => {
                 // If no genre filter is specified (Any), return all profiles
                 if (!filters.genre || filters.genre === 'any') return true;
                 

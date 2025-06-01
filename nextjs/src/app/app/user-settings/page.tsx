@@ -310,7 +310,7 @@ export default function UserSettingsPage() {
         } finally {
             setLoadingLocations(false);
         }
-    }, []);
+    }, [locationData.cities, locationServiceStatus]);
 
     const loadProfile = useCallback(async () => {
         try {
@@ -748,7 +748,7 @@ export default function UserSettingsPage() {
         if (user?.id) {
             loadProfile();
         }
-    }, [user?.id]); // Remove function dependencies to prevent infinite loops
+    }, [user?.id, loadLocationData, loadProfile, loadReferenceData]); // Add function dependencies
 
     return (
         <div className="space-y-6 p-6">
