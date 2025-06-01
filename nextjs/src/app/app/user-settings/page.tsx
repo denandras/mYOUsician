@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -74,7 +74,17 @@ export default function UserSettingsPage() {
         social: {} as Record<string, string>
     });
 
-
+    // Memoize instrumentsByCategory for the categorized dropdown
+    const instrumentsByCategory = useMemo(() => {
+        return referenceData.instruments.reduce((acc, instrument) => {
+            const category = instrument.category || 'Other'; // Default to 'Other' if category is missing
+            if (!acc[category]) {
+                acc[category] = [];
+            }
+            acc[category].push(instrument);
+            return acc;
+        }, {} as Record<string, Instrument[]>);
+    }, [referenceData.instruments]);
 
     // Load reference data from Supabase with localStorage caching
     const loadReferenceData = useCallback(async () => {
@@ -1142,11 +1152,26 @@ export default function UserSettingsPage() {
                                                     <SelectValue placeholder="Instrument" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {referenceData.instruments.map(instrument => (
-                                                        <SelectItem key={instrument.id} value={instrument.name}>
-                                                            {instrument.name}
-                                                        </SelectItem>
-                                                    ))}
+                                                    {Object.keys(instrumentsByCategory).length > 0 ? (
+                                                        Object.keys(instrumentsByCategory).sort().flatMap(category => [
+                                                            <SelectItem key={category + '-label'} value={category + '-label'} disabled className="font-semibold text-muted-foreground cursor-default opacity-100 select-none pointer-events-none" style={{ pointerEvents: 'none' }}>
+                                                                ---[{category}]---
+                                                            </SelectItem>,
+                                                            ...instrumentsByCategory[category]
+                                                                .sort((a, b) => a.name.localeCompare(b.name))
+                                                                .map(instrument => (
+                                                                    <SelectItem key={instrument.id} value={instrument.name}>
+                                                                        {instrument.name}
+                                                                    </SelectItem>
+                                                                ))
+                                                        ])
+                                                    ) : (
+                                                        referenceData.instruments.map(instrument => (
+                                                            <SelectItem key={instrument.id} value={instrument.name}>
+                                                                {instrument.name}
+                                                            </SelectItem>
+                                                        ))
+                                                    )}
                                                 </SelectContent>
                                             </Select>
 

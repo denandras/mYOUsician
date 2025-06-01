@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {usePathname, useRouter} from 'next/navigation';
 import {
@@ -17,11 +17,15 @@ import { createSPASassClient } from "@/lib/supabase/client";
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     const [isUserDropdownOpen, setUserDropdownOpen] = useState(false);
+    const [mounted, setMounted] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
 
+    const { user, loading } = useGlobal();
 
-    const { user } = useGlobal();
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const handleLogout = async () => {
         try {
@@ -120,19 +124,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         >
                             <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
                                 <span className="text-primary-700 font-medium">
-                                    {user ? getInitials(user.email) : '??'}
+                                    {!mounted || loading ? '...' : user ? getInitials(user.email) : '??'}
                                 </span>
                             </div>
-                            <span>{user?.email || 'Loading...'}</span>
+                            <span>
+                                {!mounted || loading ? 'Loading...' : user?.email || 'Not signed in'}
+                            </span>
                             <ChevronDown className="h-4 w-4"/>
                         </button>
 
-                        {isUserDropdownOpen && (
+                        {isUserDropdownOpen && mounted && !loading && (
                             <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg border">
                                 <div className="p-2 border-b border-gray-100">
                                     <p className="text-xs text-gray-500">Signed in as</p>
                                     <p className="text-sm font-medium text-gray-900 truncate">
-                                        {user?.email}
+                                        {user?.email || 'Not signed in'}
                                     </p>
                                 </div>
                                 <div className="py-1">

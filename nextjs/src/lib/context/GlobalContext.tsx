@@ -20,15 +20,20 @@ const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
 
 export function GlobalProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true);
-    const [user, setUser] = useState<User | null>(null);  // Add this
+    const [user, setUser] = useState<User | null>(null);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        async function loadData() {
+        setMounted(true);
+    }, []);
+
+    useEffect(() => {
+        async function initializeAuth() {
             try {
                 const supabase = await createSPASassClient();
                 const client = supabase.getSupabaseClient();
 
-                // Get user data
+                // Get initial user data
                 const { data: { user } } = await client.auth.getUser();
                 if (user) {
                     setUser({
@@ -37,18 +42,43 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
                         registered_at: new Date(user.created_at)
                     });
                 } else {
-                    throw new Error('User not found');
+                    setUser(null);
                 }
 
+                // Listen for auth state changes
+                const { data: { subscription } } = client.auth.onAuthStateChange(
+                    async (event, session) => {
+                        if (event === 'SIGNED_OUT' || !session?.user) {
+                            setUser(null);
+                        } else if (session?.user) {
+                            setUser({
+                                email: session.user.email!,
+                                id: session.user.id,
+                                registered_at: new Date(session.user.created_at)
+                            });
+                        }
+                    }
+                );
+
+                return () => {
+                    subscription.unsubscribe();
+                };
+
             } catch (error) {
-                console.error('Error loading data:', error);
+                console.error('Error initializing auth:', error);
+                setUser(null);
             } finally {
                 setLoading(false);
             }
         }
 
-        loadData();
-    }, []);
+        if (mounted) {
+            const cleanup = initializeAuth();
+            return () => {
+                cleanup.then(fn => fn?.());
+            };
+        }
+    }, [mounted]);
 
     return (
         <GlobalContext.Provider value={{ loading, user }}>

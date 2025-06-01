@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -46,12 +47,31 @@ interface Education {
     rank: number | null;
 }
 
+interface DatabaseRow {
+    id?: string;
+    uid?: string;
+    email?: string | null;
+    forename?: string | null;
+    surname?: string | null;
+    location?: unknown;
+    phone?: string | null;
+    bio?: string | null;
+    occupation?: string[] | null;
+    education?: string[] | null;
+    certificates?: string[] | null;
+    genre_instrument?: unknown[] | null;
+    video_links?: string[] | null;
+    social?: unknown;
+    created_at?: string;
+    updated_at?: string;
+}
+
 interface MusicianProfile {
     id: string;
     email: string | null;
     forename: string | null;
     surname: string | null;
-    location?: any;
+    location?: unknown;
     phone: string | null;
     bio: string | null;
     occupation: string[] | null;
@@ -70,6 +90,7 @@ interface SearchFilters {
     category: string;
     nameSearch: string;
     sortBy: string;
+    includeCurrentUser?: boolean;
 }
 
 export default function DatabasePage() {
@@ -77,13 +98,11 @@ export default function DatabasePage() {
     const [musicians, setMusicians] = useState<MusicianProfile[]>([]);
     const [genres, setGenres] = useState<Genre[]>([]);
     const [instruments, setInstruments] = useState<Instrument[]>([]);
-    const [educationTypes, setEducationTypes] = useState<Education[]>([]);
-    
-    // State for filters
+    const [educationTypes, setEducationTypes] = useState<Education[]>([]);      // State for filters
     const [filters, setFilters] = useState<SearchFilters>({
-        genre: '',
-        instrument: '',
-        category: '',
+        genre: 'any',
+        instrument: 'any',
+        category: 'any', // Default to "Any"
         nameSearch: '',
         sortBy: ''
     });
@@ -103,13 +122,11 @@ export default function DatabasePage() {
     useEffect(() => {
         loadReferenceData();
         loadCurrentUser();
-    }, []);
-
-    // Log when instruments or genres change
+    }, []);    // Log when instruments or genres change
     useEffect(() => {
         console.log('Instruments updated:', instruments);
         console.log('Genres updated:', genres);
-        console.log('Instruments by category:', instrumentsByCategory);
+        // instrumentsByCategory will be logged separately when it changes
     }, [instruments, genres]);
 
     const loadCurrentUser = async () => {
@@ -185,115 +202,157 @@ export default function DatabasePage() {
             setEducationTypes([]);
         }
     };    const searchMusicians = async () => {
-        if (!filters.genre || !filters.sortBy) {
+        // Only require sortBy to be selected, genre can be "Any"
+        if (!filters.sortBy) {
             return;
         }
 
         setLoading(true);
         setHasSearched(true);
+        
+        console.log('=== SIMPLIFIED DATABASE SEARCH ===');
+        console.log('Starting search with filters:', filters);
 
         try {
             const supabase = await createSPASassClient();
             const client = supabase.getSupabaseClient();
-
-            // Try musician_profiles table first
-            let query = client
+            
+            // Only query musician_profiles table (no users table fallback)
+            console.log('Querying musician_profiles table...');
+            
+            const { data: allProfiles, error: profilesError } = await client
                 .from('musician_profiles')
                 .select('*');
-
-            // Filter by genre and instrument (if provided)
-            if (filters.genre) {
-                // If both genre and instrument are selected
-                if (filters.instrument) {
-                    let searchString = `${filters.genre} ${filters.instrument}`;
-                    if (filters.category) {
-                        searchString += ` (${filters.category})`;
-                    }
-                    query = query.contains('genre_instrument', [searchString]);
-                } else {
-                    // If only genre is selected, search for genre anywhere in genre_instrument
-                    query = query.contains('genre_instrument', [filters.genre]);
-                }
-            }
-
-            const { data, error } = await query;
             
-            if (error) {
-                console.error('Error searching musician_profiles:', error);
+            console.log('musician_profiles query result:', {
+                dataLength: allProfiles?.length || 0,
+                error: profilesError,
+                errorDetails: profilesError ? {
+                    message: (profilesError as any)?.message,
+                    details: (profilesError as any)?.details,
+                    hint: (profilesError as any)?.hint,
+                    code: (profilesError as any)?.code
+                } : null,
+                sampleData: allProfiles?.slice(0, 2) // First 2 records for debugging
+            });
+            
+            if (profilesError) {
+                console.error('Error querying musician_profiles:', profilesError);
                 setMusicians([]);
                 setLoading(false);
                 return;
             }
-
-            // Helper function to properly parse array fields - same as user-settings
-            const parseArrayField = (field: unknown): string[] => {
-                if (!field) return [];
+            
+            console.log('Successfully retrieved all profiles, now filtering...');            // Filter in JavaScript to avoid complex SQL queries
+            let filteredData = (allProfiles || []).filter((profile: any) => {
+                // If no genre filter is specified (Any), return all profiles
+                if (!filters.genre || filters.genre === 'any') return true;
                 
-                // If it's already an array
-                if (Array.isArray(field)) {
-                    // Check if first element is a stringified array
-                    if (field.length === 1 && typeof field[0] === 'string') {
-                        try {
-                            const parsed = JSON.parse(field[0]);
-                            if (Array.isArray(parsed)) {
-                                return parsed.length > 0 ? parsed : [];
-                            }
-                        } catch {
-                            // If parsing fails, treat as regular string
-                            return field[0] ? [field[0]] : [];
-                        }
-                    }
-                    return field.length > 0 ? field : [];
-                }
-                
-                // If it's a string, try to parse it
-                if (typeof field === 'string') {
+                // Handle genre_instrument field which might be an array or JSON string
+                let genreInstrumentData = profile.genre_instrument;
+                if (typeof genreInstrumentData === 'string') {
                     try {
-                        const parsed = JSON.parse(field);
-                        if (Array.isArray(parsed)) {
-                            return parsed.length > 0 ? parsed : [];
-                        }
-                        return field ? [field] : [];
+                        genreInstrumentData = JSON.parse(genreInstrumentData);
                     } catch {
-                        return field ? [field] : [];
+                        // If parsing fails, treat as array with single string
+                        genreInstrumentData = [genreInstrumentData];
                     }
                 }
                 
-                return [];
-            };
+                if (!Array.isArray(genreInstrumentData)) {
+                    return false;
+                }
+                
+                // Check each genre-instrument combination in the array
+                return genreInstrumentData.some((item: any) => {
+                    const itemGenre = typeof item === 'object' ? item.genre : '';
+                    const itemInstrument = typeof item === 'object' ? item.instrument : '';
+                    const itemCategory = typeof item === 'object' ? item.category : '';
+                    
+                    // Genre must match (we already checked filters.genre is not empty above)
+                    if (!itemGenre || itemGenre.toLowerCase() !== filters.genre.toLowerCase()) {
+                        return false;
+                    }
+                      // If instrument filter is specified (not "Any"), it must match
+                    if (filters.instrument && filters.instrument !== 'any' && (!itemInstrument || itemInstrument.toLowerCase() !== filters.instrument.toLowerCase())) {
+                        return false;
+                    }
+                    
+                    // If category filter is specified (not "Any"), it must match
+                    if (filters.category && filters.category !== 'any' && (!itemCategory || itemCategory.toLowerCase() !== filters.category.toLowerCase())) {
+                        return false;
+                    }
+                    
+                    return true;
+                });
+            });
+              console.log(`Filtered ${filteredData.length} profiles matching genre criteria`);
+              // Debug the filtering steps
+            console.log('Current user email:', currentUserEmail);
+            console.log('Profile emails:', filteredData.map(m => m.email));
+              // Filter out current user (but only if we have a current user email and includeCurrentUser is false)
+            let finalFilteredMusicians = filteredData.filter((musician: any) => {
+                // If includeCurrentUser is true, don't filter out any profiles
+                if (filters.includeCurrentUser) {
+                    console.log(`Including current user due to debug flag`);
+                    return true;
+                }
+                
+                // If no current user email, don't filter out any profiles
+                if (!currentUserEmail) {
+                    console.log(`No current user email set, keeping all profiles`);
+                    return true;
+                }
+                
+                const isCurrentUser = musician.email === currentUserEmail;
+                console.log(`Profile ${musician.email} is current user: ${isCurrentUser}`);
+                return !isCurrentUser;
+            });
 
-            let filteredMusicians = (data || []).filter(musician => 
-                musician.email !== currentUserEmail
-            );
+            console.log(`After removing current user: ${finalFilteredMusicians.length} musicians`);
 
             // Apply name search filter
             if (filters.nameSearch.trim()) {
                 const searchTerm = filters.nameSearch.toLowerCase().trim();
-                filteredMusicians = filteredMusicians.filter(musician => {
+                finalFilteredMusicians = finalFilteredMusicians.filter((musician: any) => {
                     const fullName = `${musician.forename || ''} ${musician.surname || ''}`.toLowerCase();
                     return fullName.includes(searchTerm);
                 });
+                console.log(`After name search filter: ${finalFilteredMusicians.length} musicians`);
             }
 
-            // Parse and sort results
-            const parsedMusicians = filteredMusicians.map(musician => {
+            console.log(`Final result: ${finalFilteredMusicians.length} musicians`);
+
+            // Parse and normalize data to MusicianProfile format
+            const parsedMusicians = finalFilteredMusicians.map((musician: any) => {
                 // Handle social field properly
                 const socialData = typeof musician.social === 'object' && musician.social !== null && !Array.isArray(musician.social) 
                     ? musician.social
                     : parseSocialField(musician.social);
 
-                return {
-                    ...musician,
-                    education: parseEducationField(musician.education),
-                    social: socialData,
-                    video_links: parseArrayField(musician.video_links),
+                // Normalize the musician object to match MusicianProfile interface
+                const normalizedMusician: MusicianProfile = {
+                    id: musician.id || musician.uid || '',
+                    email: musician.email || null,
+                    forename: musician.forename || null,
+                    surname: musician.surname || null,
+                    location: musician.location || null,
+                    phone: musician.phone || null,
+                    bio: musician.bio || null,
                     occupation: parseArrayField(musician.occupation),
+                    education: parseEducationField(musician.education),
                     certificates: parseArrayField(musician.certificates),
                     genre_instrument: Array.isArray(musician.genre_instrument) 
                         ? musician.genre_instrument 
-                        : []
+                        : [],
+                    video_links: parseArrayField(musician.video_links),
+                    social: socialData,
+                    created_at: musician.created_at || new Date().toISOString(),
+                    updated_at: musician.updated_at || new Date().toISOString()
                 };
-            }) as MusicianProfile[];
+
+                return normalizedMusician;
+            });
 
             // Apply sorting
             const sortedMusicians = applySorting(parsedMusicians, filters.sortBy);
@@ -305,7 +364,46 @@ export default function DatabasePage() {
         } finally {
             setLoading(false);
         }
-    };// Parse education field with multiple format support
+    };
+
+    // Helper function to parse array fields properly
+    const parseArrayField = (field: unknown): string[] => {
+        if (!field) return [];
+        
+        // If it's already an array
+        if (Array.isArray(field)) {
+            // Check if first element is a stringified array
+            if (field.length === 1 && typeof field[0] === 'string') {
+                try {
+                    const parsed = JSON.parse(field[0]);
+                    if (Array.isArray(parsed)) {
+                        return parsed.length > 0 ? parsed.filter(Boolean) : [];
+                    }
+                } catch {
+                    // If parsing fails, treat as regular string
+                    return field[0] ? [field[0]] : [];
+                }
+            }
+            return field.filter(Boolean);
+        }
+        
+        // If it's a string, try to parse it
+        if (typeof field === 'string') {
+            try {
+                const parsed = JSON.parse(field);
+                if (Array.isArray(parsed)) {
+                    return parsed.filter(Boolean);
+                }
+                return field ? [field] : [];
+            } catch {
+                return field ? [field] : [];
+            }
+        }
+        
+        return [];
+    };
+
+    // Parse education field with multiple format support
     const parseEducationField = (field: unknown): string[] => {
         if (!field) return [];
         
@@ -417,28 +515,23 @@ export default function DatabasePage() {
             default:
                 return sorted;
         }
-    };
-
-    const clearFilters = () => {
+    };    const clearFilters = () => {
         setFilters({
-            genre: '',
-            instrument: '',
-            category: '',
+            genre: 'any',
+            instrument: 'any',
+            category: 'any', // Default to "Any"
             nameSearch: '',
             sortBy: ''
         });
-        setMusicians([]);
-        setHasSearched(false);
-    };
-
-    const updateFilter = (key: keyof SearchFilters, value: string) => {
+        // Don't clear musicians data or hasSearched state
+        // Let users see previous results until they search again
+    };const updateFilter = (key: keyof SearchFilters, value: string) => {
         setFilters(prev => ({ ...prev, [key]: value }));
-        if (hasSearched) {
-            setHasSearched(false); // Reset search state when filters change
-        }
+        // Don't reset hasSearched when filters change
+        // Let users keep seeing previous results until they search again
     };
 
-    const canSearch = filters.genre && filters.sortBy;  // Only require genre and sorting to be selected    // Memoize instrumentsByCategory
+    const canSearch = filters.sortBy;  // Only require sorting to be selected, genre can be "Any"    // Memoize instrumentsByCategory
     const instrumentsByCategory = useMemo(() => {
         return instruments.reduce((acc, instrument) => {
             const category = instrument.category || 'Other'; // Default to 'Other' if category is missing
@@ -486,15 +579,14 @@ export default function DatabasePage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {/* Main filter row */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        {/* Genre */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">                        {/* Genre */}
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Genre</label>
                             <Select value={filters.genre} onValueChange={(value) => updateFilter('genre', value)}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select genre" />
-                                </SelectTrigger>
-                                <SelectContent>
+                                    <SelectValue />
+                                </SelectTrigger><SelectContent>
+                                    <SelectItem value="any">Any</SelectItem>
                                     {genres.map((genre) => (
                                         <SelectItem key={genre.id} value={genre.name}>
                                             {genre.name}
@@ -502,16 +594,14 @@ export default function DatabasePage() {
                                     ))}
                                 </SelectContent>
                             </Select>
-                        </div>
-
-                        {/* Instrument */}
+                        </div>                        {/* Instrument */}
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Instrument</label>
                             <Select value={filters.instrument} onValueChange={(value) => updateFilter('instrument', value)}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select instrument" />
-                                </SelectTrigger>
-                                <SelectContent>
+                                    <SelectValue />
+                                </SelectTrigger><SelectContent>
+                                    <SelectItem value="any">Any</SelectItem>
                                     {Object.keys(instrumentsByCategory).length > 0 ? (
                                         Object.keys(instrumentsByCategory).sort().flatMap(category => [
                                             <SelectItem key={category + '-label'} value={category + '-label'} disabled className="font-semibold text-muted-foreground cursor-default opacity-100 select-none pointer-events-none" style={{ pointerEvents: 'none' }}>
@@ -534,28 +624,27 @@ export default function DatabasePage() {
                                     )}
                                 </SelectContent>
                             </Select>
-                        </div>
-
-                        {/* Type/Category */}
+                        </div>                        {/* Type/Category */}
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Type</label>
                             <Select value={filters.category} onValueChange={(value) => updateFilter('category', value)}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="">Any</SelectItem>
+                                    <SelectValue />
+                                </SelectTrigger><SelectContent>
+                                    <SelectItem value="any">Any</SelectItem>
                                     <SelectItem value="artist">Artist</SelectItem>
                                     <SelectItem value="teacher">Teacher</SelectItem>
                                 </SelectContent>
                             </Select>
-                        </div>
-
-                        {/* Sort By */}
+                        </div>                        {/* Sort By */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Sort By</label>
+                            <label className="text-sm font-medium flex items-center gap-1">
+                                Sort By
+                                <span className="text-red-500">*</span>
+                                <span className="text-xs text-red-500">(required)</span>
+                            </label>
                             <Select value={filters.sortBy} onValueChange={(value) => updateFilter('sortBy', value)}>
-                                <SelectTrigger>
+                                <SelectTrigger className={!filters.sortBy ? "bg-red-50 border-red-200" : ""}>
                                     <SelectValue placeholder="Select sorting" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -567,9 +656,7 @@ export default function DatabasePage() {
                                 </SelectContent>
                             </Select>
                         </div>
-                    </div>
-
-                    {/* Name search row */}
+                    </div>                    {/* Name search row */}
                     <div className="space-y-2">
                         <label className="text-sm font-medium">Search by Name</label>
                         <Input
@@ -578,9 +665,19 @@ export default function DatabasePage() {
                             onChange={(e) => updateFilter('nameSearch', e.target.value)}
                             className="max-w-md"
                         />
-                    </div>
-
-                    {/* Action buttons */}
+                    </div>                    {/* Debug option */}
+                    <div className="flex items-center space-x-2">
+                        <input
+                            type="checkbox"
+                            id="includeCurrentUser"
+                            checked={filters.includeCurrentUser || false}
+                            onChange={(e) => setFilters(prev => ({ ...prev, includeCurrentUser: e.target.checked }))}
+                            className="rounded border-gray-300"
+                        />
+                        <label htmlFor="includeCurrentUser" className="text-sm text-gray-600">
+                            Include current user in results (debug mode)
+                        </label>
+                    </div>                    {/* Action buttons */}
                     <div className="flex gap-2">
                         <Button 
                             onClick={searchMusicians} 
@@ -637,11 +734,13 @@ export default function DatabasePage() {
                                             {/* Skills Section */}
                                             <div>
                                                 <h4 className="text-sm font-medium mb-2">Skills & Instruments</h4>
-                                                <div className="flex flex-wrap gap-1">
-                                                    {musician.genre_instrument && musician.genre_instrument.length > 0 ? (
+                                                <div className="flex flex-wrap gap-1">                                                    {musician.genre_instrument && musician.genre_instrument.length > 0 ? (
                                                         musician.genre_instrument.map((item, index) => (
                                                             <Badge key={index} variant="secondary" className="text-xs">
-                                                                {typeof item === 'string' ? item : `${item.genre || ''} ${item.instrument || ''}`.trim()}
+                                                                {typeof item === 'string' 
+                                                                    ? item 
+                                                                    : `${item.genre || ''} ${item.instrument || ''}${item.category ? ` (${item.category})` : ''}`.trim()
+                                                                }
                                                             </Badge>
                                                         ))
                                                     ) : (
@@ -679,8 +778,7 @@ export default function DatabasePage() {
                                             )}
 
                                             {/* Contact & Links */}
-                                            <div className="flex items-center gap-2 pt-2 border-t">
-                                                {/* Email */}
+                                            <div className="flex items-center gap-2 pt-2 border-t">                                                {/* Email */}
                                                 {musician.email && (
                                                     <Button
                                                         variant="ghost"
@@ -688,7 +786,7 @@ export default function DatabasePage() {
                                                         asChild
                                                         className="h-8 w-8"
                                                     >
-                                                        <a href={`mailto:${musician.email}`} title="Send email">
+                                                        <a href={`mailto:${musician.email}`} title={`Email: ${musician.email}`}>
                                                             <Mail className="h-4 w-4" />
                                                         </a>
                                                     </Button>
@@ -702,7 +800,7 @@ export default function DatabasePage() {
                                                         asChild
                                                         className="h-8 w-8"
                                                     >
-                                                        <a href={`tel:${musician.phone}`} title="Call">
+                                                        <a href={`tel:${musician.phone}`} title={`Phone: ${musician.phone}`}>
                                                             <Phone className="h-4 w-4" />
                                                         </a>
                                                     </Button>
