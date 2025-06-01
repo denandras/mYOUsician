@@ -127,7 +127,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="lg:pl-64">
-                <div className="sticky top-0 z-10 flex items-center justify-between h-16 bg-white shadow-sm px-4">
+                <div className="sticky top-0 z-10 flex items-center justify-between h-16 bg-background/80 backdrop-blur-sm border-b border-gray-100 px-4">
                     <button
                         onClick={toggleSidebar}
                         className="lg:hidden text-gray-500 hover:text-gray-700"
