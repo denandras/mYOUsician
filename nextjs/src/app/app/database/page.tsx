@@ -677,17 +677,17 @@ export default function DatabasePage() {
                             Include current user in results (debug mode)
                         </label>
                     </div>                    {/* Action buttons */}
-                    <div className="flex gap-2">
-                        <Button 
+                    <div className="flex gap-2">                        <Button 
                             onClick={searchMusicians} 
                             disabled={!canSearch || loading}
+                            variant="teal"
                             className="flex items-center gap-2"
                         >
                             <Search className="h-4 w-4" />
                             {loading ? 'Searching...' : 'Search'}
                         </Button>
                         <Button 
-                            variant="outline" 
+                            variant="delete"
                             onClick={clearFilters}
                             className="flex items-center gap-2"
                         >

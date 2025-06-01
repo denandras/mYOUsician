@@ -919,6 +919,7 @@ export default function UserSettingsPage() {
                             <Button
                                 onClick={saveProfile}
                                 disabled={profileLoading}
+                                variant="teal"
                                 className="w-full"
                             >
                                 {profileLoading ? 'Saving...' : 'Save'}
@@ -964,7 +965,7 @@ export default function UserSettingsPage() {
                                             {(hasData || profile.occupation.length > 1) && (
                                                 <Button
                                                     type="button"
-                                                    variant="outline"
+                                                    variant="delete"
                                                     size="icon"
                                                     onClick={() => {
                                                         if (hasData) {
@@ -977,7 +978,7 @@ export default function UserSettingsPage() {
                                                     }}
                                                     title={hasData ? "Clear this field" : "Delete this row"}
                                                 >
-                                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                                    <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             )}
                                         </div>
@@ -1037,7 +1038,7 @@ export default function UserSettingsPage() {
                                                 {(hasData || profile.education.length > 1) && (
                                                     <Button
                                                         type="button"
-                                                        variant="outline"
+                                                        variant="delete"
                                                         size="icon"
                                                         onClick={() => {
                                                             if (hasData) {
@@ -1051,7 +1052,7 @@ export default function UserSettingsPage() {
                                                         }}
                                                         title={hasData ? "Clear this row" : "Delete this row"}
                                                     >
-                                                        <Trash2 className="h-4 w-4 text-red-500" />
+                                                        <Trash2 className="h-4 w-4" />
                                                     </Button>
                                                 )}
                                             </div>
@@ -1085,7 +1086,7 @@ export default function UserSettingsPage() {
                                             {(hasData || profile.certificates.length > 1) && (
                                                 <Button
                                                     type="button"
-                                                    variant="outline"
+                                                    variant="delete"
                                                     size="icon"
                                                     onClick={() => {
                                                         if (hasData) {
@@ -1098,7 +1099,7 @@ export default function UserSettingsPage() {
                                                     }}
                                                     title={hasData ? "Clear this field" : "Delete this row"}
                                                 >
-                                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                                    <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             )}
                                         </div>
@@ -1118,6 +1119,7 @@ export default function UserSettingsPage() {
                             <Button
                                 onClick={saveProfile}
                                 disabled={profileLoading}
+                                variant="teal"
                                 className="w-full"
                             >
                                 {profileLoading ? 'Saving...' : 'Save'}
@@ -1211,7 +1213,7 @@ export default function UserSettingsPage() {
                                             {(hasData || profile.genre_instrument.length > 1) && (
                                                 <Button
                                                     type="button"
-                                                    variant="outline"
+                                                    variant="delete"
                                                     size="icon"
                                                     onClick={() => {
                                                         if (hasData) {
@@ -1226,7 +1228,7 @@ export default function UserSettingsPage() {
                                                     }}
                                                     title={hasData ? "Clear this row" : "Delete this row"}
                                                 >
-                                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                                    <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             )}
                                         </div>
@@ -1259,7 +1261,7 @@ export default function UserSettingsPage() {
                                             {(hasData || profile.video_links.length > 1) && (
                                                 <Button
                                                     type="button"
-                                                    variant="outline"
+                                                    variant="delete"
                                                     size="icon"
                                                     onClick={() => {
                                                         if (hasData) {
@@ -1272,7 +1274,7 @@ export default function UserSettingsPage() {
                                                     }}
                                                     title={hasData ? "Clear this field" : "Delete this row"}
                                                 >
-                                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                                    <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             )}
                                         </div>
@@ -1331,6 +1333,7 @@ export default function UserSettingsPage() {
                             <Button
                                 onClick={saveProfile}
                                 disabled={profileLoading}
+                                variant="teal"
                                 className="w-full"
                             >
                                 {profileLoading ? 'Saving...' : 'Save'}
@@ -1372,7 +1375,7 @@ export default function UserSettingsPage() {
                                 <Button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full bg-green-600 hover:bg-green-700 text-white"
+                                    className="w-full bg-[#e62745] hover:bg-[#cc2340] text-white"
                                 >
                                     {loading ? 'Updating...' : 'Update Password'}
                                 </Button>
