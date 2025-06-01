@@ -51,8 +51,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
     const navigation = [
         { name: 'Homepage', href: '/app', icon: Home },
-        { name: 'Database', href: '/app/database', icon: Database },
         { name: 'Profile Editor', href: '/app/user-settings', icon: User },
+        { name: 'Database', href: '/app/database', icon: Database },
     ];
 
     const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
@@ -88,6 +88,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                             <Link
                                 key={item.name}
                                 href={item.href}
+                                onClick={() => setSidebarOpen(false)} // Close sidebar on menu click
                                 className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                                     isActive
                                         ? 'bg-primary-50 text-primary-600'

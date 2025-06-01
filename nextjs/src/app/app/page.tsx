@@ -53,8 +53,8 @@ export default function DashboardContent() {
                                 <Settings className="h-4 w-4 text-primary-600" />
                             </div>
                             <div>
-                                <h3 className="font-medium">User Settings</h3>
-                                <p className="text-sm text-gray-500">Manage your account preferences</p>
+                                <h3 className="font-medium">Profile Editor</h3>
+                                <p className="text-sm text-gray-500">Manage your account and data</p>
                             </div>
                         </Link>
 

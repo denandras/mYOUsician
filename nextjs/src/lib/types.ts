@@ -34,39 +34,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      todo_list: {
-        Row: {
-          created_at: string
-          description: string | null
-          done: boolean
-          done_at: string | null
-          id: number
-          owner: string
-          title: string
-          urgent: boolean
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          done?: boolean
-          done_at?: string | null
-          id?: number
-          owner: string
-          title: string
-          urgent?: boolean
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          done?: boolean
-          done_at?: string | null
-          id?: number
-          owner?: string
-          title?: string
-          urgent?: boolean
-        }
-        Relationships: []
-      }
       instruments: {
         Row: {
           id: string

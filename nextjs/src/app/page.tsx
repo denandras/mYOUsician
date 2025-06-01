@@ -22,7 +22,7 @@ export default function Home() {
     },
     {
       icon: Users,
-      title: 'User Settings',
+      title: 'Profile Editor',
       description: 'Complete user management with password updates, MFA setup, and profile controls',
       color: 'text-red-600'
     },
