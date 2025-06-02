@@ -10,37 +10,37 @@ export default function Home() {
       icon: Shield,
       title: 'Secure Authentication',
       description: 'Secure login with email/password, Multi-Factor Authentication, and SSO providers',
-      color: 'text-green-600'
+      color: 'text-primary'
     },
     {
       icon: Database,
       title: 'Musician Database',
       description: 'Easy-to-search database of musicians with advanced filtering',
-      color: 'text-orange-600'
+      color: 'text-primary'
     },
     {
       icon: Users,
       title: 'Profile Editor',
       description: 'Profile editor instead of CV uploads',
-      color: 'text-red-600'
+      color: 'text-primary'
     },
     {
       icon: Clock,
       title: 'Time Saver',
       description: 'Spare your time of asking for CVs and waiting for responses',
-      color: 'text-teal-600'
+      color: 'text-primary'
     },
     {
       icon: Globe,
       title: 'Legal Documents',
       description: 'Privacy policy, terms of service, and refund policy',
-      color: 'text-purple-600'
+      color: 'text-primary'
     },
     {
       icon: Key,
       title: 'Cookies',
       description: 'GDPR-compliant cookie system',
-      color: 'text-blue-600'
+      color: 'text-primary'
     }
   ];
 
@@ -53,11 +53,11 @@ export default function Home() {
 
   return (
       <div className="min-h-screen">
-        <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-sm z-50 border-b border-gray-100">
+        <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-sm z-50 border-b border-border">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16 items-center">
               <div className="flex-shrink-0">
-              <span className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
+              <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
                 {productName}
               </span>
               </div>
@@ -86,7 +86,7 @@ export default function Home() {
             <div className="text-center">
               <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground">
                 Welcome to
-                <span className="block text-primary-600">{productName}</span>
+                <span className="block text-primary">{productName}</span>
               </h1>
               <p className="mt-6 text-xl text-foreground/70 max-w-3xl mx-auto">
                 A database of musicians, for musicians!
@@ -104,7 +104,7 @@ export default function Home() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               {stats.map((stat, index) => (
                   <div key={index} className="text-center">
-                    <div className="text-4xl font-bold text-primary-600">{stat.value}</div>
+                    <div className="text-4xl font-bold text-primary">{stat.value}</div>
                     <div className="mt-2 text-sm text-foreground/70">{stat.label}</div>
                   </div>
               ))}
@@ -136,17 +136,17 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-24 bg-primary-600">
+        <section className="py-24 bg-primary">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl font-bold text-white">
+            <h2 className="text-3xl font-bold text-primary-foreground">
               Ready to put yourself out to the market?
             </h2>
-            <p className="mt-4 text-xl text-primary-100">
+            <p className="mt-4 text-xl text-primary-foreground/80">
               Join other musicians on {productName}
             </p>
             <Link
                 href="/auth/register"
-                className="mt-8 inline-flex items-center px-6 py-3 rounded-lg bg-white text-primary-600 font-medium hover:bg-primary-50 transition-colors"
+                className="mt-8 inline-flex items-center px-6 py-3 rounded-lg bg-primary-foreground text-primary font-medium hover:bg-primary-foreground/90 transition-colors"
             >
               Sign up
               <ArrowRight className="ml-2 h-5 w-5" />
