@@ -903,8 +903,7 @@ export default function UserSettingsPage() {
                             <Button
                                 onClick={saveProfile}
                                 disabled={profileLoading}
-                                variant="teal"
-                                className="w-full"
+                                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                             >
                                 {profileLoading ? 'Saving...' : 'Save'}
                             </Button>
@@ -1103,8 +1102,7 @@ export default function UserSettingsPage() {
                             <Button
                                 onClick={saveProfile}
                                 disabled={profileLoading}
-                                variant="teal"
-                                className="w-full"
+                                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                             >
                                 {profileLoading ? 'Saving...' : 'Save'}
                             </Button>
@@ -1322,8 +1320,7 @@ export default function UserSettingsPage() {
                             <Button
                                 onClick={saveProfile}
                                 disabled={profileLoading}
-                                variant="teal"
-                                className="w-full"
+                                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                             >
                                 {profileLoading ? 'Saving...' : 'Save'}
                             </Button>
@@ -1364,7 +1361,7 @@ export default function UserSettingsPage() {
                                 <Button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full bg-[#e62745] hover:bg-[#cc2340] text-white"
+                                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                                 >
                                     {loading ? 'Updating...' : 'Update Password'}
                                 </Button>

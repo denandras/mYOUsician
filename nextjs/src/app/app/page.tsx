@@ -18,7 +18,7 @@ export default function DashboardContent() {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
         );
     }
@@ -47,27 +47,27 @@ export default function DashboardContent() {
                     <div className="grid gap-4 md:grid-cols-2">
                         <Link
                             href="/app/user-settings"
-                            className="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                            className="flex items-center gap-3 p-4 border rounded-lg hover:bg-accent transition-colors"
                         >
-                            <div className="p-2 bg-primary-50 rounded-full">
-                                <Settings className="h-4 w-4 text-primary-600" />
+                            <div className="p-2 bg-primary/10 rounded-full">
+                                <Settings className="h-4 w-4 text-primary" />
                             </div>
                             <div>
                                 <h3 className="font-medium">Profile Editor</h3>
-                                <p className="text-sm text-gray-500">Manage your account and data</p>
+                                <p className="text-sm text-muted-foreground">Manage your account and data</p>
                             </div>
                         </Link>
 
                         <Link
                             href="/app/database"
-                            className="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                            className="flex items-center gap-3 p-4 border rounded-lg hover:bg-accent transition-colors"
                         >
-                            <div className="p-2 bg-primary-50 rounded-full">
-                                <Database className="h-4 w-4 text-primary-600" />
+                            <div className="p-2 bg-primary/10 rounded-full">
+                                <Database className="h-4 w-4 text-primary" />
                             </div>
                             <div>
                                 <h3 className="font-medium">Database</h3>
-                                <p className="text-sm text-gray-500">Find other musicians</p>
+                                <p className="text-sm text-muted-foreground">Find other musicians</p>
                             </div>
                         </Link>
                     </div>
