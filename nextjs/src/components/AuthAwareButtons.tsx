@@ -69,12 +69,11 @@ export default function AuthAwareButtons({ variant = 'primary' }) {
             >
                 Sign Up
                 <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
-            <Link
-                href="#features"
+            </Link>            <Link
+                href="/auth/login"
                 className="inline-flex items-center px-6 py-3 rounded-lg border border-border text-foreground font-medium hover:bg-accent transition-colors"
             >
-                Explore Database
+                Login
                 <ChevronRight className="ml-2 h-5 w-5" />
             </Link>
         </>

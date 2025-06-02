@@ -1,9 +1,11 @@
-import React from 'react';
+"use client";
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Globe, Shield, Users, Key, Database, Clock } from 'lucide-react';
+import { ArrowRight, Globe, Shield, Users, Key, Database, Clock, Menu, X } from 'lucide-react';
 import AuthAwareButtons from '@/components/AuthAwareButtons';
 export default function Home() {
   const productName = process.env.NEXT_PUBLIC_PRODUCTNAME;
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const features = [
     {
@@ -61,6 +63,8 @@ export default function Home() {
                 {productName}
               </span>
               </div>
+              
+              {/* Desktop Menu */}
               <div className="hidden md:flex items-center space-x-8">
                 <Link href="#features" className="text-foreground/70 hover:text-foreground">
                   Features
@@ -77,7 +81,49 @@ export default function Home() {
 
                 <AuthAwareButtons variant="nav" />
               </div>
+
+              {/* Mobile Menu Button */}
+              <div className="md:hidden">
+                <button
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className="text-foreground hover:text-primary transition-colors"
+                  aria-label="Toggle mobile menu"
+                >
+                  {isMobileMenuOpen ? (
+                    <X className="h-6 w-6" />
+                  ) : (
+                    <Menu className="h-6 w-6" />
+                  )}
+                </button>
+              </div>
             </div>
+
+            {/* Mobile Menu */}
+            {isMobileMenuOpen && (
+              <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-sm">
+                <div className="px-2 pt-2 pb-3 space-y-1">
+                  <Link 
+                    href="#features" 
+                    className="block px-3 py-2 text-foreground/70 hover:text-foreground hover:bg-accent rounded-md transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Features
+                  </Link>
+                  <Link
+                    href="https://github.com/Razikus/supabase-nextjs-template"
+                    className="block px-3 py-2 text-foreground/70 hover:text-foreground hover:bg-accent rounded-md transition-colors"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Documentation
+                  </Link>
+                  <div className="px-3 py-2">
+                    <AuthAwareButtons variant="nav" />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </nav>
 
@@ -99,6 +145,7 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Stats Section - Commented Out
         <section className="py-16 bg-gradient-to-b from-background to-background/90">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -111,6 +158,7 @@ export default function Home() {
             </div>
           </div>
         </section>
+        */}
 
         {/* Features Section */}
         <section id="features" className="py-24 bg-white">
