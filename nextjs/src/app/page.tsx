@@ -46,12 +46,12 @@ export default function Home() {
     }
   ];
 
-  const stats = [
+  /*const stats = [
     { label: 'Active Users', value: '10K+' },
     { label: 'Organizations', value: '2K+' },
     { label: 'Countries', value: '50+' },
     { label: 'Uptime', value: '99.9%' }
-  ];
+  ];*/
 
   return (
       <div className="min-h-screen">
