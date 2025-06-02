@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { createSPASassClient } from '@/lib/supabase/client';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { Key, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import {Factor} from "@supabase/auth-js";
 
@@ -287,13 +288,14 @@ export function MFASetup({ onStatusChange }: MFASetupProps) {
                                 ? 'Protect your account with two-factor authentication. When enabled, you\'ll need to enter a code from your authenticator app in addition to your password when signing in.'
                                 : 'You can add additional authentication methods or remove existing ones.'}
                         </p>
-                        <button
+                        <Button
                             onClick={() => setStep('name')}
                             disabled={actionInProgress}
-                            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+                            variant="delete"
+                            className="w-full text-white"
                         >
                             {actionInProgress ? 'Processing...' : 'Add New Authentication Method'}
-                        </button>
+                        </Button>
                     </div>
                 )}
             </CardContent>

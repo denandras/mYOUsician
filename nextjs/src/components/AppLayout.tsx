@@ -89,10 +89,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
 
                 <div className="h-16 flex items-center justify-between px-4 border-b">
-                    <span className="text-xl font-semibold text-primary-600">{productName}</span>
+                    <span className="text-xl font-semibold text-primary">{productName}</span>
                     <button
                         onClick={toggleSidebar}
-                        className="lg:hidden text-gray-500 hover:text-gray-700"
+                        className="lg:hidden text-muted-foreground hover:text-foreground"
                     >
                         <X className="h-6 w-6" />
                     </button>
@@ -109,13 +109,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                 onClick={() => setSidebarOpen(false)} // Close sidebar on menu click
                                 className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                                     isActive
-                                        ? 'bg-primary-50 text-primary-600'
-                                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                        ? 'bg-primary/10 text-primary'
+                                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                                 }`}
                             >
                                 <item.icon
                                     className={`mr-3 h-5 w-5 ${
-                                        isActive ? 'text-primary-500' : 'text-gray-400 group-hover:text-gray-500'
+                                        isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-accent-foreground'
                                     }`}
                                 />
                                 {item.name}
@@ -127,10 +127,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="lg:pl-64">
-                <div className="sticky top-0 z-10 flex items-center justify-between h-16 bg-background/80 backdrop-blur-sm border-b border-gray-100 px-4">
+                <div className="sticky top-0 z-10 flex items-center justify-between h-16 bg-background/80 backdrop-blur-sm border-b px-4">
                     <button
                         onClick={toggleSidebar}
-                        className="lg:hidden text-gray-500 hover:text-gray-700"
+                        className="lg:hidden text-muted-foreground hover:text-foreground"
                     >
                         <Menu className="h-6 w-6"/>
                     </button>
@@ -138,10 +138,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <div className="relative ml-auto" ref={userDropdownRef}>
                         <button
                             onClick={() => setUserDropdownOpen(!isUserDropdownOpen)}
-                            className="flex items-center space-x-2 text-sm text-gray-700 hover:text-gray-900"
+                            className="flex items-center space-x-2 text-sm text-foreground hover:text-primary"
                         >
-                            <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
-                                <span className="text-primary-700 font-medium">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                <span className="text-primary font-medium">
                                     {!mounted || loading ? '...' : user ? getInitials(user.email) : '??'}
                                 </span>
                             </div>
@@ -152,10 +152,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         </button>
 
                         {isUserDropdownOpen && mounted && !loading && (
-                            <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg border">
-                                <div className="p-2 border-b border-gray-100">
-                                    <p className="text-xs text-gray-500">Signed in as</p>
-                                    <p className="text-sm font-medium text-gray-900 truncate">
+                            <div className="absolute right-0 mt-2 w-64 bg-background rounded-md shadow-lg border">
+                                <div className="p-2 border-b">
+                                    <p className="text-xs text-muted-foreground">Signed in as</p>
+                                    <p className="text-sm font-medium text-foreground truncate">
                                         {user?.email || 'Not signed in'}
                                     </p>
                                 </div>
@@ -165,9 +165,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                             setUserDropdownOpen(false);
                                             handleChangePassword()
                                         }}
-                                        className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                        className="w-full flex items-center px-4 py-2 text-sm text-foreground hover:bg-accent hover:text-accent-foreground"
                                     >
-                                        <Key className="mr-3 h-4 w-4 text-gray-400"/>
+                                        <Key className="mr-3 h-4 w-4 text-muted-foreground"/>
                                         Change Password
                                     </button>
                                     <button
@@ -175,9 +175,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                             handleLogout();
                                             setUserDropdownOpen(false);
                                         }}
-                                        className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                        className="w-full flex items-center px-4 py-2 text-sm text-destructive hover:bg-destructive/10"
                                     >
-                                        <LogOut className="mr-3 h-4 w-4 text-red-400"/>
+                                        <LogOut className="mr-3 h-4 w-4 text-destructive"/>
                                         Sign Out
                                     </button>
                                 </div>
