@@ -903,7 +903,8 @@ export default function UserSettingsPage() {
                             <Button
                                 onClick={saveProfile}
                                 disabled={profileLoading}
-                                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                                variant="teal"
+                                className="w-full text-white"
                             >
                                 {profileLoading ? 'Saving...' : 'Save'}
                             </Button>
@@ -929,6 +930,7 @@ export default function UserSettingsPage() {
                                     onChange={(e) => setProfile(prev => ({ 
                                         ...prev, bio: e.target.value 
                                     }))}
+                                    className="mt-2"
                                 />
                             </div>
 
@@ -1102,7 +1104,8 @@ export default function UserSettingsPage() {
                             <Button
                                 onClick={saveProfile}
                                 disabled={profileLoading}
-                                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                                variant="teal"
+                                className="w-full text-white"
                             >
                                 {profileLoading ? 'Saving...' : 'Save'}
                             </Button>
@@ -1320,7 +1323,8 @@ export default function UserSettingsPage() {
                             <Button
                                 onClick={saveProfile}
                                 disabled={profileLoading}
-                                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                                variant="teal"
+                                className="w-full text-white"
                             >
                                 {profileLoading ? 'Saving...' : 'Save'}
                             </Button>
@@ -1361,7 +1365,8 @@ export default function UserSettingsPage() {
                                 <Button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                                    variant="delete"
+                                    className="w-full text-white"
                                 >
                                     {loading ? 'Updating...' : 'Update Password'}
                                 </Button>

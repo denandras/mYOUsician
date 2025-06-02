@@ -664,24 +664,13 @@ export default function DatabasePage() {
                             onChange={(e) => updateFilter('nameSearch', e.target.value)}
                             className="max-w-md"
                         />
-                    </div>                    {/* Debug option */}
-                    <div className="flex items-center space-x-2">
-                        <input
-                            type="checkbox"
-                            id="includeCurrentUser"
-                            checked={filters.includeCurrentUser || false}
-                            onChange={(e) => setFilters(prev => ({ ...prev, includeCurrentUser: e.target.checked }))}
-                            className="rounded border-gray-300"
-                        />
-                        <label htmlFor="includeCurrentUser" className="text-sm text-gray-600">
-                            Include current user in results (debug mode)
-                        </label>
                     </div>                    {/* Action buttons */}
-                    <div className="flex gap-2">                        <Button 
+                    <div className="flex gap-2">
+                        <Button 
                             onClick={searchMusicians} 
                             disabled={!canSearch || loading}
                             variant="teal"
-                            className="flex items-center gap-2"
+                            className="flex items-center gap-2 text-white"
                         >
                             <Search className="h-4 w-4" />
                             {loading ? 'Searching...' : 'Search'}
