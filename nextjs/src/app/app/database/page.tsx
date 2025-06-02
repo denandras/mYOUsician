@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Trash2, Mail, Phone, Video, ExternalLink, User, BookOpen } from "lucide-react";
+import { Search, Trash2, Mail, Phone, Video, ExternalLink, User, BookOpen, Youtube, Instagram, Facebook, Twitter, Linkedin, Music, Globe } from "lucide-react";
 import { createSPASassClient } from '@/lib/supabase/client';
 
 // Local Badge component to avoid import issues
@@ -98,7 +98,10 @@ export default function DatabasePage() {
     const [musicians, setMusicians] = useState<MusicianProfile[]>([]);
     const [genres, setGenres] = useState<Genre[]>([]);
     const [instruments, setInstruments] = useState<Instrument[]>([]);
-    const [educationTypes, setEducationTypes] = useState<Education[]>([]);      // State for filters
+    const [educationTypes, setEducationTypes] = useState<Education[]>([]);
+    const [socialPlatforms, setSocialPlatforms] = useState<any[]>([]);
+
+    // State for filters
     const [filters, setFilters] = useState<SearchFilters>({
         genre: 'any',
         instrument: 'any',
@@ -144,28 +147,27 @@ export default function DatabasePage() {
             // Check localStorage first for cached reference data
             const cacheKey = 'musician_reference_data';
             const cached = localStorage.getItem(cacheKey);
-            
-            if (cached) {
+              if (cached) {
                 const { data, timestamp } = JSON.parse(cached);
                 // Use cached data if less than 24 hours old
                 if (Date.now() - timestamp < 24 * 60 * 60 * 1000) {
                     setGenres(data.genres || []);
                     setInstruments(data.instruments || []);
                     setEducationTypes(data.education_types || []);
+                    setSocialPlatforms(data.social_platforms || []);
                     return;
                 }
             }
 
             const supabase = await createSPASassClient();
-            const client = supabase.getSupabaseClient();            
-            // Load all reference data in parallel
-            const [instrumentsRes, genresRes, educationRes] = await Promise.all([
+            const client = supabase.getSupabaseClient();              // Load all reference data in parallel
+            const [instrumentsRes, genresRes, educationRes, socialRes] = await Promise.all([
                 client.from('instruments').select('*').order('category', { ascending: true }).order('name'),
                 client.from('genres').select('*').order('name'),
-                client.from('education').select('*').order('rank', { ascending: false })
+                client.from('education').select('*').order('rank', { ascending: false }),
+                client.from('social').select('*').order('name')
             ]);
-            
-            // Add detailed error logging for database responses
+              // Add detailed error logging for database responses
             if (instrumentsRes.error) {
                 console.error('Instruments DB error:', instrumentsRes.error);
             }
@@ -175,22 +177,27 @@ export default function DatabasePage() {
             if (educationRes.error) {
                 console.error('Education DB error:', educationRes.error);
             }
+            if (socialRes.error) {
+                console.error('Social platforms DB error:', socialRes.error);
+            }
 
             console.log('Instruments response:', instrumentsRes);
             console.log('Genres response:', genresRes);
             console.log('Education response:', educationRes);
+            console.log('Social platforms response:', socialRes);
             
             // Set state with response data
             setInstruments(instrumentsRes.data || []);
             setGenres(genresRes.data || []);
             setEducationTypes(educationRes.data || []);
-            
-            // Cache the reference data
+            setSocialPlatforms(socialRes.data || []);
+              // Cache the reference data
             localStorage.setItem(cacheKey, JSON.stringify({
                 data: {
                     instruments: instrumentsRes.data || [],
                     genres: genresRes.data || [],
-                    education_types: educationRes.data || []
+                    education_types: educationRes.data || [],
+                    social_platforms: socialRes.data || []
                 },
                 timestamp: Date.now()
             }));
@@ -200,6 +207,7 @@ export default function DatabasePage() {
             setGenres([]);
             setInstruments([]);
             setEducationTypes([]);
+            setSocialPlatforms([]);
         }
     };    const searchMusicians = async () => {
         // Only require sortBy to be selected, genre can be "Any"
@@ -540,18 +548,64 @@ export default function DatabasePage() {
             acc[category].push(instrument);
             return acc;
         }, {} as Record<string, Instrument[]>);
-    }, [instruments]);
-
-    const getSocialIcon = (platform: string) => {
+    }, [instruments]);    const getSocialIcon = (platform: string) => {
+        if (!platform) return <ExternalLink className="h-4 w-4" />;
+        
+        // First, try to match against platforms from the database
+        const dbPlatform = socialPlatforms.find(p => 
+            p.name && p.name.toLowerCase() === platform.toLowerCase()
+        );
+        
+        // If found in database, use appropriate icon based on name
+        if (dbPlatform) {
+            const platformLower = dbPlatform.name.toLowerCase();
+            switch (platformLower) {
+                case 'youtube':
+                    return <Youtube className="h-4 w-4" />;
+                case 'instagram':
+                    return <Instagram className="h-4 w-4" />;
+                case 'facebook':
+                    return <Facebook className="h-4 w-4" />;
+                case 'twitter':
+                case 'x':
+                    return <Twitter className="h-4 w-4" />;
+                case 'linkedin':
+                    return <Linkedin className="h-4 w-4" />;
+                case 'spotify':
+                case 'soundcloud':
+                    return <Music className="h-4 w-4" />;
+                case 'website':
+                case 'personal website':
+                    return <Globe className="h-4 w-4" />;
+                case 'tiktok':
+                    return <Video className="h-4 w-4" />;
+                default:
+                    return <ExternalLink className="h-4 w-4" />;
+            }
+        }
+        
+        // Fallback: match against common platform names (case-insensitive)
         const platformLower = platform.toLowerCase();
         switch (platformLower) {
+            case 'youtube':
+                return <Youtube className="h-4 w-4" />;
             case 'instagram':
+                return <Instagram className="h-4 w-4" />;
             case 'facebook':
+                return <Facebook className="h-4 w-4" />;
             case 'twitter':
             case 'x':
+                return <Twitter className="h-4 w-4" />;
             case 'linkedin':
+                return <Linkedin className="h-4 w-4" />;
+            case 'spotify':
+            case 'soundcloud':
+                return <Music className="h-4 w-4" />;
+            case 'website':
+            case 'personal website':
+                return <Globe className="h-4 w-4" />;
             case 'tiktok':
-                return <ExternalLink className="h-4 w-4" />;
+                return <Video className="h-4 w-4" />;
             default:
                 return <ExternalLink className="h-4 w-4" />;
         }
@@ -792,11 +846,9 @@ export default function DatabasePage() {
                                                             <Phone className="h-4 w-4" />
                                                         </a>
                                                     </Button>
-                                                )}
-
-                                                {/* Video links */}
+                                                )}                                                {/* Video links */}
                                                 {musician.video_links && musician.video_links.length > 0 && (
-                                                    musician.video_links.slice(0, 2).map((link, index) => (
+                                                    musician.video_links.slice(0, 5).map((link, index) => (
                                                         <Button
                                                             key={index}
                                                             variant="ghost"
@@ -816,7 +868,7 @@ export default function DatabasePage() {
                                                     ))
                                                 )}                                                {/* Social links */}
                                                 {musician.social && musician.social.length > 0 && (
-                                                    musician.social.slice(0, 3).map((social: any, index: number) => (
+                                                    musician.social.map((social: any, index: number) => (
                                                         <Button
                                                             key={index}
                                                             variant="ghost"
