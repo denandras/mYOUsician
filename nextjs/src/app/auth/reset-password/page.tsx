@@ -72,7 +72,7 @@ export default function ResetPasswordPage() {
 
     if (success) {
         return (
-            <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <div className="bg-background py-8 px-4 shadow sm:rounded-lg sm:px-10">
                 <div className="text-center">
                     <div className="flex justify-center mb-4">
                         <CheckCircle className="h-16 w-16 text-primary" />
