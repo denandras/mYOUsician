@@ -9,6 +9,9 @@ export default function AuthAwareButtons({ variant = 'primary' }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // Debug: Log to see if custom CSS variables are available
+        console.log('CSS primary-600:', getComputedStyle(document.documentElement).getPropertyValue('--color-primary-600'));
+
         const checkAuth = async () => {
             try {
                 const supabase = await createSPASassClient();
@@ -33,7 +36,7 @@ export default function AuthAwareButtons({ variant = 'primary' }) {
         return isAuthenticated ? (
             <Link
                 href="/app"
-                className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
             >
                 Go to Dashboard
             </Link>
@@ -44,7 +47,7 @@ export default function AuthAwareButtons({ variant = 'primary' }) {
                 </Link>
                 <Link
                     href="/auth/register"
-                    className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
                 >
                     Sign Up
                 </Link>
@@ -56,7 +59,7 @@ export default function AuthAwareButtons({ variant = 'primary' }) {
     return isAuthenticated ? (
         <Link
             href="/app"
-            className="inline-flex items-center px-6 py-3 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors"
+            className="inline-flex items-center px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
         >
             Go to Dashboard
             <ArrowRight className="ml-2 h-5 w-5" />
@@ -65,7 +68,7 @@ export default function AuthAwareButtons({ variant = 'primary' }) {
         <>
             <Link
                 href="/auth/register"
-                className="inline-flex items-center px-6 py-3 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors"
+                className="inline-flex items-center px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
             >
                 Sign Up
                 <ArrowRight className="ml-2 h-5 w-5" />
