@@ -161,7 +161,7 @@ export default function Home() {
         */}
 
         {/* Features Section */}
-        <section id="features" className="py-24 bg-white">
+        <section id="features" className="py-24 bg-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-3xl font-bold text-foreground">Features</h2>
@@ -220,7 +220,17 @@ export default function Home() {
                 <h4 className="text-sm font-semibold text-foreground">Resources</h4>
                 <ul className="mt-4 space-y-2">
                   <li>
-                    <Link href="https://github.com/Razikus/supabase-nextjs-template" className="text-foreground/70 hover:text-foreground">
+                    <Link href="#features" className="text-foreground/70 hover:text-foreground">
+                      Features
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="https://github.com/Razikus/supabase-nextjs-template"
+                      className="text-foreground/70 hover:text-foreground"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       Documentation
                     </Link>
                   </li>
