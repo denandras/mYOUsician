@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, Globe, Shield, Users, Key, Database, Clock, Menu, X } from 'lucide-react';
 import AuthAwareButtons from '@/components/AuthAwareButtons';
 export default function Home() {
@@ -124,10 +125,21 @@ export default function Home() {
         <section className="relative pt-32 pb-24 overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground">
-                Welcome to
-                <span className="block text-primary">{productName}</span>
-              </h1>
+              <div className="flex items-center justify-center gap-6 mb-6">
+                <div>
+                  <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground">
+                    Welcome to
+                    <span className="block text-primary">{productName}</span>
+                  </h1>
+                </div>
+                <Image
+                  src="/branding/logo_red-teal.svg"
+                  alt={`${productName} logo`}
+                  width={120}
+                  height={120}
+                  className="w-20 h-20 md:w-32 md:h-32"
+                />
+              </div>
               <p className="mt-6 text-xl text-foreground/70 max-w-3xl mx-auto">
                 A database of musicians, for musicians!
               </p>
