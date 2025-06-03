@@ -170,7 +170,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                             </span>
                             <ChevronDown className="h-4 w-4"/>
                         </button>                        {isUserDropdownOpen && mounted && !loading && (
-                            <div className="absolute right-0 mt-2 w-64 bg-background/95 backdrop-blur-sm rounded-md shadow-lg border border-border">
+                            <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg border border-border">
                                 <div className="p-3 border-b border-border/50">
                                     <p className="text-xs text-muted-foreground">Signed in as</p>
                                     <p className="text-sm font-medium text-foreground truncate">

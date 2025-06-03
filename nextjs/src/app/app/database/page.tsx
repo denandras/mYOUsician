@@ -867,25 +867,30 @@ export default function DatabasePage() {
                                                         </Button>
                                                     ))
                                                 )}                                                {/* Social links */}
-                                                {musician.social && musician.social.length > 0 && (
-                                                    musician.social.map((social: any, index: number) => (
-                                                        <Button
-                                                            key={index}
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            asChild
-                                                            className="h-8 w-8"
-                                                        >
-                                                            <a 
-                                                                href={social.link || social.url} 
-                                                                target="_blank" 
-                                                                rel="noopener noreferrer"
-                                                                title={social.platform || 'Social link'}
+                                                {musician.social && typeof musician.social === 'object' && (
+                                                    Object.entries(musician.social).map(([platform, url]) => {
+                                                        // Skip empty values
+                                                        if (!url || url === '') return null;
+                                                        
+                                                        return (
+                                                            <Button
+                                                                key={platform}
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                asChild
+                                                                className="h-8 w-8"
                                                             >
-                                                                {getSocialIcon(social.platform || '')}
-                                                            </a>
-                                                        </Button>
-                                                    ))
+                                                                <a 
+                                                                    href={url as string} 
+                                                                    target="_blank" 
+                                                                    rel="noopener noreferrer"
+                                                                    title={`${platform.charAt(0).toUpperCase() + platform.slice(1)}: ${url}`}
+                                                                >
+                                                                    {getSocialIcon(platform)}
+                                                                </a>
+                                                            </Button>
+                                                        );
+                                                    }).filter(Boolean)
                                                 )}
                                             </div>
                                         </CardContent>
