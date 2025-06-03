@@ -22,14 +22,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const router = useRouter();
     const userDropdownRef = useRef<HTMLDivElement>(null);
+    const sidebarRef = useRef<HTMLDivElement>(null);
 
     const { user, loading } = useGlobal();
 
     useEffect(() => {
         setMounted(true);
-    }, []);
-
-    // Handle click outside user dropdown
+    }, []);    // Handle click outside user dropdown
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
@@ -45,6 +44,27 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isUserDropdownOpen]);
+
+    // Handle click outside sidebar (mobile)
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+                // Check if click is on the menu button or backdrop
+                const target = event.target as Element;
+                if (!target.closest('[data-sidebar-trigger]') && !target.closest('[data-sidebar-backdrop]')) {
+                    setSidebarOpen(false);
+                }
+            }
+        };
+
+        if (isSidebarOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isSidebarOpen]);
 
     const handleLogout = async () => {
         try {
@@ -75,30 +95,30 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
     const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
 
-    return (
-        <div className="min-h-screen bg-background">
+    return (        <div className="min-h-screen bg-background">
             {isSidebarOpen && (
                 <div
                     className="fixed inset-0 bg-gray-600 bg-opacity-75 z-20 lg:hidden"
+                    data-sidebar-backdrop
                     onClick={toggleSidebar}
                 />
-            )}
+            )}            {/* Sidebar */}
+            <div 
+                ref={sidebarRef}
+                className={`fixed inset-y-0 left-0 w-64 bg-background/95 backdrop-blur-sm shadow-lg border-r border-border transform transition-transform duration-200 ease-in-out z-30 
+                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:bg-background lg:backdrop-blur-none`}
+            >
 
-            {/* Sidebar */}
-            <div className={`fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out z-30 
-                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
-
-                <div className="h-16 flex items-center justify-between px-4 border-b">
+                <div className="h-16 flex items-center justify-between px-4 border-b border-border">
                     <span className="text-xl font-semibold text-primary">{productName}</span>
                     <button
                         onClick={toggleSidebar}
-                        className="lg:hidden text-muted-foreground hover:text-foreground"
+                        className="lg:hidden text-muted-foreground hover:text-foreground transition-colors"
+                        aria-label="Close sidebar"
                     >
                         <X className="h-6 w-6" />
                     </button>
-                </div>
-
-                {/* Navigation */}
+                </div>                {/* Navigation */}
                 <nav className="mt-4 px-2 space-y-1">
                     {navigation.map((item) => {
                         const isActive = pathname === item.href;
@@ -107,14 +127,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                 key={item.name}
                                 href={item.href}
                                 onClick={() => setSidebarOpen(false)} // Close sidebar on menu click
-                                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                                className={`group flex items-center px-3 py-3 text-sm font-medium rounded-md transition-colors ${
                                     isActive
-                                        ? 'bg-primary/10 text-primary'
+                                        ? 'bg-primary/10 text-primary border border-primary/20'
                                         : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                                 }`}
                             >
                                 <item.icon
-                                    className={`mr-3 h-5 w-5 ${
+                                    className={`mr-3 h-5 w-5 transition-colors ${
                                         isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-accent-foreground'
                                     }`}
                                 />
@@ -124,13 +144,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     })}
                 </nav>
 
-            </div>
-
-            <div className="lg:pl-64">
+            </div>            <div className="lg:pl-64">
                 <div className="sticky top-0 z-10 flex items-center justify-between h-16 bg-background/80 backdrop-blur-sm border-b px-4">
                     <button
                         onClick={toggleSidebar}
-                        className="lg:hidden text-muted-foreground hover:text-foreground"
+                        data-sidebar-trigger
+                        className="lg:hidden text-foreground hover:text-primary transition-colors"
+                        aria-label="Toggle sidebar"
                     >
                         <Menu className="h-6 w-6"/>
                     </button>
@@ -138,22 +158,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <div className="relative ml-auto" ref={userDropdownRef}>
                         <button
                             onClick={() => setUserDropdownOpen(!isUserDropdownOpen)}
-                            className="flex items-center space-x-2 text-sm text-foreground hover:text-primary"
+                            className="flex items-center space-x-2 text-sm text-foreground hover:text-primary transition-colors"
                         >
-                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border border-border">
                                 <span className="text-primary font-medium">
                                     {!mounted || loading ? '...' : user ? getInitials(user.email) : '??'}
                                 </span>
                             </div>
-                            <span>
+                            <span className="hidden sm:inline">
                                 {!mounted || loading ? 'Loading...' : user?.email || 'Not signed in'}
                             </span>
                             <ChevronDown className="h-4 w-4"/>
-                        </button>
-
-                        {isUserDropdownOpen && mounted && !loading && (
-                            <div className="absolute right-0 mt-2 w-64 bg-background rounded-md shadow-lg border">
-                                <div className="p-2 border-b">
+                        </button>                        {isUserDropdownOpen && mounted && !loading && (
+                            <div className="absolute right-0 mt-2 w-64 bg-background/95 backdrop-blur-sm rounded-md shadow-lg border border-border">
+                                <div className="p-3 border-b border-border/50">
                                     <p className="text-xs text-muted-foreground">Signed in as</p>
                                     <p className="text-sm font-medium text-foreground truncate">
                                         {user?.email || 'Not signed in'}
@@ -165,7 +183,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                             setUserDropdownOpen(false);
                                             handleChangePassword()
                                         }}
-                                        className="w-full flex items-center px-4 py-2 text-sm text-foreground hover:bg-accent hover:text-accent-foreground"
+                                        className="w-full flex items-center px-4 py-3 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                                     >
                                         <Key className="mr-3 h-4 w-4 text-muted-foreground"/>
                                         Change Password
@@ -175,7 +193,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                             handleLogout();
                                             setUserDropdownOpen(false);
                                         }}
-                                        className="w-full flex items-center px-4 py-2 text-sm text-destructive hover:bg-destructive/10"
+                                        className="w-full flex items-center px-4 py-3 text-sm text-destructive hover:bg-destructive/10 transition-colors"
                                     >
                                         <LogOut className="mr-3 h-4 w-4 text-destructive"/>
                                         Sign Out

@@ -1,11 +1,33 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Globe, Shield, Users, Key, Database, Clock, Menu, X } from 'lucide-react';
 import AuthAwareButtons from '@/components/AuthAwareButtons';
 export default function Home() {
   const productName = process.env.NEXT_PUBLIC_PRODUCTNAME;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Handle click outside mobile menu
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+        // Check if click is on the menu button
+        const target = event.target as Element;
+        if (!target.closest('[data-mobile-menu-trigger]')) {
+          setIsMobileMenuOpen(false);
+        }
+      }
+    };
+
+    if (isMobileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMobileMenuOpen]);
 
   const features = [
     {
@@ -66,19 +88,6 @@ export default function Home() {
               
               {/* Desktop Menu */}
               <div className="hidden md:flex items-center space-x-8">
-                <Link href="#features" className="text-foreground/70 hover:text-foreground">
-                  Features
-                </Link>
-
-                <Link
-                    href="https://github.com/Razikus/supabase-nextjs-template"
-                    className="text-foreground/70 hover:text-foreground"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                  Documentation
-                </Link>
-
                 <AuthAwareButtons variant="nav" />
               </div>
 
@@ -86,6 +95,7 @@ export default function Home() {
               <div className="md:hidden">
                 <button
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  data-mobile-menu-trigger
                   className="text-foreground hover:text-primary transition-colors"
                   aria-label="Toggle mobile menu"
                 >
@@ -100,25 +110,9 @@ export default function Home() {
 
             {/* Mobile Menu */}
             {isMobileMenuOpen && (
-              <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-sm">
+              <div ref={mobileMenuRef} className="md:hidden border-t border-border bg-background/95 backdrop-blur-sm">
                 <div className="px-4 pt-4 pb-4 space-y-3">
-                  <Link 
-                    href="#features" 
-                    className="block px-3 py-2 text-foreground/70 hover:text-foreground hover:bg-accent rounded-md transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Features
-                  </Link>
-                  <Link
-                    href="https://github.com/Razikus/supabase-nextjs-template"
-                    className="block px-3 py-2 text-foreground/70 hover:text-foreground hover:bg-accent rounded-md transition-colors"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Documentation
-                  </Link>
-                  <div className="pt-2 border-t border-border/50">
+                  <div className="pt-2">
                     <AuthAwareButtons variant="mobile" />
                   </div>
                 </div>
