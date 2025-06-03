@@ -105,20 +105,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             )}            {/* Sidebar */}
             <div 
                 ref={sidebarRef}
-                className={`fixed inset-y-0 left-0 w-64 bg-background/95 backdrop-blur-sm shadow-lg border-r border-border transform transition-transform duration-200 ease-in-out z-30 
-                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:bg-background lg:backdrop-blur-none`}
+                className={`fixed inset-y-0 left-0 w-64 bg-white backdrop-blur-sm shadow-lg border-r border-border transform transition-transform duration-200 ease-in-out z-30 
+                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:bg-white lg:backdrop-blur-none`}
             >
 
-                <div className="h-16 flex items-center justify-between px-4 border-b border-border">
-                    <span className="text-xl font-semibold text-primary">{productName}</span>
+                <div className="h-16 flex items-center justify-between px-4 border-b border-border bg-[#083e4d]">
+                    <span className="text-xl font-semibold text-white">{productName}</span>
                     <button
                         onClick={toggleSidebar}
-                        className="lg:hidden text-muted-foreground hover:text-foreground transition-colors"
+                        className="lg:hidden text-white hover:text-[#b5d1d6] transition-colors"
                         aria-label="Close sidebar"
                     >
                         <X className="h-6 w-6" />
                     </button>
-                </div>                {/* Navigation */}
+                </div>
+                {/* Navigation */}
                 <nav className="mt-4 px-2 space-y-1">
                     {navigation.map((item) => {
                         const isActive = pathname === item.href;
@@ -145,7 +146,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </nav>
 
             </div>            <div className="lg:pl-64">
-                <div className="sticky top-0 z-10 flex items-center justify-between h-16 bg-[#083e4d] border-b border-[#062f3b] px-4 shadow-md">
+                <div className="sticky top-0 z-10 flex items-center justify-between h-16 bg-[#083e4d] bg-opacity-100 border-b border-[#062f3b] px-4 shadow-md">
                     <button
                         onClick={toggleSidebar}
                         data-sidebar-trigger
