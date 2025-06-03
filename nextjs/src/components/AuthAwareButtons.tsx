@@ -22,11 +22,34 @@ export default function AuthAwareButtons({ variant = 'primary' }) {
         };
 
         checkAuth();
-    }, []);
-
-    if (loading) {
-        return null;
-    }    // Navigation buttons for the header
+    }, []);    if (loading) {
+        // Render skeleton buttons to prevent hydration mismatch
+        if (variant === 'nav') {
+            return (
+                <>
+                    <div className="w-16 h-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
+                </>
+            );
+        }
+        
+        if (variant === 'mobile') {
+            return (
+                <div className="flex flex-col space-y-2 w-full">
+                    <div className="w-full h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+                    <div className="w-full h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+                </div>
+            );
+        }
+        
+        // Primary variant loading state
+        return (
+            <>
+                <div className="w-24 h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+                <div className="w-20 h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+            </>
+        );
+    }// Navigation buttons for the header
     if (variant === 'nav') {
         return isAuthenticated ? (
             <Link
