@@ -986,61 +986,63 @@ export default function UserSettingsPage() {
                                     const hasData = education.type || education.school;
                                     
                                     return (
-                                        <div key={index} className="grid grid-cols-2 gap-2 mt-2">
-                                            <div>
-                                                <Select
-                                                    value={education.type}
-                                                    onValueChange={(value) => updateEducation(index, 'type', value)}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select education level" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {(() => {
-                                                            // Safety check for education_types availability
-                                                            if (!referenceData.education_types || !Array.isArray(referenceData.education_types)) {
-                                                                return null;
-                                                            }
-                                                            const sortedEducation = referenceData.education_types
-                                                                .sort((a, b) => (a.rank || 999) - (b.rank || 999));
-                                                            return sortedEducation.map(edu => (
-                                                                <SelectItem key={edu.id} value={edu.name}>
-                                                                    {edu.name}
-                                                                </SelectItem>
-                                                            ));
-                                                        })()}
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            <div className="flex gap-2">
+                                        // Wrap in flex and items-stretch for full height trash button
+                                        <div key={index} className="flex gap-2 mt-2 items-stretch">
+                                            <div className="grid grid-cols-2 gap-2 flex-1">
+                                                <div>
+                                                    <Select
+                                                        value={education.type}
+                                                        onValueChange={(value) => updateEducation(index, 'type', value)}
+                                                    >
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select education level" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {(() => {
+                                                                // Safety check for education_types availability
+                                                                if (!referenceData.education_types || !Array.isArray(referenceData.education_types)) {
+                                                                    return null;
+                                                                }
+                                                                const sortedEducation = referenceData.education_types
+                                                                    .sort((a, b) => (a.rank || 999) - (b.rank || 999));
+                                                                return sortedEducation.map(edu => (
+                                                                    <SelectItem key={edu.id} value={edu.name}>
+                                                                        {edu.name}
+                                                                    </SelectItem>
+                                                                ));
+                                                            })()}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
                                                 <Input
                                                     value={education.school}
                                                     onChange={(e) => updateEducation(index, 'school', e.target.value)}
                                                     placeholder="School/Institution name"
                                                     className="flex-1"
                                                 />
-                                                {/* Single trash can that clears data or removes row */}
-                                                {(hasData || profile.education.length > 1) && (
-                                                    <Button
-                                                        type="button"
-                                                        variant="delete"
-                                                        size="icon"
-                                                        onClick={() => {
-                                                            if (hasData) {
-                                                                // If there's data, clear it first
-                                                                updateEducation(index, 'type', '');
-                                                                updateEducation(index, 'school', '');
-                                                            } else if (profile.education.length > 1) {
-                                                                // If no data and multiple rows, remove the row
-                                                                removeEducation(index);
-                                                            }
-                                                        }}
-                                                        title={hasData ? "Clear this row" : "Delete this row"}
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                )}
                                             </div>
+                                            {/* Trash button fills height of both fields */}
+                                            {(hasData || profile.education.length > 1) && (
+                                                <Button
+                                                    type="button"
+                                                    variant="delete"
+                                                    size="icon"
+                                                    onClick={() => {
+                                                        if (hasData) {
+                                                            // If there's data, clear it first
+                                                            updateEducation(index, 'type', '');
+                                                            updateEducation(index, 'school', '');
+                                                        } else if (profile.education.length > 1) {
+                                                            // If no data and multiple rows, remove the row
+                                                            removeEducation(index);
+                                                        }
+                                                    }}
+                                                    title={hasData ? "Clear this row" : "Delete this row"}
+                                                    className="h-full"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            )}
                                         </div>
                                     );
                                 })}
@@ -1128,99 +1130,97 @@ export default function UserSettingsPage() {
                                     const hasData = item.genre || item.instrument || item.category;
                                     
                                     return (
-                                        <div key={index} className="mt-2">
-                                            <div className="flex gap-2 items-center">
-                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 flex-1">
-                                                    <Select
-                                                        value={item.genre}
-                                                        onValueChange={(value) => updateGenreInstrument(index, 'genre', value)}
-                                                    >
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Genre" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {referenceData.genres && Array.isArray(referenceData.genres) 
-                                                                ? referenceData.genres.map(genre => (
-                                                                    <SelectItem key={genre.id} value={genre.name}>
-                                                                        {genre.name}
-                                                                    </SelectItem>
-                                                                ))
-                                                                : null
-                                                            }
-                                                        </SelectContent>
-                                                    </Select>
-                                                    
-                                                    <Select
-                                                        value={item.instrument}
-                                                        onValueChange={(value) => updateGenreInstrument(index, 'instrument', value)}
-                                                    >
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Instrument" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {Object.keys(instrumentsByCategory).length > 0 ? (
-                                                                Object.keys(instrumentsByCategory).sort().flatMap(category => [
-                                                                    <SelectItem key={category + '-label'} value={category + '-label'} disabled className="font-semibold text-muted-foreground cursor-default opacity-100 select-none pointer-events-none" style={{ pointerEvents: 'none' }}>
-                                                                        ---[{category}]---
-                                                                    </SelectItem>,
-                                                                    ...instrumentsByCategory[category]
-                                                                        .sort((a, b) => a.name.localeCompare(b.name))
-                                                                        .map(instrument => (
-                                                                            <SelectItem key={instrument.id} value={instrument.name}>
-                                                                                {instrument.name}
-                                                                            </SelectItem>
-                                                                        ))
-                                                                ])
-                                                            ) : (
-                                                                referenceData.instruments && Array.isArray(referenceData.instruments)
-                                                                    ? referenceData.instruments.map(instrument => (
+                                        // Wrap in flex and items-stretch for full height trash button
+                                        <div key={index} className="flex gap-2 mt-2 items-stretch">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 flex-1">
+                                                <Select
+                                                    value={item.genre}
+                                                    onValueChange={(value) => updateGenreInstrument(index, 'genre', value)}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Genre" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {referenceData.genres && Array.isArray(referenceData.genres) 
+                                                            ? referenceData.genres.map(genre => (
+                                                                <SelectItem key={genre.id} value={genre.name}>
+                                                                    {genre.name}
+                                                                </SelectItem>
+                                                            ))
+                                                            : null
+                                                        }
+                                                    </SelectContent>
+                                                </Select>
+                                                
+                                                <Select
+                                                    value={item.instrument}
+                                                    onValueChange={(value) => updateGenreInstrument(index, 'instrument', value)}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Instrument" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {Object.keys(instrumentsByCategory).length > 0 ? (
+                                                            Object.keys(instrumentsByCategory).sort().flatMap(category => [
+                                                                <SelectItem key={category + '-label'} value={category + '-label'} disabled className="font-semibold text-muted-foreground cursor-default opacity-100 select-none pointer-events-none" style={{ pointerEvents: 'none' }}>
+                                                                    ---[{category}]---
+                                                                </SelectItem>,
+                                                                ...instrumentsByCategory[category]
+                                                                    .sort((a, b) => a.name.localeCompare(b.name))
+                                                                    .map(instrument => (
                                                                         <SelectItem key={instrument.id} value={instrument.name}>
                                                                             {instrument.name}
                                                                         </SelectItem>
                                                                     ))
-                                                                    : null
-                                                            )}
-                                                        </SelectContent>
-                                                    </Select>
+                                                            ])
+                                                        ) : (
+                                                            referenceData.instruments && Array.isArray(referenceData.instruments)
+                                                                ? referenceData.instruments.map(instrument => (
+                                                                    <SelectItem key={instrument.id} value={instrument.name}>
+                                                                        {instrument.name}
+                                                                    </SelectItem>
+                                                                ))
+                                                                : null
+                                                        )}
+                                                    </SelectContent>
+                                                </Select>
 
-                                                    <Select
-                                                        value={item.category}
-                                                        onValueChange={(value) => updateGenreInstrument(index, 'category', value)}
-                                                    >
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Category" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="artist">artist</SelectItem>
-                                                            <SelectItem value="teacher">teacher</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                                
-                                                {/* Delete button positioned next to the selects */}
-                                                {(hasData || profile.genre_instrument.length > 1) && (
-                                                    <Button
-                                                        type="button"
-                                                        variant="delete"
-                                                        size="icon"
-                                                        onClick={() => {
-                                                            if (hasData) {
-                                                                // If there's data, clear it first
-                                                                updateGenreInstrument(index, 'genre', '');
-                                                                updateGenreInstrument(index, 'instrument', '');
-                                                                updateGenreInstrument(index, 'category', '');
-                                                            } else if (profile.genre_instrument.length > 1) {
-                                                                // If no data and multiple rows, remove the row
-                                                                removeGenreInstrument(index);
-                                                            }
-                                                        }}
-                                                        title={hasData ? "Clear this row" : "Delete this row"}
-                                                        className="shrink-0"
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                )}
+                                                <Select
+                                                    value={item.category}
+                                                    onValueChange={(value) => updateGenreInstrument(index, 'category', value)}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Category" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="artist">artist</SelectItem>
+                                                        <SelectItem value="teacher">teacher</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
                                             </div>
+                                            {/* Trash button fills height of all selects */}
+                                            {(hasData || profile.genre_instrument.length > 1) && (
+                                                <Button
+                                                    type="button"
+                                                    variant="delete"
+                                                    size="icon"
+                                                    onClick={() => {
+                                                        if (hasData) {
+                                                            // If there's data, clear it first
+                                                            updateGenreInstrument(index, 'genre', '');
+                                                            updateGenreInstrument(index, 'instrument', '');
+                                                            updateGenreInstrument(index, 'category', '');
+                                                        } else if (profile.genre_instrument.length > 1) {
+                                                            // If no data and multiple rows, remove the row
+                                                            removeGenreInstrument(index);
+                                                        }
+                                                    }}
+                                                    title={hasData ? "Clear this row" : "Delete this row"}
+                                                    className="h-full"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            )}
                                         </div>
                                     );
                                 })}
