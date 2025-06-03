@@ -145,11 +145,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </nav>
 
             </div>            <div className="lg:pl-64">
-                <div className="sticky top-0 z-10 flex items-center justify-between h-16 bg-background/80 backdrop-blur-sm border-b px-4">
+                <div className="sticky top-0 z-10 flex items-center justify-between h-16 bg-[#083e4d] border-b border-[#062f3b] px-4 shadow-md">
                     <button
                         onClick={toggleSidebar}
                         data-sidebar-trigger
-                        className="lg:hidden text-foreground hover:text-primary transition-colors"
+                        className="lg:hidden text-white hover:text-[#26545c] transition-colors"
                         aria-label="Toggle sidebar"
                     >
                         <Menu className="h-6 w-6"/>
@@ -158,10 +158,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <div className="relative ml-auto" ref={userDropdownRef}>
                         <button
                             onClick={() => setUserDropdownOpen(!isUserDropdownOpen)}
-                            className="flex items-center space-x-2 text-sm text-foreground hover:text-primary transition-colors"
+                            className="flex items-center space-x-2 text-sm text-white hover:text-[#b5d1d6] transition-colors"
                         >
-                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border border-border">
-                                <span className="text-primary font-medium">
+                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border border-[#dceaed]">
+                                <span className="text-[#083e4d] font-medium">
                                     {!mounted || loading ? '...' : user ? getInitials(user.email) : '??'}
                                 </span>
                             </div>
@@ -169,7 +169,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                 {!mounted || loading ? 'Loading...' : user?.email || 'Not signed in'}
                             </span>
                             <ChevronDown className="h-4 w-4"/>
-                        </button>                        {isUserDropdownOpen && mounted && !loading && (
+                        </button>{isUserDropdownOpen && mounted && !loading && (
                             <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg border border-border">
                                 <div className="p-3 border-b border-border/50">
                                     <p className="text-xs text-muted-foreground">Signed in as</p>

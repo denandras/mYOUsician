@@ -34,10 +34,9 @@ export default function AuthAwareButtons({ variant = 'primary' }) {
                 className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg transition-colors"
             >
                 Go to Dashboard
-            </Link>
-        ) : (
+            </Link>        ) : (
             <>
-                <Link href="/auth/login" className="text-muted-foreground hover:text-foreground">
+                <Link href="/auth/login" className="text-white hover:text-[#b5d1d6]">
                     Login
                 </Link>
                 <Link

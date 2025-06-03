@@ -77,11 +77,11 @@ export default function Home() {
 
   return (
       <div className="min-h-screen">
-        <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-sm z-50 border-b border-border">
+        <nav className="fixed top-0 w-full bg-[#083e4d] z-50 border-b border-[#062f3b] shadow-md">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16 items-center">
               <div className="flex-shrink-0">
-              <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+              <span className="text-2xl font-bold text-white">
                 {productName}
               </span>
               </div>
@@ -96,7 +96,7 @@ export default function Home() {
                 <button
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                   data-mobile-menu-trigger
-                  className="text-foreground hover:text-primary transition-colors"
+                  className="text-white hover:text-[#b5d1d6] transition-colors"
                   aria-label="Toggle mobile menu"
                 >
                   {isMobileMenuOpen ? (
@@ -110,7 +110,7 @@ export default function Home() {
 
             {/* Mobile Menu */}
             {isMobileMenuOpen && (
-              <div ref={mobileMenuRef} className="md:hidden border-t border-border bg-background/95 backdrop-blur-sm">
+              <div ref={mobileMenuRef} className="md:hidden border-t border-[#062f3b] bg-[#083e4d]">
                 <div className="px-4 pt-4 pb-4 space-y-3">
                   <div className="pt-2">
                     <AuthAwareButtons variant="mobile" />
