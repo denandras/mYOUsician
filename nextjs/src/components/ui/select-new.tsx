@@ -2,7 +2,7 @@
 
 import * as React from "react"
 
-// Simple Select wrapper for native select elements
+// Simple Select wrapper for native select elements with controlled value management
 const Select = React.forwardRef<
   HTMLSelectElement,
   React.SelectHTMLAttributes<HTMLSelectElement> & {
@@ -10,38 +10,39 @@ const Select = React.forwardRef<
     value?: string
     children?: React.ReactNode
   }
->(({ className, children, onValueChange, onChange, value, disabled, ...props }, ref) => {  // Store the current selected value in local state to prevent flickering
-  const [internalValue, setInternalValue] = React.useState(value ?? '');
-  const [userHasInteracted, setUserHasInteracted] = React.useState(false);
-    // Only update internal value from prop if user hasn't interacted or if it's a genuine external update
-  React.useEffect(() => {
-    const propValue = value ?? '';
-    console.log('🔥 Select useEffect:', { propValue, internalValue, userHasInteracted, willUpdate: !userHasInteracted || (propValue !== internalValue && propValue !== '') });
-    // Only sync if user hasn't interacted yet, or if the prop value is different from what we expect
-    if (!userHasInteracted || (propValue !== internalValue && propValue !== '')) {
-      setInternalValue(propValue);
-    }
-  }, [value, userHasInteracted, internalValue]);
+>(({ className, children, onValueChange, onChange, value, disabled, ...props }, ref) => {
+  // Use a ref to control the select value directly
+  const selectRef = React.useRef<HTMLSelectElement>(null);
   
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  // Track if we're in the middle of a user-initiated change
+  const isUserChanging = React.useRef(false);
+  // Set initial value
+  React.useEffect(() => {
+    if (selectRef.current && !isUserChanging.current) {
+      console.log('SELECT UPDATE - Setting value from prop:', { newValue: value, reason: 'Prop value changed' });
+      selectRef.current.value = value ?? '';
+    }
+  }, [value]);  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newValue = e.target.value;
-    console.log('🚀 Select handleChange:', { newValue, oldInternalValue: internalValue });
+    console.log('SELECT UPDATE - User changed selection:', { newValue, reason: 'User interaction' });
     
-    // Mark that user has interacted
-    setUserHasInteracted(true);
-    
-    // Update internal state immediately
-    setInternalValue(newValue);
+    // Mark that we're in a user change
+    isUserChanging.current = true;
     
     // Call onValueChange for parent state updates
     if (onValueChange) {
       onValueChange(newValue);
     }
     
-    // Then call original onChange if provided
+    // Call original onChange if provided
     if (onChange) {
       onChange(e);
     }
+    
+    // Reset the flag after a short delay
+    setTimeout(() => {
+      isUserChanging.current = false;
+    }, 50);
   }
 
   // Extract options from nested children (inside SelectContent)
@@ -76,13 +77,24 @@ const Select = React.forwardRef<
     if (React.isValidElement(child) && child.type === SelectValue) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       placeholder = (child.props as any).placeholder || placeholder;
-    }  });
+    }
+  });
+
+  // Combine refs
+  const combinedRef = React.useCallback((element: HTMLSelectElement) => {
+    selectRef.current = element;
+    if (typeof ref === 'function') {
+      ref(element);
+    } else if (ref) {
+      ref.current = element;
+    }
+  }, [ref]);
 
   return (
     <select
       className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className || ''}`}
-      ref={ref}
-      value={internalValue}
+      ref={combinedRef}
+      defaultValue={value ?? ''}
       onChange={handleChange}
       disabled={disabled}
       {...props}
@@ -90,7 +102,8 @@ const Select = React.forwardRef<
       <option value="" disabled hidden>
         {placeholder}
       </option>
-      {options}    </select>
+      {options}
+    </select>
   )
 })
 Select.displayName = "Select"

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select-new';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { createSPASassClient } from '@/lib/supabase/client';
 import { Key, User, CheckCircle, Briefcase, Music, Plus, Trash2, AlertTriangle } from 'lucide-react';
@@ -449,6 +449,11 @@ export default function UserSettingsPage() {
                         : {}
                 };
 
+                console.log('LOCATION UPDATE - Profile loaded from database:', { 
+                    location: profileData.location, 
+                    reason: 'Initial profile load from database' 
+                });
+
                 setProfile(profileData); // Set initial state for comparison
 
                 // Load cities for the selected country if available
@@ -674,6 +679,8 @@ export default function UserSettingsPage() {
     };
 
     const handleCountryChange = useCallback((countryName: string) => {
+        console.log('LOCATION UPDATE - Country changed by user selection:', { newCountry: countryName, reason: 'User selected from dropdown' });
+        
         const country = locationData.countries.find(c => c.countryName === countryName);
         if (country) {
             // Use functional update to ensure we have the latest state
@@ -686,6 +693,7 @@ export default function UserSettingsPage() {
                         city: '' 
                     }
                 };
+                console.log('LOCATION UPDATE - Profile state updated:', { oldLocation: prev.location, newLocation: newProfile.location });
                 return newProfile;
             });
             
@@ -695,11 +703,14 @@ export default function UserSettingsPage() {
     }, [locationData.countries, loadCitiesForCountry]);
 
     const handleCityChange = useCallback((value: string) => {
+        console.log('LOCATION UPDATE - City changed by user selection:', { newCity: value, reason: 'User selected from dropdown' });
+        
         setProfile(prev => {
             const newProfile = {
                 ...prev,
                 location: { ...prev.location, city: value }
             };
+            console.log('LOCATION UPDATE - Profile state updated:', { oldLocation: prev.location, newLocation: newProfile.location });
             return newProfile;
         });
     }, []);
@@ -769,12 +780,13 @@ export default function UserSettingsPage() {
 
     // Load data when component mounts or user changes
     useEffect(() => {
+        console.log('MAIN USEEFFECT - Running with user?.id:', user?.id);
         loadReferenceData();
         loadLocationData();
         if (user?.id) {
             loadProfile();
         }
-    }, [user?.id, loadLocationData, loadProfile, loadReferenceData]); // Add function dependencies
+    }, [user?.id]); // Only depend on user?.id to prevent infinite loops
 
     return (
         <div className="space-y-6 p-6">
