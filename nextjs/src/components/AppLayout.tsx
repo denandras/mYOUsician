@@ -203,9 +203,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                             </div>
                         )}
                     </div>
-                </div>
-
-                <main className="p-4">
+                </div>                <main className="p-2 sm:p-4">
                     {children}
                 </main>
             </div>
