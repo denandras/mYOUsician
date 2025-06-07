@@ -6,29 +6,28 @@ import { ArrowRight, Globe, Shield, Users, Key, Database, Clock, Menu, X } from 
 import AuthAwareButtons from '@/components/AuthAwareButtons';
 export default function Home() {
   const productName = process.env.NEXT_PUBLIC_PRODUCTNAME;
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  // Handle click outside mobile menu
+  // Handle click outside menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         // Check if click is on the menu button
         const target = event.target as Element;
-        if (!target.closest('[data-mobile-menu-trigger]')) {
-          setIsMobileMenuOpen(false);
+        if (!target.closest('[data-menu-trigger]')) {
+          setIsMenuOpen(false);
         }
       }
     };
 
-    if (isMobileMenuOpen) {
+    if (isMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isMobileMenuOpen]);
+    };  }, [isMenuOpen]);
 
   const features = [
     {
@@ -86,30 +85,24 @@ export default function Home() {
                 {productName}
               </span>
               </div>
-              
-              {/* Desktop Menu */}
-              <div className="hidden md:flex items-center space-x-8">
-                <AuthAwareButtons variant="nav" />
-              </div>
-
-              {/* Mobile Menu Button */}
-              <div className="md:hidden">
+                {/* Menu Button */}
+              <div>
                 <button
-                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  data-mobile-menu-trigger
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  data-menu-trigger
                   className="text-white hover:text-[#b5d1d6] transition-colors"
-                  aria-label="Toggle mobile menu"
+                  aria-label="Toggle menu"
                 >
-                  {isMobileMenuOpen ? (
+                  {isMenuOpen ? (
                     <X className="h-6 w-6" />
                   ) : (
                     <Menu className="h-6 w-6" />
                   )}
                 </button>
-              </div>
-            </div>            {/* Mobile Menu */}
-            {isMobileMenuOpen && (
-              <div ref={mobileMenuRef} className="md:hidden border-t border-[#062f3b] bg-[#083e4d]">
+              </div>            </div>
+              {/* Collapsible Menu - Works on all screen sizes */}
+            {isMenuOpen && (
+              <div ref={menuRef} className="border-t border-[#062f3b] bg-[#083e4d]">
                 <div className="px-4 py-4 space-y-3">
                   <AuthAwareButtons variant="mobile" />
                 </div>
@@ -136,12 +129,10 @@ export default function Home() {
                   className="self-center"
                   style={{ height: '100%', width: 'auto', maxHeight: '6.5rem' }}
                 />
-              </div>
-              <p className="mt-6 text-xl text-foreground/70 max-w-3xl mx-auto">
+              </div>              <p className="mt-6 text-xl text-foreground/70 max-w-3xl mx-auto">
                 A database of musicians, for musicians!
               </p>
               <div className="mt-10 flex gap-4 justify-center">
-
                 <AuthAwareButtons />
               </div>
             </div>

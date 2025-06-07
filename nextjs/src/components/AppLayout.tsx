@@ -95,25 +95,23 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
     const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
 
-    return (        <div className="min-h-screen bg-background">
-            {isSidebarOpen && (
+    return (        <div className="min-h-screen bg-background">            {isSidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-gray-600 bg-opacity-75 z-20 lg:hidden"
+                    className="fixed inset-0 bg-gray-600 bg-opacity-75 z-20"
                     data-sidebar-backdrop
                     onClick={toggleSidebar}
                 />
-            )}            {/* Sidebar */}
+            )}{/* Sidebar */}
             <div 
                 ref={sidebarRef}
                 className={`fixed inset-y-0 left-0 w-64 bg-white backdrop-blur-sm shadow-lg border-r border-border transform transition-transform duration-200 ease-in-out z-30 
-                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:bg-white lg:backdrop-blur-none`}
+                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
             >
 
                 <div className="h-16 flex items-center justify-between px-4 border-b border-border bg-[#083e4d]">
-                    <span className="text-xl font-semibold text-white">{productName}</span>
-                    <button
+                    <span className="text-xl font-semibold text-white">{productName}</span>                    <button
                         onClick={toggleSidebar}
-                        className="lg:hidden text-white hover:text-[#b5d1d6] transition-colors"
+                        className="text-white hover:text-[#b5d1d6] transition-colors"
                         aria-label="Close sidebar"
                     >
                         <X className="h-6 w-6" />
@@ -145,12 +143,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     })}
                 </nav>
 
-            </div>            <div className="lg:pl-64">
+            </div>            <div className="">
                 <div className="sticky top-0 z-10 flex items-center justify-between h-16 bg-[#083e4d] bg-opacity-100 border-b border-[#062f3b] px-4 shadow-md">
                     <button
                         onClick={toggleSidebar}
                         data-sidebar-trigger
-                        className="lg:hidden text-white hover:text-[#26545c] transition-colors"
+                        className="text-white hover:text-[#26545c] transition-colors"
                         aria-label="Toggle sidebar"
                     >
                         <Menu className="h-6 w-6"/>
