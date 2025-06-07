@@ -213,13 +213,10 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                                     <div className="flex items-center justify-center sm:justify-start gap-2 text-sm">
                                         <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                                         <span className="break-words">{formatLocation(musician.location)}</span>
-                                    </div>
-                                )}
-                                
-                                {(musician.email || musician.phone) && (
-                                    <div className="flex flex-col sm:flex-row gap-2 w-full">
+                                    </div>                                )}                                  {(musician.email || musician.phone) && (
+                                    <div className="flex flex-col sm:flex-row gap-2 w-full justify-center sm:justify-start">
                                         {musician.email && (
-                                            <Button variant="outline" size="sm" asChild className="w-full sm:flex-1">
+                                            <Button size="sm" asChild className="w-full sm:w-auto sm:min-w-[120px] sm:max-w-[160px] lg:max-w-[140px] bg-[#083e4d] hover:bg-[#0a4a59] text-white border-[#083e4d]">
                                                 <a href={`mailto:${musician.email}`} className="flex items-center gap-2 justify-center">
                                                     <Mail className="h-4 w-4" />
                                                     <span className="truncate">Email</span>
@@ -228,7 +225,7 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                                         )}
                                         
                                         {musician.phone && (
-                                            <Button variant="outline" size="sm" asChild className="w-full sm:flex-1">
+                                            <Button size="sm" asChild className="w-full sm:w-auto sm:min-w-[120px] sm:max-w-[160px] lg:max-w-[140px] bg-[#e62745] hover:bg-[#d1233e] text-white border-[#e62745]">
                                                 <a href={`tel:${musician.phone}`} className="flex items-center gap-2 justify-center">
                                                     <Phone className="h-4 w-4" />
                                                     <span className="truncate">Call</span>
@@ -271,14 +268,13 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                                         <h2 className="text-base sm:text-lg md:text-xl font-semibold mb-2 sm:mb-3 md:mb-4 flex items-center gap-2">
                                             <Briefcase className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
                                             <span className="break-words">Current Occupation</span>
-                                        </h2>
-                                        <div className="space-y-2">
-                                            {musician.occupation.map((job, index) => (
-                                                <div key={index} className="text-xs sm:text-sm bg-muted p-2 md:p-3 rounded-md break-words">
-                                                    {job}
-                                                </div>
-                                            ))}
-                                        </div>
+                                        </h2>                        <div className="space-y-2">
+                            {musician.occupation.map((job, index) => (
+                                <div key={index} className="text-xs sm:text-sm border border-input bg-background p-2 md:p-3 rounded-md break-words hover:bg-accent/50 transition-colors">
+                                    {job}
+                                </div>
+                            ))}
+                        </div>
                                     </CardContent>
                                 </Card>
                             )}
@@ -290,14 +286,13 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                                         <h2 className="text-base sm:text-lg md:text-xl font-semibold mb-2 sm:mb-3 md:mb-4 flex items-center gap-2">
                                             <Award className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
                                             <span className="break-words">Certificates & Awards</span>
-                                        </h2>
-                                        <div className="space-y-2">
-                                            {musician.certificates.map((cert, index) => (
-                                                <div key={index} className="text-xs sm:text-sm bg-muted p-2 md:p-3 rounded-md break-words">
-                                                    {cert}
-                                                </div>
-                                            ))}
-                                        </div>
+                                        </h2>                        <div className="space-y-2">
+                            {musician.certificates.map((cert, index) => (
+                                <div key={index} className="text-xs sm:text-sm border border-input bg-background p-2 md:p-3 rounded-md break-words hover:bg-accent/50 transition-colors">
+                                    {cert}
+                                </div>
+                            ))}
+                        </div>
                                     </CardContent>
                                 </Card>
                             )}
@@ -310,14 +305,13 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                                         <h2 className="text-base sm:text-lg md:text-xl font-semibold mb-2 sm:mb-3 md:mb-4 flex items-center gap-2">
                                             <BookOpen className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
                                             <span className="break-words">Education</span>
-                                        </h2>
-                                        <div className="space-y-2 md:space-y-3">
-                                            {musician.education.map((edu, index) => (
-                                                <div key={index} className="text-xs sm:text-sm bg-muted p-2 md:p-3 rounded-md break-words">
-                                                    {edu}
-                                                </div>
-                                            ))}
-                                        </div>
+                                        </h2>                        <div className="space-y-2 md:space-y-3">
+                            {musician.education.map((edu, index) => (
+                                <div key={index} className="text-xs sm:text-sm border border-input bg-background p-2 md:p-3 rounded-md break-words hover:bg-accent/50 transition-colors">
+                                    {edu}
+                                </div>
+                            ))}
+                        </div>
                                     </CardContent>
                                 </Card>
                             )}                            {/* Video Links */}
