@@ -33,34 +33,33 @@ export type Database = {
     }
   }
   public: {
-    Tables: {
-      instruments: {
+    Tables: {      instruments: {
         Row: {
           id: string
           name: string
-          name_HUN: string | null
+          name_hun: string | null
           category: string
-          category_HUN: string | null
-          created_at: string
-          updated_at: string
+          category_hun: string | null
+          category_rank: number | null
+          instrument_rank: number | null
         }
         Insert: {
           id?: string
           name: string
-          name_HUN?: string | null
+          name_hun?: string | null
           category: string
-          category_HUN?: string | null
-          created_at?: string
-          updated_at?: string
+          category_hun?: string | null
+          category_rank?: number | null
+          instrument_rank?: number | null
         }
         Update: {
           id?: string
           name?: string
-          name_HUN?: string | null
+          name_hun?: string | null
           category?: string
-          category_HUN?: string | null
-          created_at?: string
-          updated_at?: string
+          category_hun?: string | null
+          category_rank?: number | null
+          instrument_rank?: number | null
         }
         Relationships: []
       }

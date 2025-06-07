@@ -5,16 +5,17 @@ import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup } from "@/components/ui/select-new";
 import { Search, Trash2, Mail, Phone, Video, ExternalLink, User, BookOpen, Youtube, Instagram, Facebook, Twitter, Linkedin, Music, Globe } from "lucide-react";
 import { createSPASassClient } from '@/lib/supabase/client';
 import { ProfileQueryModal } from '@/components/ProfileQueryModal';
 
 // Local Badge component to avoid import issues
-const Badge = ({ children, variant = "default", className = "" }: { 
+const Badge = ({ children, variant = "default", className = "", onClick }: { 
   children: React.ReactNode; 
   variant?: "default" | "secondary" | "destructive" | "outline"; 
   className?: string;
+  onClick?: () => void;
 }) => {
   const baseClasses = "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors";
   const variantClasses = {
@@ -23,8 +24,9 @@ const Badge = ({ children, variant = "default", className = "" }: {
     destructive: "border-transparent bg-red-600 text-white hover:bg-red-700",
     outline: "border-gray-300 bg-transparent text-gray-700 hover:bg-gray-50"
   };
-  const combinedClasses = `${baseClasses} ${variantClasses[variant]} ${className}`.trim();
-  return <div className={combinedClasses}>{children}</div>;
+  const clickableClasses = onClick ? "cursor-pointer hover:bg-accent" : "";
+  const combinedClasses = `${baseClasses} ${variantClasses[variant]} ${clickableClasses} ${className}`.trim();
+  return <div className={combinedClasses} onClick={onClick}>{children}</div>;
 };
 
 interface Genre {
@@ -37,8 +39,10 @@ interface Instrument {
     id: string;
     name: string;
     category: string;
-    name_HUN: string | null;
-    category_HUN: string | null;
+    name_hun: string | null;
+    category_hun: string | null;
+    category_rank: number | null;
+    instrument_rank: number | null;
 }
 
 interface Education {
@@ -191,9 +195,9 @@ export default function DatabasePage() {
             }
 
             const supabase = await createSPASassClient();
-            const client = supabase.getSupabaseClient();              // Load all reference data in parallel
+            const client = supabase.getSupabaseClient();            // Load all reference data in parallel
             const [instrumentsRes, genresRes, educationRes, socialRes] = await Promise.all([
-                client.from('instruments').select('*').order('category', { ascending: true }).order('name'),
+                client.from('instruments').select('*').order('category_rank', { ascending: true }).order('instrument_rank', { ascending: true }),
                 client.from('genres').select('*').order('name'),
                 client.from('education').select('*').order('rank', { ascending: false }),
                 client.from('social').select('*').order('name')
@@ -569,7 +573,231 @@ export default function DatabasePage() {
         // Let users keep seeing previous results until they search again
     };
 
-    const canSearch = filters.sortBy;  // Only require sorting to be selected, genre can be "Any"    // Memoize instrumentsByCategory
+    const canSearch = filters.sortBy;  // Only require sorting to be selected, genre can be "Any"    // Search callback functions for ProfileQueryModal
+    const handleGenreSearch = async (genre: string) => {        const newFilters = {
+            genre: genre,
+            instrument: 'any',
+            category: 'any',
+            nameSearch: '',
+            sortBy: 'name_asc' // Set a default sorting
+        };
+        setFilters(newFilters);
+        
+        // Perform search immediately with the new filters
+        setLoading(true);
+        setHasSearched(true);
+        
+        try {
+            const supabase = await createSPASassClient();
+            const client = supabase.getSupabaseClient();
+            
+            const { data: allProfiles, error: profilesError } = await client
+                .from('musician_profiles')
+                .select('*');
+            
+            if (profilesError) {
+                console.error('Error querying musician_profiles:', profilesError);
+                setMusicians([]);
+                return;
+            }
+            
+            // Apply genre filter
+            const filteredData = (allProfiles || []).filter((profile: any) => {
+                let genreInstrumentData = profile.genre_instrument;
+                if (typeof genreInstrumentData === 'string') {
+                    try {
+                        genreInstrumentData = JSON.parse(genreInstrumentData);
+                    } catch {
+                        genreInstrumentData = [genreInstrumentData];
+                    }
+                }
+                
+                if (!Array.isArray(genreInstrumentData)) return false;
+                
+                return genreInstrumentData.some((item: any) => {
+                    if (typeof item === 'string') {
+                        return item.toLowerCase().includes(genre.toLowerCase());
+                    }
+                    if (item && typeof item === 'object') {
+                        const itemGenre = String(item.genre || '').toLowerCase();
+                        return itemGenre === genre.toLowerCase();
+                    }
+                    return false;
+                });
+            });
+            
+            // Filter out current user if needed
+            const finalFilteredMusicians = filteredData.filter((musician: any) => {
+                return !currentUserEmail || musician.email !== currentUserEmail;
+            });
+            
+            // Parse and normalize data
+            const parsedMusicians = finalFilteredMusicians.map((musician: any) => ({
+                ...musician,
+                occupation: parseArrayField(musician.occupation),
+                education: parseEducationField(musician.education),
+                certificates: parseArrayField(musician.certificates),
+                genre_instrument: parseArrayField(musician.genre_instrument),
+                video_links: parseArrayField(musician.video_links),
+                social: parseSocialField(musician.social)
+            }));
+            
+            // Apply sorting
+            const sortedMusicians = applySorting(parsedMusicians, newFilters.sortBy);
+            setMusicians(sortedMusicians);
+        } catch (error) {
+            console.error('Error in genre search:', error);
+            setMusicians([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleInstrumentSearch = async (instrument: string) => {
+        const newFilters = {
+            genre: 'any',
+            instrument: instrument,
+            category: 'any',
+            nameSearch: '',
+            sortBy: 'name_asc'
+        };
+        setFilters(newFilters);
+        
+        // Perform search immediately with the new filters
+        setLoading(true);
+        setHasSearched(true);
+        
+        try {
+            const supabase = await createSPASassClient();
+            const client = supabase.getSupabaseClient();
+            
+            const { data: allProfiles, error: profilesError } = await client
+                .from('musician_profiles')
+                .select('*');
+            
+            if (profilesError) {
+                console.error('Error querying musician_profiles:', profilesError);
+                setMusicians([]);
+                return;
+            }
+            
+            // Apply instrument filter
+            const filteredData = (allProfiles || []).filter((profile: any) => {
+                let genreInstrumentData = profile.genre_instrument;
+                if (typeof genreInstrumentData === 'string') {
+                    try {
+                        genreInstrumentData = JSON.parse(genreInstrumentData);
+                    } catch {
+                        genreInstrumentData = [genreInstrumentData];
+                    }
+                }
+                
+                if (!Array.isArray(genreInstrumentData)) return false;
+                
+                return genreInstrumentData.some((item: any) => {
+                    if (typeof item === 'string') {
+                        return item.toLowerCase().includes(instrument.toLowerCase());
+                    }
+                    if (item && typeof item === 'object') {
+                        const itemInstrument = String(item.instrument || '').toLowerCase();
+                        return itemInstrument === instrument.toLowerCase();
+                    }
+                    return false;                });
+            });
+            
+            // Filter out current user if needed
+            const finalFilteredMusicians = filteredData.filter((musician: any) => {
+                return !currentUserEmail || musician.email !== currentUserEmail;
+            });
+            
+            // Parse and normalize data
+            const parsedMusicians = finalFilteredMusicians.map((musician: any) => ({
+                ...musician,
+                occupation: parseArrayField(musician.occupation),
+                education: parseEducationField(musician.education),
+                certificates: parseArrayField(musician.certificates),
+                genre_instrument: parseArrayField(musician.genre_instrument),
+                video_links: parseArrayField(musician.video_links),
+                social: parseSocialField(musician.social)
+            }));
+            
+            // Apply sorting
+            const sortedMusicians = applySorting(parsedMusicians, newFilters.sortBy);
+            setMusicians(sortedMusicians);
+        } catch (error) {
+            console.error('Error in instrument search:', error);
+            setMusicians([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleOccupationSearch = async (occupation: string) => {
+        const newFilters = {
+            genre: 'any',
+            instrument: 'any',
+            category: 'any',
+            nameSearch: occupation,
+            sortBy: 'name_asc'
+        };
+        setFilters(newFilters);
+        
+        // Perform search immediately with the new filters
+        setLoading(true);
+        setHasSearched(true);
+        
+        try {
+            const supabase = await createSPASassClient();
+            const client = supabase.getSupabaseClient();
+            
+            const { data: allProfiles, error: profilesError } = await client
+                .from('musician_profiles')
+                .select('*');
+            
+            if (profilesError) {
+                console.error('Error querying musician_profiles:', profilesError);
+                setMusicians([]);
+                return;
+            }
+            
+            // Apply name/occupation search filter
+            const filteredData = (allProfiles || []).filter((profile: any) => {
+                const fullName = `${profile.forename || ''} ${profile.surname || ''}`.toLowerCase();
+                const bio = (profile.bio || '').toLowerCase();
+                const occupations = parseArrayField(profile.occupation);
+                
+                const searchTerm = occupation.toLowerCase();
+                
+                return fullName.includes(searchTerm) ||
+                       bio.includes(searchTerm) ||                       occupations.some((occ: string) => occ.toLowerCase().includes(searchTerm));
+            });
+            
+            // Filter out current user if needed
+            const finalFilteredMusicians = filteredData.filter((musician: any) => {
+                return !currentUserEmail || musician.email !== currentUserEmail;
+            });
+            
+            // Parse and normalize data
+            const parsedMusicians = finalFilteredMusicians.map((musician: any) => ({
+                ...musician,
+                occupation: parseArrayField(musician.occupation),
+                education: parseEducationField(musician.education),
+                certificates: parseArrayField(musician.certificates),
+                genre_instrument: parseArrayField(musician.genre_instrument),
+                video_links: parseArrayField(musician.video_links),
+                social: parseSocialField(musician.social)
+            }));
+            
+            // Apply sorting
+            const sortedMusicians = applySorting(parsedMusicians, newFilters.sortBy);
+            setMusicians(sortedMusicians);
+        } catch (error) {
+            console.error('Error in occupation search:', error);
+            setMusicians([]);
+        } finally {
+            setLoading(false);
+        }
+    };    // Memoize instrumentsByCategory with ranking
     const instrumentsByCategory = useMemo(() => {
         return instruments.reduce((acc, instrument) => {
             const category = instrument.category || 'Other'; // Default to 'Other' if category is missing
@@ -579,7 +807,30 @@ export default function DatabasePage() {
             acc[category].push(instrument);
             return acc;
         }, {} as Record<string, Instrument[]>);
-    }, [instruments]);    const getSocialIcon = (platform: string) => {
+    }, [instruments]);
+
+    // Memoize sorted categories by category_rank for consistent ordering
+    const sortedCategories = useMemo(() => {
+        const categories = Object.keys(instrumentsByCategory);
+        return categories.sort((a, b) => {
+            // Find the category_rank for each category by looking at the first instrument in each category
+            const categoryA = instrumentsByCategory[a][0];
+            const categoryB = instrumentsByCategory[b][0];
+            const rankA = categoryA?.category_rank ?? 999;
+            const rankB = categoryB?.category_rank ?? 999;
+            return rankA - rankB;
+        });
+    }, [instrumentsByCategory]);    // Memoize instruments sorted by instrument ID within each category
+    const sortedInstrumentsByCategory = useMemo(() => {
+        const result: Record<string, Instrument[]> = {};
+        sortedCategories.forEach(category => {
+            result[category] = instrumentsByCategory[category].sort((a, b) => {
+                // Sort by instrument ID
+                return a.id.localeCompare(b.id);
+            });
+        });
+        return result;
+    }, [instrumentsByCategory, sortedCategories]);const getSocialIcon = (platform: string) => {
         if (!platform) return <ExternalLink className="h-4 w-4" />;
         
         // First, try to match against platforms from the database
@@ -699,21 +950,18 @@ export default function DatabasePage() {
                             <Select value={filters.instrument} onValueChange={(value) => updateFilter('instrument', value)}>
                                 <SelectTrigger>
                                     <SelectValue />
-                                </SelectTrigger><SelectContent>
+                                </SelectTrigger>                                <SelectContent>
                                     <SelectItem value="any">Any</SelectItem>
-                                    {Object.keys(instrumentsByCategory).length > 0 ? (
-                                        Object.keys(instrumentsByCategory).sort().flatMap(category => [
-                                            <SelectItem key={category + '-label'} value={category + '-label'} disabled className="font-semibold text-muted-foreground cursor-default opacity-100 select-none pointer-events-none" style={{ pointerEvents: 'none' }}>
-                                                ---[{category}]---
-                                            </SelectItem>,
-                                            ...instrumentsByCategory[category]
-                                                .sort((a, b) => a.name.localeCompare(b.name))
-                                                .map(instrument => (
+                                    {sortedCategories.length > 0 ? (
+                                        sortedCategories.map(category => (
+                                            <SelectGroup key={category} label={category}>
+                                                {sortedInstrumentsByCategory[category].map(instrument => (
                                                     <SelectItem key={instrument.id} value={instrument.name}>
                                                         {instrument.name}
                                                     </SelectItem>
-                                                ))
-                                        ])
+                                                ))}
+                                            </SelectGroup>
+                                        ))
                                     ) : (
                                         instruments.map(instrument => (
                                             <SelectItem key={instrument.id} value={instrument.name}>
@@ -826,26 +1074,55 @@ export default function DatabasePage() {
                                                 </div>
                                             </div>
                                         </CardHeader>
-                                        <CardContent className="pt-0 space-y-4">
-                                            {/* Skills Section */}
+                                        <CardContent className="pt-0 space-y-4">                                            {/* Skills Section */}
                                             <div>
                                                 <h4 className="text-sm font-medium mb-2">Skills & Instruments</h4>
                                                 <div className="flex flex-wrap gap-1">                                                    {musician.genre_instrument && musician.genre_instrument.length > 0 ? (
-                                                        musician.genre_instrument.map((item, index) => (
-                                                            <Badge key={index} variant="secondary" className="text-xs">
-                                                                {typeof item === 'string' 
-                                                                    ? item 
-                                                                    : `${item.genre || ''} ${item.instrument || ''}${item.category ? ` (${item.category})` : ''}`.trim()
+                                                        musician.genre_instrument.map((item, index) => {
+                                                            let displayText: string;
+                                                            let genre: string = '';
+                                                            let instrument: string = '';
+                                                            
+                                                            if (typeof item === 'string') {
+                                                                displayText = item;
+                                                                // Try to parse genre/instrument from string format
+                                                                const parts = displayText.split(' ');
+                                                                if (parts.length >= 2) {
+                                                                    genre = parts[0];
+                                                                    instrument = parts.slice(1).join(' ');
                                                                 }
-                                                            </Badge>
-                                                        ))
+                                                            } else if (item && typeof item === 'object') {
+                                                                const itemObj = item as Record<string, unknown>;
+                                                                genre = String(itemObj.genre || '');
+                                                                instrument = String(itemObj.instrument || '');
+                                                                const category = itemObj.category ? ` (${String(itemObj.category)})` : '';
+                                                                displayText = `${genre} ${instrument}${category}`.trim();
+                                                            } else {
+                                                                displayText = String(item || '');
+                                                            }
+
+                                                            return (
+                                                                <Badge 
+                                                                    key={index} 
+                                                                    variant="secondary" 
+                                                                    className="text-xs"
+                                                                    onClick={() => {
+                                                                        if (genre && handleGenreSearch) {
+                                                                            handleGenreSearch(genre);
+                                                                        } else if (instrument && handleInstrumentSearch) {
+                                                                            handleInstrumentSearch(instrument);
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    {displayText}
+                                                                </Badge>
+                                                            );
+                                                        })
                                                     ) : (
                                                         <span className="text-sm text-muted-foreground">No skills listed</span>
                                                     )}
                                                 </div>
-                                            </div>
-
-                                            {/* Occupation */}
+                                            </div>                                            {/* Occupation */}
                                             {musician.occupation && musician.occupation.length > 0 && (
                                                 <div>
                                                     <h4 className="text-sm font-medium mb-2">Current Occupation</h4>
@@ -958,13 +1235,15 @@ export default function DatabasePage() {
                         )}
                     </CardContent>
                 </Card>            )}
-              {/* Profile Query Modal */}
-            <ProfileQueryModal 
+              {/* Profile Query Modal */}            <ProfileQueryModal 
                 isOpen={isProfileModalOpen}
                 onClose={closeProfileModal}
                 musician={selectedMusician}
                 isLoading={profileLoading}
                 error={profileError}
+                onGenreSearch={handleGenreSearch}
+                onInstrumentSearch={handleInstrumentSearch}
+                onOccupationSearch={handleOccupationSearch}
             />
         </div>
     );

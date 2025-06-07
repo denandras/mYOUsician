@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select-new';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup } from '@/components/ui/select-new';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { createSPASassClient } from '@/lib/supabase/client';
 import { Key, User, CheckCircle, Briefcase, Music, Plus, Trash2, AlertTriangle } from 'lucide-react';
@@ -72,9 +72,7 @@ export default function ProfilePage() {
         genre_instrument: [{ genre: '', instrument: '', category: '' }],
         video_links: [''],
         social: {} as Record<string, string>
-    });
-
-    // Memoize instrumentsByCategory for the categorized dropdown
+    });    // Memoize instrumentsByCategory for the categorized dropdown with ranking
     const instrumentsByCategory = useMemo(() => {
         return referenceData.instruments.reduce((acc, instrument) => {
             const category = instrument.category || 'Other'; // Default to 'Other' if category is missing
@@ -85,6 +83,29 @@ export default function ProfilePage() {
             return acc;
         }, {} as Record<string, Instrument[]>);
     }, [referenceData.instruments]);
+
+    // Memoize sorted categories by category_rank for consistent ordering
+    const sortedCategories = useMemo(() => {
+        const categories = Object.keys(instrumentsByCategory);
+        return categories.sort((a, b) => {
+            // Find the category_rank for each category by looking at the first instrument in each category
+            const categoryA = instrumentsByCategory[a][0];
+            const categoryB = instrumentsByCategory[b][0];
+            const rankA = categoryA?.category_rank ?? 999;
+            const rankB = categoryB?.category_rank ?? 999;
+            return rankA - rankB;
+        });
+    }, [instrumentsByCategory]);    // Memoize instruments sorted by instrument ID within each category
+    const sortedInstrumentsByCategory = useMemo(() => {
+        const result: Record<string, Instrument[]> = {};
+        sortedCategories.forEach(category => {
+            result[category] = instrumentsByCategory[category].sort((a, b) => {
+                // Sort by instrument ID
+                return a.id.localeCompare(b.id);
+            });
+        });
+        return result;
+    }, [instrumentsByCategory, sortedCategories]);
 
     // Load reference data from Supabase with localStorage caching
     const loadReferenceData = useCallback(async () => {
@@ -1179,21 +1200,17 @@ export default function ProfilePage() {
                                                     >
                                                         <SelectTrigger>
                                                             <SelectValue placeholder="Instrument" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {Object.keys(instrumentsByCategory).length > 0 ? (
-                                                                Object.keys(instrumentsByCategory).sort().flatMap(category => [
-                                                                    <SelectItem key={category + '-label'} value={category + '-label'} disabled className="font-semibold text-muted-foreground cursor-default opacity-100 select-none pointer-events-none" style={{ pointerEvents: 'none' }}>
-                                                                        ---[{category}]---
-                                                                    </SelectItem>,
-                                                                    ...instrumentsByCategory[category]
-                                                                        .sort((a, b) => a.name.localeCompare(b.name))
-                                                                        .map(instrument => (
+                                                        </SelectTrigger>                                                        <SelectContent>
+                                                            {sortedCategories.length > 0 ? (
+                                                                sortedCategories.map(category => (
+                                                                    <SelectGroup key={category} label={category}>
+                                                                        {sortedInstrumentsByCategory[category].map(instrument => (
                                                                             <SelectItem key={instrument.id} value={instrument.name}>
                                                                                 {instrument.name}
                                                                             </SelectItem>
-                                                                        ))
-                                                                ])
+                                                                        ))}
+                                                                    </SelectGroup>
+                                                                ))
                                                             ) : (
                                                                 referenceData.instruments && Array.isArray(referenceData.instruments)
                                                                     ? referenceData.instruments.map(instrument => (

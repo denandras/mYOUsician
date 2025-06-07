@@ -43,9 +43,7 @@ const Select = React.forwardRef<
     setTimeout(() => {
       isUserChanging.current = false;
     }, 50);
-  }
-
-  // Extract options from nested children (inside SelectContent)
+  }  // Extract options from nested children (inside SelectContent)
   const extractOptions = (children: React.ReactNode): React.ReactNode[] => {
     const options: React.ReactNode[] = [];
     
@@ -55,12 +53,20 @@ const Select = React.forwardRef<
           // Extract options from SelectContent
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           React.Children.forEach((child.props as any).children, contentChild => {
-            if (React.isValidElement(contentChild) && contentChild.type === SelectItem) {
-              options.push(contentChild);
+            if (React.isValidElement(contentChild)) {
+              if (contentChild.type === SelectItem) {
+                options.push(contentChild);
+              } else if (contentChild.type === SelectGroup) {
+                // Handle SelectGroup (optgroup)
+                options.push(contentChild);
+              }
             }
           });
         } else if (child.type === SelectItem) {
           // Direct SelectItem
+          options.push(child);
+        } else if (child.type === SelectGroup) {
+          // Direct SelectGroup
           options.push(child);
         }
       }
@@ -155,10 +161,26 @@ const SelectItem = React.forwardRef<
 ))
 SelectItem.displayName = "SelectItem"
 
+const SelectGroup = React.forwardRef<
+  HTMLOptGroupElement,
+  React.OptgroupHTMLAttributes<HTMLOptGroupElement>
+>(({ className, children, label, ...props }, ref) => (
+  <optgroup
+    ref={ref}
+    label={label}
+    className={className}
+    {...props}
+  >
+    {children}
+  </optgroup>
+))
+SelectGroup.displayName = "SelectGroup"
+
 export {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
+  SelectGroup,
 }
