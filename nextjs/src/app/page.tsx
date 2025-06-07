@@ -107,15 +107,11 @@ export default function Home() {
                   )}
                 </button>
               </div>
-            </div>
-
-            {/* Mobile Menu */}
+            </div>            {/* Mobile Menu */}
             {isMobileMenuOpen && (
               <div ref={mobileMenuRef} className="md:hidden border-t border-[#062f3b] bg-[#083e4d]">
-                <div className="px-4 pt-4 pb-4 space-y-3">
-                  <div className="pt-2">
-                    <AuthAwareButtons variant="mobile" />
-                  </div>
+                <div className="px-4 py-4 space-y-3">
+                  <AuthAwareButtons variant="mobile" />
                 </div>
               </div>
             )}

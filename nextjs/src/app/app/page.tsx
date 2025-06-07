@@ -23,10 +23,8 @@ export default function DashboardContent() {
         );
     }
 
-    const daysSinceRegistration = getDaysSinceRegistration();
-
-    return (
-        <div className="space-y-6 p-6">
+    const daysSinceRegistration = getDaysSinceRegistration();    return (
+        <div className="space-y-6 p-3 sm:p-6">
             <Card>
                 <CardHeader>
                     <CardTitle>Welcome, {user?.email?.split('@')[0]}! 👋</CardTitle>

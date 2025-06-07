@@ -31,11 +31,9 @@ export default function AuthAwareButtons({ variant = 'primary' }) {
                     <div className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
                 </>
             );
-        }
-        
-        if (variant === 'mobile') {
+        }        if (variant === 'mobile') {
             return (
-                <div className="flex flex-col space-y-2 w-full">
+                <div className="flex flex-col space-y-2 w-full min-h-[96px]">
                     <div className="w-full h-12 bg-gray-200 rounded-lg animate-pulse"></div>
                     <div className="w-full h-12 bg-gray-200 rounded-lg animate-pulse"></div>
                 </div>
@@ -70,19 +68,19 @@ export default function AuthAwareButtons({ variant = 'primary' }) {
                 </Link>
             </>
         );
-    }
-
-    // Mobile navigation buttons - stacked vertically
+    }    // Mobile navigation buttons - stacked vertically
     if (variant === 'mobile') {
         return isAuthenticated ? (
-            <Link
-                href="/app"
-                className="block w-full text-center bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-3 rounded-lg transition-colors"
-            >
-                Go to Dashboard
-            </Link>
+            <div className="flex flex-col space-y-2 w-full min-h-[96px] justify-center">
+                <Link
+                    href="/app"
+                    className="block w-full text-center bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-3 rounded-lg transition-colors"
+                >
+                    Go to Dashboard
+                </Link>
+            </div>
         ) : (
-            <div className="flex flex-col space-y-2 w-full">
+            <div className="flex flex-col space-y-2 w-full min-h-[96px]">
                 <Link 
                     href="/auth/login"
                     className="block w-full text-center px-4 py-3 rounded-lg border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
