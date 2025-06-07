@@ -1003,17 +1003,13 @@ export default function UserSettingsPage() {
                                     <Plus className="h-4 w-4 mr-2" />
                                     Add Occupation
                                 </Button>
-                            </div>
-
-                            <div>
-                                <Label>Education</Label>
-                                {profile.education.map((education, index) => {
+                            </div>                            <div>
+                                <Label>Education</Label>                                {profile.education.map((education, index) => {
                                     const hasData = education.type || education.school;
-                                    
                                     return (
                                         // Wrap in flex and items-stretch for full height trash button
                                         <div key={index} className="flex gap-2 mt-2 items-stretch">
-                                            <div className="grid grid-cols-2 gap-2 flex-1">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
                                                 <div>
                                                     <Select
                                                         value={education.type}
@@ -1045,13 +1041,13 @@ export default function UserSettingsPage() {
                                                     placeholder="School/Institution name"
                                                     className="flex-1"
                                                 />
-                                            </div>
-                                            {/* Trash button fills height of both fields */}
+                                            </div>                                            {/* Trash button fills height of both fields */}
                                             {(hasData || profile.education.length > 1) && (
                                                 <Button
                                                     type="button"
                                                     variant="delete"
                                                     size="icon"
+                                                    className="self-stretch !h-auto min-h-[2.5rem]"
                                                     onClick={() => {
                                                         if (hasData) {
                                                             // If there's data, clear it first
@@ -1063,7 +1059,6 @@ export default function UserSettingsPage() {
                                                         }
                                                     }}
                                                     title={hasData ? "Clear this row" : "Delete this row"}
-                                                    className="h-full"
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -1148,12 +1143,9 @@ export default function UserSettingsPage() {
                             </CardTitle>
                             <CardDescription>Your musical skills and presence</CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div>
-                                <Label>Genres & Instruments</Label>
-                                {profile.genre_instrument.map((item, index) => {
+                        <CardContent className="space-y-4">                            <div>
+                                <Label>Genres & Instruments</Label>                                {profile.genre_instrument.map((item, index) => {
                                     const hasData = item.genre || item.instrument || item.category;
-                                    
                                     return (
                                         // Wrap in flex and items-stretch for full height trash button
                                         <div key={index} className="flex gap-2 mt-2 items-stretch">
@@ -1213,8 +1205,7 @@ export default function UserSettingsPage() {
                                                 <Select
                                                     value={item.category}
                                                     onValueChange={(value) => updateGenreInstrument(index, 'category', value)}
-                                                >
-                                                    <SelectTrigger>
+                                                >                                                    <SelectTrigger>
                                                         <SelectValue placeholder="Category" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -1222,13 +1213,13 @@ export default function UserSettingsPage() {
                                                         <SelectItem value="teacher">teacher</SelectItem>
                                                     </SelectContent>
                                                 </Select>
-                                            </div>
-                                            {/* Trash button fills height of all selects */}
+                                            </div>                                            {/* Trash button fills height of all selects */}
                                             {(hasData || profile.genre_instrument.length > 1) && (
                                                 <Button
                                                     type="button"
                                                     variant="delete"
                                                     size="icon"
+                                                    className="self-stretch !h-auto min-h-[2.5rem]"
                                                     onClick={() => {
                                                         if (hasData) {
                                                             // If there's data, clear it first
@@ -1241,7 +1232,6 @@ export default function UserSettingsPage() {
                                                         }
                                                     }}
                                                     title={hasData ? "Clear this row" : "Delete this row"}
-                                                    className="h-full"
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
