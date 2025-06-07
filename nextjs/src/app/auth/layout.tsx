@@ -28,9 +28,13 @@ export default function AuthLayout({
                 </Link>
 
                 <div className="sm:mx-auto sm:w-full sm:max-w-md">
-                    <h2 className="text-center text-3xl font-bold tracking-tight text-gray-900">
-                        {productName}
-                    </h2>
+                    <a href="/" className="block text-center">
+                      <img 
+                        src="/branding/text_vanilla.svg" 
+                        alt={productName}
+                        className="h-12 w-auto mx-auto"
+                      />
+                    </a>
                 </div>
 
                 <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">

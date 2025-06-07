@@ -88,11 +88,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         { name: 'Homepage', href: '/app', icon: Home },
         { name: 'Profile Editor', href: '/app/profile', icon: User },
         { name: 'Database', href: '/app/database', icon: Database },
-    ];
+    ];    const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
 
-    const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
+    // Get current page title based on pathname
+    const getCurrentPageTitle = () => {
+        const currentNav = navigation.find(item => item.href === pathname);
+        return currentNav ? currentNav.name : 'Dashboard';
+    };
 
-    return (        <div className="min-h-screen bg-background">            {isSidebarOpen && (
+    return (<div className="min-h-screen bg-background">            {isSidebarOpen && (
                 <div
                     className="fixed inset-0 bg-gray-600 bg-opacity-75 z-20"
                     data-sidebar-backdrop
@@ -103,10 +107,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 ref={sidebarRef}
                 className={`fixed inset-y-0 left-0 w-64 bg-white backdrop-blur-sm shadow-lg border-r border-border transform transition-transform duration-200 ease-in-out z-30 
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
-            >
-
-                <div className="h-16 flex items-center justify-between px-4 border-b border-border bg-[#083e4d]">
-                    <span className="text-xl font-semibold text-white">{productName}</span>                    <button
+            >                <div className="h-16 flex items-center justify-between px-4 border-b border-border bg-[#083e4d]">
+                    <a href="/" className="block">
+                      <img 
+                        src="/branding/text_vanilla.svg" 
+                        alt={productName}
+                        className="h-6 w-auto"
+                      />
+                    </a><button
                         onClick={toggleSidebar}
                         className="text-white hover:text-[#b5d1d6] transition-colors"
                         aria-label="Close sidebar"
@@ -141,15 +149,24 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </nav>
 
             </div>            <div className="">
-                <div className="sticky top-0 z-10 flex items-center justify-between h-16 bg-[#083e4d] bg-opacity-100 border-b border-[#062f3b] px-4 shadow-md">
-                    <button
-                        onClick={toggleSidebar}
-                        data-sidebar-trigger
-                        className="text-white hover:text-[#26545c] transition-colors"
-                        aria-label="Toggle sidebar"
-                    >
-                        <Menu className="h-6 w-6"/>
-                    </button>
+                <div className="sticky top-0 z-10 flex items-center justify-between h-16 bg-[#083e4d] bg-opacity-100 border-b border-[#062f3b] px-4 shadow-md">                    <div className="flex items-center space-x-4">
+                        <button
+                            onClick={toggleSidebar}
+                            data-sidebar-trigger
+                            className="text-white hover:text-[#26545c] transition-colors"
+                            aria-label="Toggle sidebar"
+                        >
+                            <Menu className="h-6 w-6"/>
+                        </button>
+                        
+                        <a href="/" className="block">
+                            <img 
+                                src="/branding/text_vanilla.svg" 
+                                alt={productName}
+                                className="h-8 w-auto"
+                            />
+                        </a>
+                    </div>
 
                     <div className="relative ml-auto" ref={userDropdownRef}>
                         <button
