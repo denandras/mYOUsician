@@ -57,7 +57,7 @@ INSERT INTO instruments (name, name_hun, category, category_hun, category_rank, 
 ('harpsichord', 'csembaló', 'chordal', 'akkordikus', 5, 4),
 ('harp', 'hárfa', 'chordal', 'akkordikus', 5, 5),
 ('accordion', 'harmonika', 'chordal', 'akkordikus', 5, 6),
-('guitar', 'gitár', 'chordal', 'akkordikus', 5, 6);
+('guitar', 'gitár', 'chordal', 'akkordikus', 5, 7);
 
 -- Insert singing instruments
 INSERT INTO instruments (name, name_hun, category, category_hun, category_rank, instrument_rank) VALUES
@@ -74,12 +74,12 @@ INSERT INTO instruments (name, name_hun, category, category_hun, category_rank, 
 ('bass choir', 'basszus', 'singing', 'ének', 6, 11),
 ('bass solo', 'basszus szóló', 'singing', 'ének', 6, 12);
 
--- Insert theory instruments (no instrument_rank for theory as indicated by empty value)
+-- Insert theory instruments
 INSERT INTO instruments (name, name_hun, category, category_hun, category_rank, instrument_rank) VALUES
 ('choir conducting', 'karvezetés', 'theory', 'elméleti', 7, 1),
+('orchestral conducting', 'karmester', 'theory', 'elméleti', 7, 2),
 ('solfeggio', 'szolfézs', 'theory', 'elméleti', 7, 3),
-('composition', 'zeneszerzés', 'theory', 'elméleti', 7, 4),
-('orchestral conducting', 'karmester', 'theory', 'elméleti', 7, 2);
+('composition', 'zeneszerzés', 'theory', 'elméleti', 7, 4);
 
 -- Insert folk instruments
 INSERT INTO instruments (name, name_hun, category, category_hun, category_rank, instrument_rank) VALUES

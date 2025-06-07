@@ -820,13 +820,18 @@ export default function DatabasePage() {
             const rankB = categoryB?.category_rank ?? 999;
             return rankA - rankB;
         });
-    }, [instrumentsByCategory]);    // Memoize instruments sorted by instrument ID within each category
+    }, [instrumentsByCategory]);    // Memoize instruments sorted by instrument_rank within each category
     const sortedInstrumentsByCategory = useMemo(() => {
         const result: Record<string, Instrument[]> = {};
         sortedCategories.forEach(category => {
             result[category] = instrumentsByCategory[category].sort((a, b) => {
-                // Sort by instrument ID
-                return a.id.localeCompare(b.id);
+                // Sort by instrument_rank, fallback to name if ranks are equal or missing
+                const rankA = a.instrument_rank ?? 999;
+                const rankB = b.instrument_rank ?? 999;
+                if (rankA !== rankB) {
+                    return rankA - rankB;
+                }
+                return a.name.localeCompare(b.name);
             });
         });
         return result;
