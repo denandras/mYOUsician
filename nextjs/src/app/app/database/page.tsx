@@ -609,10 +609,8 @@ export default function DatabasePage() {
             default:
                 return <ExternalLink className="h-4 w-4" />;
         }
-    };
-
-    return (
-        <div className="space-y-6 p-6">
+    };    return (
+        <div className="space-y-6 p-3 sm:p-6">
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Musician Database</h1>
