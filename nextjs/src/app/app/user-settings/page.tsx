@@ -446,18 +446,7 @@ export default function UserSettingsPage() {
                     video_links: Array.isArray(data.video_links) && data.video_links.length ? data.video_links : [''],
                     social: typeof data.social === 'object' && data.social !== null && !Array.isArray(data.social) 
                         ? data.social as Record<string, string>
-                        : {}
-                };
-
-                console.log('LOCATION UPDATE - Profile loaded from database:', { 
-                    location: profileData.location, 
-                    reason: 'Initial profile load from database' 
-                });
-
-                console.log('LOCATION UPDATE - Profile loaded from database:', { 
-                    location: profileData.location, 
-                    reason: 'Initial profile load from database' 
-                });
+                        : {}                };
 
                 setProfile(profileData); // Set initial state for comparison
 
@@ -493,10 +482,22 @@ export default function UserSettingsPage() {
                     );
                     invalidSocialLinks.push(`${platform?.name || platformName}: must start with ${platform?.base_url}`);
                 }
+            }            if (invalidSocialLinks.length > 0) {
+                setError(`Invalid social links:\n${invalidSocialLinks.join('\n')}`);
+                setProfileLoading(false);
+                return;
             }
 
-            if (invalidSocialLinks.length > 0) {
-                setError(`Invalid social links:\n${invalidSocialLinks.join('\n')}`);
+            // Validate video links before saving
+            const invalidVideoLinks = [];
+            for (const [index, videoUrl] of profile.video_links.entries()) {
+                if (videoUrl && videoUrl.trim() && !videoUrl.trim().startsWith('https://')) {
+                    invalidVideoLinks.push(`Video link ${index + 1}: must start with https://`);
+                }
+            }
+
+            if (invalidVideoLinks.length > 0) {
+                setError(`Invalid video links:\n${invalidVideoLinks.join('\n')}`);
                 setProfileLoading(false);
                 return;
             }
@@ -724,8 +725,13 @@ export default function UserSettingsPage() {
         );
         
         if (!platform?.base_url) return true; // No base URL restriction
-        
-        return url.toLowerCase().startsWith(platform.base_url.toLowerCase());
+          return url.toLowerCase().startsWith(platform.base_url.toLowerCase());
+    };
+
+    // Add validation function for video links
+    const validateVideoUrl = (url: string): boolean => {
+        if (!url.trim()) return true; // Empty URLs are allowed
+        return url.trim().startsWith('https://');
     };
 
     // Add this helper function to sort social platforms
@@ -777,11 +783,10 @@ export default function UserSettingsPage() {
         loadLocationData();
         if (user?.id) {
             loadProfile();
-        }
-    }, [user?.id]); // Only depend on user?.id to prevent infinite loops
+        }    }, [user?.id]); // Only depend on user?.id to prevent infinite loops
 
     return (
-        <div className="space-y-6 p-6">
+        <div className="space-y-6 p-3 sm:p-6">
             <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tight">Profile Editor</h1>
                 <p className="text-muted-foreground">
@@ -1251,19 +1256,24 @@ export default function UserSettingsPage() {
                                     <Plus className="h-4 w-4 mr-2" />
                                     Add Genre & Instrument
                                 </Button>
-                            </div>
-
-                            <div>
+                            </div>                            <div>
                                 <Label>Video Links</Label>                                {profile.video_links.map((link, index) => {
                                     const hasData = link && link.trim();
+                                    const isValid = validateVideoUrl(link);
                                       return (
                                         <div key={index} className="flex gap-2 mt-2">
                                             <div className="flex-1">
                                                 <Input
                                                     value={link}
                                                     onChange={(e) => updateArrayItem('video_links', index, e.target.value)}
-                                                    placeholder="https://"
+                                                    placeholder="https://youtube.com/watch?v=... or https://vimeo.com/..."
+                                                    className={!isValid ? 'border-red-500 focus:border-red-500' : ''}
                                                 />
+                                                {!isValid && link && (
+                                                    <p className="text-xs text-red-500 mt-1">
+                                                        Video link must start with https://
+                                                    </p>
+                                                )}
                                             </div>
                                             {/* Trash button box */}
                                             {(hasData || profile.video_links.length > 1) && (
