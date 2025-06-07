@@ -673,20 +673,36 @@ export default function UserSettingsPage() {
         }));
     };
 
-    const handleCountryChange = (countryName: string) => {
+    const handleCountryChange = useCallback((countryName: string) => {
         const country = locationData.countries.find(c => c.countryName === countryName);
         if (country) {
-            setProfile(prev => ({
-                ...prev,
-                location: { 
-                    country: countryName, 
-                    countryCode: country.countryCode, 
-                    city: '' 
-                }
-            }));
+            // Use functional update to ensure we have the latest state
+            setProfile(prev => {
+                const newProfile = {
+                    ...prev,
+                    location: { 
+                        country: countryName, 
+                        countryCode: country.countryCode, 
+                        city: '' 
+                    }
+                };
+                return newProfile;
+            });
+            
+            // Load cities for the new country
             loadCitiesForCountry(country.countryCode);
         }
-    };
+    }, [locationData.countries, loadCitiesForCountry]);
+
+    const handleCityChange = useCallback((value: string) => {
+        setProfile(prev => {
+            const newProfile = {
+                ...prev,
+                location: { ...prev.location, city: value }
+            };
+            return newProfile;
+        });
+    }, []);
 
     // Add validation function
     const validateSocialUrl = (platformName: string, url: string): boolean => {
@@ -850,10 +866,7 @@ export default function UserSettingsPage() {
                                     <Label>City</Label>
                                     <Select
                                         value={profile.location.city}
-                                        onValueChange={(value) => setProfile(prev => ({
-                                            ...prev,
-                                            location: { ...prev.location, city: value }
-                                        }))}
+                                        onValueChange={handleCityChange}
                                         disabled={
                                             locationServiceStatus === 'unavailable' || 
                                             !profile.location.countryCode || 

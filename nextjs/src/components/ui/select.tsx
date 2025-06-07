@@ -11,18 +11,35 @@ const Select = React.forwardRef<
     children?: React.ReactNode
   }
 >(({ className, children, onValueChange, onChange, value, disabled, ...props }, ref) => {
+  // Store the current selected value in local state to prevent flickering
+  const [internalValue, setInternalValue] = React.useState(value ?? '');
+  
+  // Update internal value when prop changes
+  React.useEffect(() => {
+    setInternalValue(value ?? '');
+  }, [value]);
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newValue = e.target.value;
+    
+    // Update internal state immediately
+    setInternalValue(newValue);
+    
+    // Call onValueChange for parent state updates
     if (onValueChange) {
-      onValueChange(e.target.value)
+      onValueChange(newValue);
     }
+    
+    // Then call original onChange if provided
     if (onChange) {
-      onChange(e)
+      onChange(e);
     }
   }
 
   // Extract options from nested children (inside SelectContent)
   const extractOptions = (children: React.ReactNode): React.ReactNode[] => {
-    const options: React.ReactNode[] = [];    React.Children.forEach(children, child => {
+    const options: React.ReactNode[] = [];
+    
+    React.Children.forEach(children, child => {
       if (React.isValidElement(child)) {
         if (child.type === SelectContent) {
           // Extract options from SelectContent
@@ -42,29 +59,29 @@ const Select = React.forwardRef<
     return options;
   };
 
-  const options = extractOptions(children);  // Extract placeholder from SelectValue if present
+  const options = extractOptions(children);
+
+  // Extract placeholder from SelectValue if present
   let placeholder = "Select";
   React.Children.forEach(children, child => {
     if (React.isValidElement(child) && child.type === SelectValue) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       placeholder = (child.props as any).placeholder || placeholder;
-    }
-  });
+    }  });
 
   return (
     <select
       className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className || ''}`}
       ref={ref}
-      value={value || ''}
+      value={internalValue}
       onChange={handleChange}
       disabled={disabled}
       {...props}
     >
-      <option value="" disabled>
+      <option value="" disabled hidden>
         {placeholder}
       </option>
-      {options}
-    </select>
+      {options}    </select>
   )
 })
 Select.displayName = "Select"
