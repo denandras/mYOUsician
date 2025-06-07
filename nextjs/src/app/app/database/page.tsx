@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Trash2, Mail, Phone, Video, ExternalLink, User, BookOpen, Youtube, Instagram, Facebook, Twitter, Linkedin, Music, Globe } from "lucide-react";
 import { createSPASassClient } from '@/lib/supabase/client';
+import { ProfileQueryModal } from '@/components/ProfileQueryModal';
 
 // Local Badge component to avoid import issues
 const Badge = ({ children, variant = "default", className = "" }: { 
@@ -109,11 +110,41 @@ export default function DatabasePage() {
         nameSearch: '',
         sortBy: ''
     });
-    
-    // State for UI
+      // State for UI
     const [loading, setLoading] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
-    const [currentUserEmail, setCurrentUserEmail] = useState('');
+    const [currentUserEmail, setCurrentUserEmail] = useState('');    // State for profile modal
+    const [selectedMusician, setSelectedMusician] = useState<MusicianProfile | null>(null);
+    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+    const [profileLoading, setProfileLoading] = useState(false);
+    const [profileError, setProfileError] = useState<string | null>(null);
+
+    const openProfileModal = async (musician: MusicianProfile) => {
+        setSelectedMusician(musician);
+        setIsProfileModalOpen(true);
+        setProfileLoading(false);
+        setProfileError(null);
+        
+        // Simulate any additional data loading if needed
+        // This is where you could fetch additional profile data if required
+        try {
+            // For now, we just use the existing musician data
+            // But this could be expanded to fetch more detailed profile information
+            setSelectedMusician(musician);
+        } catch (error) {
+            console.error('Error loading profile:', error);
+            setProfileError('Failed to load profile details. Please try again.');
+        } finally {
+            setProfileLoading(false);
+        }
+    };
+
+    const closeProfileModal = () => {
+        setIsProfileModalOpen(false);
+        setSelectedMusician(null);
+        setProfileLoading(false);
+        setProfileError(null);
+    };
 
     // Sort options
     const sortOptions = [
@@ -752,18 +783,27 @@ export default function DatabasePage() {
                         {musicians.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {musicians.map((musician) => (
-                                    <Card key={musician.id} className="h-fit">
-                                        <CardHeader className="pb-3">
+                                    <Card key={musician.id} className="h-fit">                                        <CardHeader className="pb-3">
                                             <div className="flex items-center gap-3">
-                                                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                                                <button 
+                                                    className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors cursor-pointer"
+                                                    onClick={() => openProfileModal(musician)}
+                                                    title="View full profile"
+                                                >
                                                     <User className="h-6 w-6 text-primary" />
-                                                </div>
+                                                </button>
                                                 <div className="flex-1 min-w-0">
-                                                    <CardTitle className="text-lg truncate">
-                                                        {musician.forename || musician.surname 
-                                                            ? `${musician.forename || ''} ${musician.surname || ''}`.trim() 
-                                                            : 'Anonymous'}
-                                                    </CardTitle>
+                                                    <button 
+                                                        className="text-left w-full"
+                                                        onClick={() => openProfileModal(musician)}
+                                                        title="View full profile"
+                                                    >
+                                                        <CardTitle className="text-lg truncate hover:text-primary transition-colors cursor-pointer">
+                                                            {musician.forename || musician.surname 
+                                                                ? `${musician.forename || ''} ${musician.surname || ''}`.trim() 
+                                                                : 'Anonymous'}
+                                                        </CardTitle>
+                                                    </button>
                                                     <CardDescription className="truncate">
                                                         {musician.bio || 'No bio available'}
                                                     </CardDescription>
@@ -901,8 +941,15 @@ export default function DatabasePage() {
                             </div>
                         )}
                     </CardContent>
-                </Card>
-            )}
+                </Card>            )}
+              {/* Profile Query Modal */}
+            <ProfileQueryModal 
+                isOpen={isProfileModalOpen}
+                onClose={closeProfileModal}
+                musician={selectedMusician}
+                isLoading={profileLoading}
+                error={profileError}
+            />
         </div>
     );
 }
