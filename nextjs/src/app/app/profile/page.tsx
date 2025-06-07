@@ -389,13 +389,14 @@ export default function ProfilePage() {
                     }
                     
                     return [''];
-                };
-
-                // Helper function to parse education field
+                };                // Helper function to parse education field
                 const parseEducationField = (field: unknown) => {
                     if (!field) return [{ type: '', school: '' }];
                     
                     if (Array.isArray(field)) {
+                        // If it's an empty array, return default empty object
+                        if (field.length === 0) return [{ type: '', school: '' }];
+                        
                         // Check if it's array of objects (new format)
                         if (field.length > 0 && typeof field[0] === 'object' && field[0] !== null && 'type' in field[0]) {
                             return field;
@@ -645,13 +646,15 @@ export default function ProfilePage() {
             ...prev,
             [field]: [...(prev[field as keyof typeof prev] as string[]), '']
         }));
-    };
-
-    const removeArrayItem = (field: string, index: number) => {
-        setProfile(prev => ({
-            ...prev,
-            [field]: (prev[field as keyof typeof prev] as string[]).filter((_, i) => i !== index)
-        }));
+    };    const removeArrayItem = (field: string, index: number) => {
+        setProfile(prev => {
+            const newArray = (prev[field as keyof typeof prev] as string[]).filter((_, i) => i !== index);
+            // Ensure we always have at least one empty item for user input
+            return {
+                ...prev,
+                [field]: newArray.length === 0 ? [''] : newArray
+            };
+        });
     };
 
     const updateArrayItem = (field: string, index: number, value: string) => {
@@ -668,13 +671,15 @@ export default function ProfilePage() {
             ...prev,
             genre_instrument: [...prev.genre_instrument, { genre: '', instrument: '', category: '' }]
         }));
-    };
-
-    const removeGenreInstrument = (index: number) => {
-        setProfile(prev => ({
-            ...prev,
-            genre_instrument: prev.genre_instrument.filter((_, i) => i !== index)
-        }));
+    };    const removeGenreInstrument = (index: number) => {
+        setProfile(prev => {
+            const newGenreInstrument = prev.genre_instrument.filter((_, i) => i !== index);
+            // Ensure we always have at least one empty genre_instrument item
+            return {
+                ...prev,
+                genre_instrument: newGenreInstrument.length === 0 ? [{ genre: '', instrument: '', category: '' }] : newGenreInstrument
+            };
+        });
     };
 
     const updateGenreInstrument = (index: number, field: string, value: string) => {
@@ -692,13 +697,15 @@ export default function ProfilePage() {
             ...prev,
             education: [...prev.education, { type: '', school: '' }]
         }));
-    };
-
-    const removeEducation = (index: number) => {
-        setProfile(prev => ({
-            ...prev,
-            education: prev.education.filter((_, i) => i !== index)
-        }));
+    };    const removeEducation = (index: number) => {
+        setProfile(prev => {
+            const newEducation = prev.education.filter((_, i) => i !== index);
+            // Ensure we always have at least one empty education item
+            return {
+                ...prev,
+                education: newEducation.length === 0 ? [{ type: '', school: '' }] : newEducation
+            };
+        });
     };
 
     const updateEducation = (index: number, field: 'type' | 'school', value: string) => {
@@ -1029,8 +1036,10 @@ export default function ProfilePage() {
                                     Add Occupation
                                 </Button>
                             </div>                            <div>
-                                <Label>Education</Label>                                {profile.education.map((education, index) => {
-                                    const hasData = education.type || education.school;                                    return (
+                                <Label>Education</Label>
+                                {profile.education.map((education, index) => {
+                                    const hasData = education.type || education.school;
+                                    return (
                                         <div key={index} className="flex gap-2 mt-2">
                                             <div className="flex-1">
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
