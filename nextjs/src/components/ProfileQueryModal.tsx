@@ -40,9 +40,8 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                 <DialogContent className="max-w-md w-[96vw] sm:w-[90vw] p-4 sm:p-6">
                     <div className="flex flex-col items-center justify-center py-8 space-y-4">
                         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                        <h3 className="text-lg font-semibold">Loading Profile...</h3>
-                        <p className="text-sm text-muted-foreground text-center">
-                            Please wait while we fetch the musician's information.
+                        <h3 className="text-lg font-semibold">Loading Profile...</h3>                        <p className="text-sm text-muted-foreground text-center">
+                            Please wait while we fetch the musician&apos;s information.
                         </p>
                     </div>
                 </DialogContent>
@@ -202,15 +201,17 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                                         <p className="text-sm xs:text-base sm:text-base md:text-lg text-muted-foreground mt-1 break-words">{musician.bio}</p>
                                     )}
                                 </div>
-                            </div>
-                              {/* Contact Information Row */}
+                            </div>                              {/* Contact Information Row */}
                             <div className="flex flex-col gap-3 pt-4 border-t">
-                                {musician.location && (
-                                    <div className="flex items-center justify-center sm:justify-start gap-2 text-sm">
-                                        <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                        <span className="break-words">{formatLocation(musician.location)}</span>
-                                    </div>
-                                )}
+                                {(() => {
+                                    const location = formatLocation(musician.location);
+                                    return location && location !== 'Not specified' ? (
+                                        <div className="flex items-center justify-center sm:justify-start gap-2 text-sm">
+                                            <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                            <span className="break-words">{location}</span>
+                                        </div>
+                                    ) : null;
+                                })()}
                                 
                                 {(musician.email || musician.phone) && (
                                     <div className="flex flex-col sm:flex-row gap-2 w-full justify-center sm:justify-start">
