@@ -794,7 +794,7 @@ export default function DatabasePage() {
                                             {/* Occupation */}
                                             {musician.occupation && musician.occupation.length > 0 && (
                                                 <div>
-                                                    <h4 className="text-sm font-medium mb-2">Current Roles</h4>
+                                                    <h4 className="text-sm font-medium mb-2">Current Occupation</h4>
                                                     <div className="text-sm text-muted-foreground">
                                                         {musician.occupation.join(', ')}
                                                     </div>
