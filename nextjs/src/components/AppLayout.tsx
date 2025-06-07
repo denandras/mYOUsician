@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import {usePathname, useRouter} from 'next/navigation';
+import {usePathname} from 'next/navigation';
 import {
     Home,
     User,
@@ -17,9 +17,7 @@ import { createSPASassClient } from "@/lib/supabase/client";
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     const [isUserDropdownOpen, setUserDropdownOpen] = useState(false);
-    const [mounted, setMounted] = useState(false);
-    const pathname = usePathname();
-    const router = useRouter();
+    const [mounted, setMounted] = useState(false);    const pathname = usePathname();
     const userDropdownRef = useRef<HTMLDivElement>(null);
     const sidebarRef = useRef<HTMLDivElement>(null);
 

@@ -1,4 +1,4 @@
-// Demo component to test ProfileQueryModal states
+// Testing component to test ProfileQueryModal states
 "use client";
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -128,9 +128,8 @@ export function ProfileModalDemo() {
     return (
         <div className="p-6 max-w-4xl mx-auto space-y-6">
             <Card>
-                <CardHeader>
-                    <CardTitle>ProfileQueryModal Demo</CardTitle>
-                    <p className="text-muted-foreground">Test different states of the ProfileQueryModal component</p>
+                <CardHeader>                    <CardTitle>ProfileQueryModal Testing Interface</CardTitle>
+                    <p className="text-muted-foreground">Test different states and scenarios of the ProfileQueryModal component</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

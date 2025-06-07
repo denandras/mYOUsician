@@ -636,11 +636,28 @@ export default function DatabasePage() {
             case 'personal website':
                 return <Globe className="h-4 w-4" />;
             case 'tiktok':
-                return <Video className="h-4 w-4" />;
-            default:
+                return <Video className="h-4 w-4" />;            default:
                 return <ExternalLink className="h-4 w-4" />;
         }
-    };    return (
+    };
+
+    const formatLocation = (location: unknown): string => {
+        if (!location) return 'Location not specified';
+        
+        if (typeof location === 'object' && location !== null) {
+            const locationObj = location as Record<string, unknown>;
+            const city = locationObj.city || '';
+            const country = locationObj.country || '';
+            if (city && country) {
+                return `${String(city)}, ${String(country)}`;
+            }
+            return String(city || country) || 'Location not specified';
+        }
+        
+        return String(location);
+    };
+
+    return (
         <div className="space-y-6 p-3 sm:p-6">
             <div className="flex items-center justify-between">
                 <div>
@@ -802,10 +819,9 @@ export default function DatabasePage() {
                                                             {musician.forename || musician.surname 
                                                                 ? `${musician.forename || ''} ${musician.surname || ''}`.trim() 
                                                                 : 'Anonymous'}
-                                                        </CardTitle>
-                                                    </button>
+                                                        </CardTitle>                                                    </button>
                                                     <CardDescription className="truncate">
-                                                        {musician.bio || 'No bio available'}
+                                                        {formatLocation(musician.location)}
                                                     </CardDescription>
                                                 </div>
                                             </div>
