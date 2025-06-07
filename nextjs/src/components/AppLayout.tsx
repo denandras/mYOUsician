@@ -143,12 +143,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                             aria-label="Toggle sidebar"
                         >
                             <Menu className="h-6 w-6"/>                        </button>
-                        
-                        <Link href="/" className="block">
+                          <Link href="/" className="block">
                             <img 
                                 src="/branding/text_vanilla.svg" 
                                 alt={productName}
-                                className="h-8 w-auto"
+                                className="h-5 w-auto"
                             />
                         </Link>
                     </div>
