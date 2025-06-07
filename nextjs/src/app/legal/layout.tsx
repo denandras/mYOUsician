@@ -2,7 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, FileText, ShieldAlert, RefreshCw } from 'lucide-react';
+import { ArrowLeft, FileText, ShieldAlert } from 'lucide-react';
 
 const legalDocuments = [
     {
@@ -16,12 +16,6 @@ const legalDocuments = [
         title: 'Terms of Service',
         icon: FileText,
         description: 'Rules and guidelines for using our service'
-    },
-    {
-        id: 'refund',
-        title: 'Refund Policy',
-        icon: RefreshCw,
-        description: 'Our policy on refunds and cancellations'
     }
 ];
 
@@ -41,9 +35,9 @@ export default function LegalLayout({ children } : { children: React.ReactNode }
                     </button>
                 </div>
 
-                <div className="flex flex-col lg:flex-row gap-8">
+                <div className="flex flex-col xl:flex-row gap-8">
                     {/* Sidebar Navigation */}
-                    <div className="w-full lg:w-64 flex-shrink-0">
+                    <div className="w-full xl:w-64 flex-shrink-0">
                         <div className="bg-white rounded-lg shadow-sm border border-border">
                             <div className="p-4 border-b border-border">
                                 <h2 className="text-lg font-semibold text-foreground">Legal Documents</h2>

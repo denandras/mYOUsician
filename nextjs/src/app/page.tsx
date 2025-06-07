@@ -194,22 +194,9 @@ export default function Home() {
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </div>
-        </section>
-
-        <footer className="bg-background border-t border-gray-200">
+        </section>        <footer className="bg-background border-t border-gray-200">
           <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              <div>
-                <h4 className="text-sm font-semibold text-foreground">Product</h4>
-                <ul className="mt-4 space-y-2">
-                  <li>
-                    <Link href="#features" className="text-foreground/70 hover:text-foreground">
-                      Features
-                    </Link>
-                  </li>
-
-                </ul>
-              </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
               <div>
                 <h4 className="text-sm font-semibold text-foreground">Resources</h4>
                 <ul className="mt-4 space-y-2">
