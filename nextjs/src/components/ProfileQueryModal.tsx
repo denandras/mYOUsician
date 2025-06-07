@@ -184,13 +184,14 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
         return String(location);
     };const fullName = musician.forename || musician.surname 
         ? `${musician.forename || ''} ${musician.surname || ''}`.trim() 
-        : 'Anonymous Musician';    return (        <Dialog open={isOpen} onOpenChange={onClose}>            <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto w-[98vw] xs:w-[95vw] sm:w-[95vw] md:w-[90vw] lg:w-[85vw] p-3 xs:p-4 sm:p-4 md:p-6">
-                <DialogHeader>
+        : 'Anonymous Musician';    return (        <Dialog open={isOpen} onOpenChange={onClose}>            <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden w-[98vw] xs:w-[95vw] sm:w-[95vw] md:w-[90vw] lg:w-[85vw] p-0 flex flex-col">
+                <DialogHeader className="px-3 py-3 xs:px-4 xs:py-4 sm:px-4 sm:py-4 md:px-6 md:py-4 border-b flex-shrink-0">
                     <DialogTitle className="sr-only">
                         {fullName} - Musician Profile
                     </DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4 xs:space-y-5 sm:space-y-6">
+                <div className="overflow-y-auto flex-1 px-3 pb-3 xs:px-4 xs:pb-4 sm:px-4 sm:pb-4 md:px-6 md:pb-6">
+                    <div className="space-y-4 xs:space-y-5 sm:space-y-6 pt-2 md:pt-4">
                     {/* Header Section */}
                     <Card>
                         <CardContent className="pt-4 xs:pt-5 sm:pt-6">
@@ -408,6 +409,7 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                             <span className="hidden sm:inline">•</span>
                             <span>Last updated: {new Date(musician.updated_at).toLocaleDateString()}</span>
                         </div>
+                    </div>
                     </div>
                 </div>
             </DialogContent>
