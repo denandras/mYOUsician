@@ -41,10 +41,9 @@ export default function DashboardContent() {
                     <CardTitle>Quick Actions</CardTitle>
                     <CardDescription>Frequently used features</CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <div className="grid gap-4 md:grid-cols-2">
+                <CardContent>                    <div className="grid gap-4 md:grid-cols-2">
                         <Link
-                            href="/app/user-settings"
+                            href="/app/profile"
                             className="flex items-center gap-3 p-4 border rounded-lg hover:bg-accent transition-colors"
                         >
                             <div className="p-2 bg-primary/10 rounded-full">

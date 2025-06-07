@@ -71,11 +71,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             const client = await createSPASassClient();
             await client.logout();
         } catch (error) {
-            console.error('Error logging out:', error);
-        }
+            console.error('Error logging out:', error);        }
     };
     const handleChangePassword = async () => {
-        router.push('/app/user-settings')
+        router.push('/app/profile')
     };
 
     const getInitials = (email: string) => {
@@ -85,11 +84,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             : parts[0].slice(0, 2).toUpperCase();
     };
 
-    const productName = process.env.NEXT_PUBLIC_PRODUCTNAME;
-
-    const navigation = [
+    const productName = process.env.NEXT_PUBLIC_PRODUCTNAME;    const navigation = [
         { name: 'Homepage', href: '/app', icon: Home },
-        { name: 'Profile Editor', href: '/app/user-settings', icon: User },
+        { name: 'Profile Editor', href: '/app/profile', icon: User },
         { name: 'Database', href: '/app/database', icon: Database },
     ];
 

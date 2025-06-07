@@ -31,7 +31,7 @@ interface LocationData {
   cities: Record<string, Array<{ geonameId: number; name: string; countryCode: string }>>;
 }
 
-export default function UserSettingsPage() {
+export default function ProfilePage() {
     const { user } = useGlobal();
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
