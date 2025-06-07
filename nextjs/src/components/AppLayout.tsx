@@ -9,7 +9,6 @@ import {
     X,
     ChevronDown,
     LogOut,
-    Key,
     Database,
 } from 'lucide-react';
 import { useGlobal } from "@/lib/context/GlobalContext";
@@ -64,17 +63,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [isSidebarOpen]);
-
-    const handleLogout = async () => {
+    }, [isSidebarOpen]);    const handleLogout = async () => {
         try {
             const client = await createSPASassClient();
             await client.logout();
         } catch (error) {
             console.error('Error logging out:', error);        }
-    };
-    const handleChangePassword = async () => {
-        router.push('/app/profile')
     };
 
     const getInitials = (email: string) => {
@@ -181,19 +175,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                     <p className="text-xs text-muted-foreground">Signed in as</p>
                                     <p className="text-sm font-medium text-foreground truncate">
                                         {user?.email || 'Not signed in'}
-                                    </p>
-                                </div>
+                                    </p>                                </div>
                                 <div className="py-1">
-                                    <button
-                                        onClick={() => {
-                                            setUserDropdownOpen(false);
-                                            handleChangePassword()
-                                        }}
-                                        className="w-full flex items-center px-4 py-3 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-                                    >
-                                        <Key className="mr-3 h-4 w-4 text-muted-foreground"/>
-                                        Change Password
-                                    </button>
                                     <button
                                         onClick={() => {
                                             handleLogout();
