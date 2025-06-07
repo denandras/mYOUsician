@@ -33,8 +33,7 @@ export default function AuthAwareButtons({ variant = 'primary' }) {
             );
         }        if (variant === 'mobile') {
             return (
-                <div className="flex flex-col space-y-2 w-full min-h-[96px]">
-                    <div className="w-full h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+                <div className="flex flex-col space-y-2 w-full min-h-[96px] justify-center">
                     <div className="w-full h-12 bg-gray-200 rounded-lg animate-pulse"></div>
                 </div>
             );
