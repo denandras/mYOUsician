@@ -990,10 +990,8 @@ export default function DatabasePage() {
                             </Select>
                         </div>                        {/* Sort By */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium flex items-center gap-1">
-                                Sort By
-                                <span className="text-red-500">*</span>
-                                <span className="text-xs text-red-500">(required)</span>
+                            <label className="text-sm font-medium">
+                                Sort By <span className="text-red-500">*</span> <span className="text-xs text-red-500">(required)</span>
                             </label>
                             <Select value={filters.sortBy} onValueChange={(value) => updateFilter('sortBy', value)}>
                                 <SelectTrigger className={!filters.sortBy ? "bg-red-50 border-red-200" : ""}>
