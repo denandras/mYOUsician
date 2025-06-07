@@ -90,12 +90,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         { name: 'Database', href: '/app/database', icon: Database },
     ];    const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
 
-    // Get current page title based on pathname
-    const getCurrentPageTitle = () => {
-        const currentNav = navigation.find(item => item.href === pathname);
-        return currentNav ? currentNav.name : 'Dashboard';
-    };
-
     return (<div className="min-h-screen bg-background">            {isSidebarOpen && (
                 <div
                     className="fixed inset-0 bg-gray-600 bg-opacity-75 z-20"
@@ -108,13 +102,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 className={`fixed inset-y-0 left-0 w-64 bg-white backdrop-blur-sm shadow-lg border-r border-border transform transition-transform duration-200 ease-in-out z-30 
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
             >                <div className="h-16 flex items-center justify-between px-4 border-b border-border bg-[#083e4d]">
-                    <a href="/" className="block">
+                    <Link href="/" className="block">
                       <img 
                         src="/branding/text_vanilla.svg" 
                         alt={productName}
                         className="h-6 w-auto"
                       />
-                    </a><button
+                    </Link><button
                         onClick={toggleSidebar}
                         className="text-white hover:text-[#b5d1d6] transition-colors"
                         aria-label="Close sidebar"
@@ -156,16 +150,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                             className="text-white hover:text-[#26545c] transition-colors"
                             aria-label="Toggle sidebar"
                         >
-                            <Menu className="h-6 w-6"/>
-                        </button>
+                            <Menu className="h-6 w-6"/>                        </button>
                         
-                        <a href="/" className="block">
+                        <Link href="/" className="block">
                             <img 
                                 src="/branding/text_vanilla.svg" 
                                 alt={productName}
                                 className="h-8 w-auto"
                             />
-                        </a>
+                        </Link>
                     </div>
 
                     <div className="relative ml-auto" ref={userDropdownRef}>

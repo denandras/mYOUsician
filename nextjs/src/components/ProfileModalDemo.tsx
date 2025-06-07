@@ -12,13 +12,12 @@ interface MusicianProfile {
     surname: string | null;
     location?: unknown;
     phone: string | null;
-    bio: string | null;
-    occupation: string[] | null;
+    bio: string | null;    occupation: string[] | null;
     education: string[] | null;
     certificates: string[] | null;
-    genre_instrument: any[] | null;
+    genre_instrument: Record<string, unknown>[] | null;
     video_links: string[] | null;
-    social: any;
+    social: Record<string, unknown>;
     created_at: string;
     updated_at: string;
 }

@@ -777,13 +777,14 @@ export default function ProfilePage() {
         if (!profile.location.countryCode) return "Select country first";
         if (loadingLocations) return "Loading cities...";
         return "Select city";
-    };    // Load data when component mounts or user changes
+    };    // Load data when component mounts or user changes    
     useEffect(() => {
         loadReferenceData();
         loadLocationData();
         if (user?.id) {
             loadProfile();
-        }    }, [user?.id]); // Only depend on user?.id to prevent infinite loops
+        }
+    }, [user?.id, loadReferenceData, loadLocationData, loadProfile]); // Include all dependencies
 
     return (
         <div className="space-y-6 p-3 sm:p-6">

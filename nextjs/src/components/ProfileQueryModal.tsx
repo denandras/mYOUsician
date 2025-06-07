@@ -17,9 +17,9 @@ interface MusicianProfile {
     occupation: string[] | null;
     education: string[] | null;
     certificates: string[] | null;
-    genre_instrument: any[] | null;
+    genre_instrument: Record<string, unknown>[] | null;
     video_links: string[] | null;
-    social: any;
+    social: Record<string, unknown>;
     created_at: string;
     updated_at: string;
 }
@@ -70,9 +70,8 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                             <div className="space-y-2">
                                 <h3 className="text-lg font-semibold text-destructive">
                                     {error ? 'Failed to Load Profile' : 'Profile Not Found'}
-                                </h3>
-                                <p className="text-sm text-muted-foreground">
-                                    {error || "This musician's profile could not be found or may have been removed."}
+                                </h3>                                <p className="text-sm text-muted-foreground">
+                                    {error || "This musician&apos;s profile could not be found or may have been removed."}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
                                     Please try again later or contact support if the issue persists.
@@ -120,9 +119,8 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                                 <User className="h-8 w-8 text-amber-600" />
                             </div>
                             <div className="space-y-2">
-                                <h3 className="text-lg font-semibold text-amber-600">Profile Incomplete</h3>
-                                <p className="text-sm text-muted-foreground">
-                                    This musician hasn't completed their profile yet. Only basic account information is available.
+                                <h3 className="text-lg font-semibold text-amber-600">Profile Incomplete</h3>                                <p className="text-sm text-muted-foreground">
+                                    This musician hasn&apos;t completed their profile yet. Only basic account information is available.
                                 </p>
                                 {musician.email && (
                                     <div className="bg-muted p-3 rounded-md mt-4">
@@ -171,22 +169,21 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
             default:
                 return <ExternalLink className="h-5 w-5" />;
         }
-    };
-
-    const formatLocation = (location: any) => {
+    };    const formatLocation = (location: unknown): string => {
         if (!location) return 'Not specified';
         
-        if (typeof location === 'object') {
-            const city = location.city || '';
-            const country = location.country || '';
+        if (typeof location === 'object' && location !== null) {
+            const locationObj = location as Record<string, unknown>;
+            const city = locationObj.city || '';
+            const country = locationObj.country || '';
             if (city && country) {
-                return `${city}, ${country}`;
+                return `${String(city)}, ${String(country)}`;
             }
-            return city || country || 'Not specified';
+            return String(city || country) || 'Not specified';
         }
         
-        return location.toString();
-    };    const fullName = musician.forename || musician.surname 
+        return String(location);
+    };const fullName = musician.forename || musician.surname 
         ? `${musician.forename || ''} ${musician.surname || ''}`.trim() 
         : 'Anonymous Musician';    return (        <Dialog open={isOpen} onOpenChange={onClose}>            <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto w-[98vw] xs:w-[95vw] sm:w-[95vw] md:w-[90vw] lg:w-[85vw] p-3 xs:p-4 sm:p-4 md:p-6">
                 <DialogHeader className="pb-4">
@@ -206,14 +203,16 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                                     )}
                                 </div>
                             </div>
-                            
-                            {/* Contact Information Row */}
+                              {/* Contact Information Row */}
                             <div className="flex flex-col gap-3 pt-4 border-t">
                                 {musician.location && (
                                     <div className="flex items-center justify-center sm:justify-start gap-2 text-sm">
                                         <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                                         <span className="break-words">{formatLocation(musician.location)}</span>
-                                    </div>                                )}                                  {(musician.email || musician.phone) && (
+                                    </div>
+                                )}
+                                
+                                {(musician.email || musician.phone) && (
                                     <div className="flex flex-col sm:flex-row gap-2 w-full justify-center sm:justify-start">
                                         {musician.email && (
                                             <Button size="sm" asChild className="w-full sm:w-auto sm:min-w-[120px] sm:max-w-[160px] lg:max-w-[140px] bg-[#083e4d] hover:bg-[#0a4a59] text-white border-[#083e4d]">
@@ -245,17 +244,28 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                                     <h2 className="text-base sm:text-lg md:text-xl font-semibold mb-2 sm:mb-3 md:mb-4 flex items-center gap-2">
                                         <Music className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
                                         <span className="break-words">Skills & Instruments</span>
-                                    </h2>
-                                    {musician.genre_instrument && musician.genre_instrument.length > 0 ? (
+                                    </h2>                                    {musician.genre_instrument && musician.genre_instrument.length > 0 ? (
                                         <div className="flex flex-wrap gap-1 sm:gap-2">
-                                            {musician.genre_instrument.map((item, index) => (
-                                                <Badge key={index} variant="secondary" className="text-xs sm:text-sm break-words">
-                                                    {typeof item === 'string' 
-                                                        ? item 
-                                                        : `${item.genre || ''} ${item.instrument || ''}${item.category ? ` (${item.category})` : ''}`.trim()
-                                                    }
-                                                </Badge>
-                                            ))}
+                                            {musician.genre_instrument.map((item, index) => {
+                                                let displayText: string;
+                                                if (typeof item === 'string') {
+                                                    displayText = item;
+                                                } else if (item && typeof item === 'object') {
+                                                    const itemObj = item as Record<string, unknown>;
+                                                    const genre = String(itemObj.genre || '');
+                                                    const instrument = String(itemObj.instrument || '');
+                                                    const category = itemObj.category ? ` (${String(itemObj.category)})` : '';
+                                                    displayText = `${genre} ${instrument}${category}`.trim();
+                                                } else {
+                                                    displayText = String(item || '');
+                                                }
+                                                
+                                                return (
+                                                    <Badge key={index} variant="secondary" className="text-xs sm:text-sm break-words">
+                                                        {displayText}
+                                                    </Badge>
+                                                );
+                                            })}
                                         </div>
                                     ) : (
                                         <p className="text-sm text-muted-foreground">No skills listed</p>
