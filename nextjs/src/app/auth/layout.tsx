@@ -9,23 +9,11 @@ export default function AuthLayout({
     const productName = process.env.NEXT_PUBLIC_PRODUCTNAME;
     const testimonials = [
         {
-            quote: "This template helped us launch our SaaS product in just two weeks. The authentication and multi-tenancy features are rock solid.",
-            author: "Sarah Chen",
-            role: "CTO, TechStart",
-            avatar: "SC"
+            quote: "Why is there no such a platform already? It would be so easy to find those who you study with but do not understand in such a database",
+            author: "Zoltán Körösvölgyi",
+            role: "Art Management Teacher at Liszt Ferenc Academy of Music",
+            avatar: "ZK"
         },
-        {
-            quote: "The best part is how well thought out the organization management is. It saved us months of development time.",
-            author: "Michael Roberts",
-            role: "Founder, DataFlow",
-            avatar: "MR"
-        },
-        {
-            quote: "Clean code, great documentation, and excellent support. Exactly what we needed to get our MVP off the ground.",
-            author: "Jessica Kim",
-            role: "Lead Developer, CloudScale",
-            avatar: "JK"
-        }
     ];
 
     return (
