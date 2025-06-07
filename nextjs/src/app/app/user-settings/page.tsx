@@ -957,39 +957,40 @@ export default function UserSettingsPage() {
                                     }))}
                                     className="mt-2"
                                 />
-                            </div>
-
-                            <div>
-                                <Label>Occupation</Label>
-                                {profile.occupation.map((occupation, index) => {
+                            </div>                            <div>
+                                <Label>Occupation</Label>                                {profile.occupation.map((occupation, index) => {
                                     const hasData = occupation && occupation.trim();
-                                    
-                                    return (
+                                      return (
                                         <div key={index} className="flex gap-2 mt-2">
-                                            <Input
-                                                value={occupation}
-                                                onChange={(e) => updateArrayItem('occupation', index, e.target.value)}
-                                                placeholder="e.g., Music Teacher, Session Musician"
-                                            />
-                                            {/* Single trash can that clears data or removes row */}
+                                            <div className="flex-1">
+                                                <Input
+                                                    value={occupation}
+                                                    onChange={(e) => updateArrayItem('occupation', index, e.target.value)}
+                                                    placeholder="e.g., Music Teacher, Session Musician"
+                                                />
+                                            </div>
+                                            {/* Trash button box */}
                                             {(hasData || profile.occupation.length > 1) && (
-                                                <Button
-                                                    type="button"
-                                                    variant="delete"
-                                                    size="icon"
-                                                    onClick={() => {
-                                                        if (hasData) {
-                                                            // If there's data, clear it first
-                                                            updateArrayItem('occupation', index, '');
-                                                        } else if (profile.occupation.length > 1) {
-                                                            // If no data and multiple rows, remove the row
-                                                            removeArrayItem('occupation', index);
-                                                        }
-                                                    }}
-                                                    title={hasData ? "Clear this field" : "Delete this row"}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
+                                                <div className="flex items-stretch">
+                                                    <Button
+                                                        type="button"
+                                                        variant="delete"
+                                                        size="icon"
+                                                        className="h-full"
+                                                        onClick={() => {
+                                                            if (hasData) {
+                                                                // If there's data, clear it first
+                                                                updateArrayItem('occupation', index, '');
+                                                            } else if (profile.occupation.length > 1) {
+                                                                // If no data and multiple rows, remove the row
+                                                                removeArrayItem('occupation', index);
+                                                            }
+                                                        }}
+                                                        title={hasData ? "Clear this field" : "Delete this row"}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
                                             )}
                                         </div>
                                     );
@@ -1005,63 +1006,66 @@ export default function UserSettingsPage() {
                                 </Button>
                             </div>                            <div>
                                 <Label>Education</Label>                                {profile.education.map((education, index) => {
-                                    const hasData = education.type || education.school;
-                                    return (
-                                        // Wrap in flex and items-stretch for full height trash button
-                                        <div key={index} className="flex gap-2 mt-2 items-stretch">
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
-                                                <div>
-                                                    <Select
-                                                        value={education.type}
-                                                        onValueChange={(value) => updateEducation(index, 'type', value)}
-                                                    >
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select education level" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {(() => {
-                                                                // Safety check for education_types availability
-                                                                if (!referenceData.education_types || !Array.isArray(referenceData.education_types)) {
-                                                                    return null;
-                                                                }
-                                                                const sortedEducation = referenceData.education_types
-                                                                    .sort((a, b) => (a.rank || 999) - (b.rank || 999));
-                                                                return sortedEducation.map(edu => (
-                                                                    <SelectItem key={edu.id} value={edu.name}>
-                                                                        {edu.name}
-                                                                    </SelectItem>
-                                                                ));
-                                                            })()}
-                                                        </SelectContent>
-                                                    </Select>
+                                    const hasData = education.type || education.school;                                    return (
+                                        <div key={index} className="flex gap-2 mt-2">
+                                            <div className="flex-1">
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                    <div>
+                                                        <Select
+                                                            value={education.type}
+                                                            onValueChange={(value) => updateEducation(index, 'type', value)}
+                                                        >
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select education level" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {(() => {
+                                                                    // Safety check for education_types availability
+                                                                    if (!referenceData.education_types || !Array.isArray(referenceData.education_types)) {
+                                                                        return null;
+                                                                    }
+                                                                    const sortedEducation = referenceData.education_types
+                                                                        .sort((a, b) => (a.rank || 999) - (b.rank || 999));
+                                                                    return sortedEducation.map(edu => (
+                                                                        <SelectItem key={edu.id} value={edu.name}>
+                                                                            {edu.name}
+                                                                        </SelectItem>
+                                                                    ));
+                                                                })()}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                    <Input
+                                                        value={education.school}
+                                                        onChange={(e) => updateEducation(index, 'school', e.target.value)}
+                                                        placeholder="School/Institution name"
+                                                        className="flex-1"
+                                                    />
                                                 </div>
-                                                <Input
-                                                    value={education.school}
-                                                    onChange={(e) => updateEducation(index, 'school', e.target.value)}
-                                                    placeholder="School/Institution name"
-                                                    className="flex-1"
-                                                />
-                                            </div>                                            {/* Trash button fills height of both fields */}
+                                            </div>
+                                            {/* Trash button box */}
                                             {(hasData || profile.education.length > 1) && (
-                                                <Button
-                                                    type="button"
-                                                    variant="delete"
-                                                    size="icon"
-                                                    className="self-stretch !h-auto min-h-[2.5rem]"
-                                                    onClick={() => {
-                                                        if (hasData) {
-                                                            // If there's data, clear it first
-                                                            updateEducation(index, 'type', '');
-                                                            updateEducation(index, 'school', '');
-                                                        } else if (profile.education.length > 1) {
-                                                            // If no data and multiple rows, remove the row
-                                                            removeEducation(index);
-                                                        }
-                                                    }}
-                                                    title={hasData ? "Clear this row" : "Delete this row"}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
+                                                <div className="flex items-stretch">
+                                                    <Button
+                                                        type="button"
+                                                        variant="delete"
+                                                        size="icon"
+                                                        className="h-full"
+                                                        onClick={() => {
+                                                            if (hasData) {
+                                                                // If there's data, clear it first
+                                                                updateEducation(index, 'type', '');
+                                                                updateEducation(index, 'school', '');
+                                                            } else if (profile.education.length > 1) {
+                                                                // If no data and multiple rows, remove the row
+                                                                removeEducation(index);
+                                                            }
+                                                        }}
+                                                        title={hasData ? "Clear this row" : "Delete this row"}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
                                             )}
                                         </div>
                                     );
@@ -1078,36 +1082,39 @@ export default function UserSettingsPage() {
                             </div>
 
                             <div>
-                                <Label>Certificates</Label>
-                                {profile.certificates.map((certificate, index) => {
+                                <Label>Certificates</Label>                                {profile.certificates.map((certificate, index) => {
                                     const hasData = certificate && certificate.trim();
-                                    
-                                    return (
+                                      return (
                                         <div key={index} className="flex gap-2 mt-2">
-                                            <Input
-                                                value={certificate}
-                                                onChange={(e) => updateArrayItem('certificates', index, e.target.value)}
-                                                placeholder="e.g. Music Competition, Young Artist Award"
-                                            />
-                                            {/* Single trash can that clears data or removes row */}
+                                            <div className="flex-1">
+                                                <Input
+                                                    value={certificate}
+                                                    onChange={(e) => updateArrayItem('certificates', index, e.target.value)}
+                                                    placeholder="e.g. Music Competition, Young Artist Award"
+                                                />
+                                            </div>
+                                            {/* Trash button box */}
                                             {(hasData || profile.certificates.length > 1) && (
-                                                <Button
-                                                    type="button"
-                                                    variant="delete"
-                                                    size="icon"
-                                                    onClick={() => {
-                                                        if (hasData) {
-                                                            // If there's data, clear it first
-                                                            updateArrayItem('certificates', index, '');
-                                                        } else if (profile.certificates.length > 1) {
-                                                            // If no data and multiple rows, remove the row
-                                                            removeArrayItem('certificates', index);
-                                                        }
-                                                    }}
-                                                    title={hasData ? "Clear this field" : "Delete this row"}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
+                                                <div className="flex items-stretch">
+                                                    <Button
+                                                        type="button"
+                                                        variant="delete"
+                                                        size="icon"
+                                                        className="h-full"
+                                                        onClick={() => {
+                                                            if (hasData) {
+                                                                // If there's data, clear it first
+                                                                updateArrayItem('certificates', index, '');
+                                                            } else if (profile.certificates.length > 1) {
+                                                                // If no data and multiple rows, remove the row
+                                                                removeArrayItem('certificates', index);
+                                                            }
+                                                        }}
+                                                        title={hasData ? "Clear this field" : "Delete this row"}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
                                             )}
                                         </div>
                                     );
@@ -1145,96 +1152,100 @@ export default function UserSettingsPage() {
                         </CardHeader>
                         <CardContent className="space-y-4">                            <div>
                                 <Label>Genres & Instruments</Label>                                {profile.genre_instrument.map((item, index) => {
-                                    const hasData = item.genre || item.instrument || item.category;
-                                    return (
-                                        // Wrap in flex and items-stretch for full height trash button
-                                        <div key={index} className="flex gap-2 mt-2 items-stretch">
-                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 flex-1">
-                                                <Select
-                                                    value={item.genre}
-                                                    onValueChange={(value) => updateGenreInstrument(index, 'genre', value)}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Genre" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {referenceData.genres && Array.isArray(referenceData.genres) 
-                                                            ? referenceData.genres.map(genre => (
-                                                                <SelectItem key={genre.id} value={genre.name}>
-                                                                    {genre.name}
-                                                                </SelectItem>
-                                                            ))
-                                                            : null
-                                                        }
-                                                    </SelectContent>
-                                                </Select>
-                                                
-                                                <Select
-                                                    value={item.instrument}
-                                                    onValueChange={(value) => updateGenreInstrument(index, 'instrument', value)}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Instrument" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {Object.keys(instrumentsByCategory).length > 0 ? (
-                                                            Object.keys(instrumentsByCategory).sort().flatMap(category => [
-                                                                <SelectItem key={category + '-label'} value={category + '-label'} disabled className="font-semibold text-muted-foreground cursor-default opacity-100 select-none pointer-events-none" style={{ pointerEvents: 'none' }}>
-                                                                    ---[{category}]---
-                                                                </SelectItem>,
-                                                                ...instrumentsByCategory[category]
-                                                                    .sort((a, b) => a.name.localeCompare(b.name))
-                                                                    .map(instrument => (
+                                    const hasData = item.genre || item.instrument || item.category;                                    return (
+                                        <div key={index} className="flex gap-2 mt-2">
+                                            <div className="flex-1">
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                                    <Select
+                                                        value={item.genre}
+                                                        onValueChange={(value) => updateGenreInstrument(index, 'genre', value)}
+                                                    >
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Genre" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {referenceData.genres && Array.isArray(referenceData.genres) 
+                                                                ? referenceData.genres.map(genre => (
+                                                                    <SelectItem key={genre.id} value={genre.name}>
+                                                                        {genre.name}
+                                                                    </SelectItem>
+                                                                ))
+                                                                : null
+                                                            }
+                                                        </SelectContent>
+                                                    </Select>
+                                                    
+                                                    <Select
+                                                        value={item.instrument}
+                                                        onValueChange={(value) => updateGenreInstrument(index, 'instrument', value)}
+                                                    >
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Instrument" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {Object.keys(instrumentsByCategory).length > 0 ? (
+                                                                Object.keys(instrumentsByCategory).sort().flatMap(category => [
+                                                                    <SelectItem key={category + '-label'} value={category + '-label'} disabled className="font-semibold text-muted-foreground cursor-default opacity-100 select-none pointer-events-none" style={{ pointerEvents: 'none' }}>
+                                                                        ---[{category}]---
+                                                                    </SelectItem>,
+                                                                    ...instrumentsByCategory[category]
+                                                                        .sort((a, b) => a.name.localeCompare(b.name))
+                                                                        .map(instrument => (
+                                                                            <SelectItem key={instrument.id} value={instrument.name}>
+                                                                                {instrument.name}
+                                                                            </SelectItem>
+                                                                        ))
+                                                                ])
+                                                            ) : (
+                                                                referenceData.instruments && Array.isArray(referenceData.instruments)
+                                                                    ? referenceData.instruments.map(instrument => (
                                                                         <SelectItem key={instrument.id} value={instrument.name}>
                                                                             {instrument.name}
                                                                         </SelectItem>
                                                                     ))
-                                                            ])
-                                                        ) : (
-                                                            referenceData.instruments && Array.isArray(referenceData.instruments)
-                                                                ? referenceData.instruments.map(instrument => (
-                                                                    <SelectItem key={instrument.id} value={instrument.name}>
-                                                                        {instrument.name}
-                                                                    </SelectItem>
-                                                                ))
-                                                                : null
-                                                        )}
-                                                    </SelectContent>
-                                                </Select>
+                                                                    : null
+                                                            )}
+                                                        </SelectContent>
+                                                    </Select>
 
-                                                <Select
-                                                    value={item.category}
-                                                    onValueChange={(value) => updateGenreInstrument(index, 'category', value)}
-                                                >                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Category" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="artist">artist</SelectItem>
-                                                        <SelectItem value="teacher">teacher</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>                                            {/* Trash button fills height of all selects */}
+                                                    <Select
+                                                        value={item.category}
+                                                        onValueChange={(value) => updateGenreInstrument(index, 'category', value)}
+                                                    >
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Category" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="artist">artist</SelectItem>
+                                                            <SelectItem value="teacher">teacher</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            </div>
+                                            {/* Trash button box */}
                                             {(hasData || profile.genre_instrument.length > 1) && (
-                                                <Button
-                                                    type="button"
-                                                    variant="delete"
-                                                    size="icon"
-                                                    className="self-stretch !h-auto min-h-[2.5rem]"
-                                                    onClick={() => {
-                                                        if (hasData) {
-                                                            // If there's data, clear it first
-                                                            updateGenreInstrument(index, 'genre', '');
-                                                            updateGenreInstrument(index, 'instrument', '');
-                                                            updateGenreInstrument(index, 'category', '');
-                                                        } else if (profile.genre_instrument.length > 1) {
-                                                            // If no data and multiple rows, remove the row
-                                                            removeGenreInstrument(index);
-                                                        }
-                                                    }}
-                                                    title={hasData ? "Clear this row" : "Delete this row"}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
+                                                <div className="flex items-stretch">
+                                                    <Button
+                                                        type="button"
+                                                        variant="delete"
+                                                        size="icon"
+                                                        className="h-full"
+                                                        onClick={() => {
+                                                            if (hasData) {
+                                                                // If there's data, clear it first
+                                                                updateGenreInstrument(index, 'genre', '');
+                                                                updateGenreInstrument(index, 'instrument', '');
+                                                                updateGenreInstrument(index, 'category', '');
+                                                            } else if (profile.genre_instrument.length > 1) {
+                                                                // If no data and multiple rows, remove the row
+                                                                removeGenreInstrument(index);
+                                                            }
+                                                        }}
+                                                        title={hasData ? "Clear this row" : "Delete this row"}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
                                             )}
                                         </div>
                                     );
@@ -1251,36 +1262,39 @@ export default function UserSettingsPage() {
                             </div>
 
                             <div>
-                                <Label>Video Links</Label>
-                                {profile.video_links.map((link, index) => {
+                                <Label>Video Links</Label>                                {profile.video_links.map((link, index) => {
                                     const hasData = link && link.trim();
-                                    
-                                    return (
+                                      return (
                                         <div key={index} className="flex gap-2 mt-2">
-                                            <Input
-                                                value={link}
-                                                onChange={(e) => updateArrayItem('video_links', index, e.target.value)}
-                                                placeholder="https://youtube.com/watch?v=..."
-                                            />
-                                            {/* Single trash can that clears data or removes row */}
+                                            <div className="flex-1">
+                                                <Input
+                                                    value={link}
+                                                    onChange={(e) => updateArrayItem('video_links', index, e.target.value)}
+                                                    placeholder="https://"
+                                                />
+                                            </div>
+                                            {/* Trash button box */}
                                             {(hasData || profile.video_links.length > 1) && (
-                                                <Button
-                                                    type="button"
-                                                    variant="delete"
-                                                    size="icon"
-                                                    onClick={() => {
-                                                        if (hasData) {
-                                                            // If there's data, clear it first
-                                                            updateArrayItem('video_links', index, '');
-                                                        } else if (profile.video_links.length > 1) {
-                                                            // If no data and multiple rows, remove the row
-                                                            removeArrayItem('video_links', index);
-                                                        }
-                                                    }}
-                                                    title={hasData ? "Clear this field" : "Delete this row"}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
+                                                <div className="flex items-stretch">
+                                                    <Button
+                                                        type="button"
+                                                        variant="delete"
+                                                        size="icon"
+                                                        className="h-full"
+                                                        onClick={() => {
+                                                            if (hasData) {
+                                                                // If there's data, clear it first
+                                                                updateArrayItem('video_links', index, '');
+                                                            } else if (profile.video_links.length > 1) {
+                                                                // If no data and multiple rows, remove the row
+                                                                removeArrayItem('video_links', index);
+                                                            }
+                                                        }}
+                                                        title={hasData ? "Clear this field" : "Delete this row"}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
                                             )}
                                         </div>
                                     );
