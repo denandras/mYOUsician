@@ -12,6 +12,9 @@ const config: Config = {
   		screens: {
   			'xs': '475px',
   		},
+  		fontFamily: {
+  			'sans': ['var(--font-poppins)', 'system-ui', 'sans-serif'],
+  		},
   		colors: {
   			primary: {
   				'50': 'var(--color-primary-50)',
