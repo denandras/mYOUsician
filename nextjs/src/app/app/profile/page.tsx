@@ -35,10 +35,10 @@ export default function ProfilePage() {
     const { user } = useGlobal();
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [profileLoading, setProfileLoading] = useState(false);
+    const [loading, setLoading] = useState(false);    const [profileLoading, setProfileLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [profileSaved, setProfileSaved] = useState(false);
 
     // Location service state
     const [locationServiceStatus, setLocationServiceStatus] = useState<'loading' | 'available' | 'unavailable'>('loading');
@@ -589,11 +589,14 @@ export default function ProfilePage() {
                     genre_instrument: cleanedProfile.genre_instrument,
                     video_links: cleanedProfile.video_links,
                     social: cleanedProfile.social
-                });
-
-            if (error) throw error;
+                });            if (error) throw error;
             
-            setSuccess('Profile updated successfully');
+            setProfileSaved(true);
+            
+            // Reset the saved state after 1 second
+            setTimeout(() => {
+                setProfileSaved(false);
+            }, 1000);
         } catch (err: unknown) {
             console.error('Error saving profile:', err);
             const errorMessage = err instanceof Error ? err.message : 'Failed to save profile';
@@ -655,15 +658,14 @@ export default function ProfilePage() {
                 [field]: newArray.length === 0 ? [''] : newArray
             };
         });
-    };
-
-    const updateArrayItem = (field: string, index: number, value: string) => {
+    };    const updateArrayItem = (field: string, index: number, value: string) => {
         setProfile(prev => ({
             ...prev,
             [field]: (prev[field as keyof typeof prev] as string[]).map((item, i) => 
                 i === index ? value : item
             )
         }));
+        setProfileSaved(false);
     };
 
     const addGenreInstrument = () => {
@@ -680,15 +682,14 @@ export default function ProfilePage() {
                 genre_instrument: newGenreInstrument.length === 0 ? [{ genre: '', instrument: '', category: '' }] : newGenreInstrument
             };
         });
-    };
-
-    const updateGenreInstrument = (index: number, field: string, value: string) => {
+    };    const updateGenreInstrument = (index: number, field: string, value: string) => {
         setProfile(prev => ({
             ...prev,
             genre_instrument: prev.genre_instrument.map((item, i) => 
                 i === index ? { ...item, [field]: value } : item
             )
         }));
+        setProfileSaved(false);
     };
 
     // Add these helper functions for education
@@ -706,17 +707,15 @@ export default function ProfilePage() {
                 education: newEducation.length === 0 ? [{ type: '', school: '' }] : newEducation
             };
         });
-    };
-
-    const updateEducation = (index: number, field: 'type' | 'school', value: string) => {
+    };    const updateEducation = (index: number, field: 'type' | 'school', value: string) => {
         setProfile(prev => ({
             ...prev,
             education: prev.education.map((item, i) => 
                 i === index ? { ...item, [field]: value } : item
             )
         }));
-    };    const handleCountryChange = useCallback((countryName: string) => {
-        const country = locationData.countries.find(c => c.countryName === countryName);
+        setProfileSaved(false);
+    };const handleCountryChange = useCallback((countryName: string) => {        const country = locationData.countries.find(c => c.countryName === countryName);
         if (country) {
             // Use functional update to ensure we have the latest state
             setProfile(prev => {
@@ -730,6 +729,7 @@ export default function ProfilePage() {
                 };
                 return newProfile;
             });
+            setProfileSaved(false);
             
             // Load cities for the new country
             loadCitiesForCountry(country.countryCode);
@@ -742,6 +742,7 @@ export default function ProfilePage() {
             };
             return newProfile;
         });
+        setProfileSaved(false);
     }, []);
 
     // Add validation function
@@ -866,10 +867,12 @@ export default function ProfilePage() {
                                     <Label htmlFor="forename">First Name</Label>
                                     <Input
                                         id="forename"
-                                        value={profile.forename}
-                                        onChange={(e) => setProfile(prev => ({ 
-                                            ...prev, forename: e.target.value 
-                                        }))}
+                                        value={profile.forename}                                        onChange={(e) => {
+                                            setProfile(prev => ({ 
+                                                ...prev, forename: e.target.value 
+                                            }));
+                                            setProfileSaved(false);
+                                        }}
                                         placeholder="Enter your first name"
                                         className={!profile.forename ? "text-muted-foreground placeholder:text-muted-foreground/60" : ""}
                                     />
@@ -878,10 +881,12 @@ export default function ProfilePage() {
                                     <Label htmlFor="surname">Last Name</Label>
                                     <Input
                                         id="surname"
-                                        value={profile.surname}
-                                        onChange={(e) => setProfile(prev => ({ 
-                                            ...prev, surname: e.target.value 
-                                        }))}
+                                        value={profile.surname}                                        onChange={(e) => {
+                                            setProfile(prev => ({ 
+                                                ...prev, surname: e.target.value 
+                                            }));
+                                            setProfileSaved(false);
+                                        }}
                                         placeholder="Enter your last name"
                                         className={!profile.surname ? "text-muted-foreground placeholder:text-muted-foreground/60" : ""}
                                     />
@@ -948,23 +953,25 @@ export default function ProfilePage() {
                                 <div>
                                     <Label htmlFor="phone">Phone</Label>                                    <Input
                                         id="phone"
-                                        value={profile.phone}
-                                        onChange={(e) => setProfile(prev => ({ 
-                                            ...prev, phone: e.target.value 
-                                        }))}
-                                        placeholder="e.g. +1234567890"
+                                        value={profile.phone}                                        onChange={(e) => {
+                                            setProfile(prev => ({ 
+                                                ...prev, phone: e.target.value 
+                                            }));
+                                            setProfileSaved(false);
+                                        }}placeholder="e.g. +1234567890"
                                         className={!profile.phone ? "text-muted-foreground placeholder:text-muted-foreground/60" : ""}
                                     />
                                 </div>
-                            </div>
-
-                            <Button
+                            </div>                            <Button
                                 onClick={saveProfile}
                                 disabled={profileLoading}
-                                variant="teal"
-                                className="w-full text-white"
-                            >
-                                {profileLoading ? 'Saving...' : 'Save'}
+                                variant={profileSaved ? "default" : "teal"}
+                                className={`w-full text-white transition-all duration-1000 ${
+                                    profileSaved 
+                                        ? "bg-green-400 hover:bg-green-500" 
+                                        : ""
+                                }`}                            >
+                                {profileLoading ? 'Saving...' : profileSaved ? 'Saved ✓' : 'Save'}
                             </Button>
                         </CardContent>
                     </Card>
@@ -983,10 +990,12 @@ export default function ProfilePage() {
                                 <Label htmlFor="bio">Bio</Label>                                <Textarea
                                     id="bio"
                                     rows={4}
-                                    value={profile.bio}
-                                    onChange={(e) => setProfile(prev => ({ 
-                                        ...prev, bio: e.target.value 
-                                    }))}
+                                    value={profile.bio}                                    onChange={(e) => {
+                                        setProfile(prev => ({ 
+                                            ...prev, bio: e.target.value 
+                                        }));
+                                        setProfileSaved(false);
+                                    }}
                                     placeholder="Tell us about your musical journey, style, and experience..."
                                     className={`mt-2 ${!profile.bio ? "text-muted-foreground placeholder:text-muted-foreground/60" : ""}`}
                                 />
@@ -1158,18 +1167,18 @@ export default function ProfilePage() {
                                     onClick={() => addArrayItem('certificates')}
                                     className="mt-2"
                                 >
-                                    <Plus className="h-4 w-4 mr-2" />
-                                    Add Certificate
+                                    <Plus className="h-4 w-4 mr-2" />                                    Add Certificate
                                 </Button>
-                            </div>
-
-                            <Button
+                            </div>                            <Button
                                 onClick={saveProfile}
                                 disabled={profileLoading}
-                                variant="teal"
-                                className="w-full text-white"
-                            >
-                                {profileLoading ? 'Saving...' : 'Save'}
+                                variant={profileSaved ? "default" : "teal"}
+                                className={`w-full text-white transition-all duration-1000 ${
+                                    profileSaved 
+                                        ? "bg-green-400 hover:bg-green-500" 
+                                        : ""
+                                }`}                            >
+                                {profileLoading ? 'Saving...' : profileSaved ? 'Saved ✓' : 'Save'}
                             </Button>
                         </CardContent>
                     </Card>
@@ -1352,8 +1361,7 @@ export default function ProfilePage() {
                                                     {platform.name}
                                                 </Label>                                                <Input
                                                     id={platform.name.toLowerCase()}
-                                                    value={currentValue}
-                                                    onChange={(e) => {
+                                                    value={currentValue}                                                    onChange={(e) => {
                                                         const newValue = e.target.value;
                                                         setProfile(prev => ({
                                                             ...prev,
@@ -1362,6 +1370,7 @@ export default function ProfilePage() {
                                                                 [platform.name.toLowerCase()]: newValue 
                                                             }
                                                         }));
+                                                        setProfileSaved(false);
                                                     }}
                                                     placeholder={platform.base_url || `${platform.name} URL`}
                                                     className={!isValid ? 'border-red-500 focus:border-red-500' : (!currentValue ? "text-muted-foreground placeholder:text-muted-foreground/60" : "")}
@@ -1373,17 +1382,17 @@ export default function ProfilePage() {
                                                 )}
                                             </div>
                                         );
-                                    })}
-                                </div>
-                            </div>
-
-                            <Button
+                                    })}                                </div>
+                            </div>                            <Button
                                 onClick={saveProfile}
                                 disabled={profileLoading}
-                                variant="teal"
-                                className="w-full text-white"
-                            >
-                                {profileLoading ? 'Saving...' : 'Save'}
+                                variant={profileSaved ? "default" : "teal"}
+                                className={`w-full text-white transition-all duration-1000 ${
+                                    profileSaved 
+                                        ? "bg-green-400 hover:bg-green-500" 
+                                        : ""
+                                }`}                            >
+                                {profileLoading ? 'Saving...' : profileSaved ? 'Saved ✓' : 'Save'}
                             </Button>
                         </CardContent>
                     </Card>
