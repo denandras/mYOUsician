@@ -13,7 +13,7 @@ const buttonVariants = cva(
         teal: "bg-foreground text-background hover:bg-foreground/90", /* Uses the teal color for Save buttons */
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        delete: "bg-[#e62745] text-white hover:bg-[#cc2340]", /* Red background with white text for delete buttons */
+        delete: "bg-[#e62745] text-white hover:bg-[#cc2340] transition-colors duration-200", /* Red background with white text for delete buttons */
         outline:
           "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
         secondary:

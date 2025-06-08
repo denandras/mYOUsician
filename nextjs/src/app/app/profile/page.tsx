@@ -613,13 +613,12 @@ export default function ProfilePage() {
                     video_links: cleanedProfile.video_links,
                     social: cleanedProfile.social
                 });            if (error) throw error;
+              setProfileSaved(true);
             
-            setProfileSaved(true);
-            
-            // Reset the saved state after 1 second
+            // Reset the saved state after 2 seconds
             setTimeout(() => {
                 setProfileSaved(false);
-            }, 1000);
+            }, 2000);
         } catch (err: unknown) {
             console.error('Error saving profile:', err);
             const errorMessage = err instanceof Error ? err.message : 'Failed to save profile';
@@ -663,35 +662,32 @@ export default function ProfilePage() {
             }, 2000);        } catch (err: Error | unknown) {
             if (err instanceof Error) {
                 console.error('Error updating password:', err);
-                
-                // Handle specific AuthApiError cases with button feedback
+                  // Handle specific AuthApiError cases with button feedback
                 const errorMessage = err.message.toLowerCase();
                 if (errorMessage.includes('new password should be different') || 
                     errorMessage.includes('same_password') ||
                     errorMessage.includes('password must be different')) {
-                    setPasswordError('Must be different from current password');
+                    setPasswordError('Must be different');
                 } else if (errorMessage.includes('password is too weak')) {
                     setPasswordError('Password too weak');
                 } else if (errorMessage.includes('password too short')) {
-                    setPasswordError('Password too short (min 6 characters)');
-                } else {
+                    setPasswordError('Password too short (min 6 characters)');                } else {
                     setPasswordError('Update failed');
                     setError(err.message);
                 }
                 
-                // Clear password error after 4 seconds
+                // Clear password error after 2 seconds
                 setTimeout(() => {
                     setPasswordError('');
-                }, 4000);
+                }, 2000);
             } else {
-                console.error('Error updating password:', err);
-                setPasswordError('Update failed');
+                console.error('Error updating password:', err);                setPasswordError('Update failed');
                 setError('Failed to update password');
                 
-                // Clear password error after 4 seconds
+                // Clear password error after 2 seconds
                 setTimeout(() => {
                     setPasswordError('');
-                }, 4000);
+                }, 2000);
             }
         } finally {
             setLoading(false);
@@ -1113,8 +1109,7 @@ export default function ProfilePage() {
                                             setProfile(prev => ({ 
                                                 ...prev, phone: e.target.value 
                                             }));
-                                            setProfileSaved(false);
-                                        }}placeholder="e.g. +1234567890"
+                                            setProfileSaved(false);                                }}placeholder="e.g. +1234567890"
                                         className={!profile.phone ? "text-muted-foreground placeholder:text-muted-foreground/60" : ""}
                                     />
                                 </div>
@@ -1122,11 +1117,11 @@ export default function ProfilePage() {
                                 onClick={saveProfile}
                                 disabled={profileLoading}
                                 variant={profileSaved ? "default" : "teal"}
-                                className={`w-full text-white transition-all duration-1000 ${
+                                className={`w-full text-white transition-all duration-700 ${
                                     profileSaved 
                                         ? "bg-green-400 hover:bg-green-500" 
                                         : ""
-                                }`}                            >
+                                }`}>
                                 {profileLoading ? 'Saving...' : profileSaved ? 'Saved ✓' : 'Save'}
                             </Button>
                         </CardContent>
@@ -1280,7 +1275,7 @@ export default function ProfilePage() {
                             </div>
 
                             <div>
-                                <Label>Certificates</Label>                                {profile.certificates.map((certificate, index) => {
+                                <Label>Certificates & Awards</Label>                                {profile.certificates.map((certificate, index) => {
                                     const hasData = certificate && certificate.trim();
                                       return (
                                         <div key={index} className="flex gap-2 mt-2">
@@ -1322,18 +1317,17 @@ export default function ProfilePage() {
                                     variant="outline"
                                     onClick={() => addArrayItem('certificates')}
                                     className="mt-2"
-                                >
-                                    <Plus className="h-4 w-4 mr-2" />                                    Add Certificate
+                                >                                    <Plus className="h-4 w-4 mr-2" />                                    Add Certificate
                                 </Button>
                             </div>                            <Button
                                 onClick={saveProfile}
                                 disabled={profileLoading}
                                 variant={profileSaved ? "default" : "teal"}
-                                className={`w-full text-white transition-all duration-1000 ${
+                                className={`w-full text-white transition-all duration-700 ${
                                     profileSaved 
                                         ? "bg-green-400 hover:bg-green-500" 
                                         : ""
-                                }`}                            >
+                                }`}>
                                 {profileLoading ? 'Saving...' : profileSaved ? 'Saved ✓' : 'Save'}
                             </Button>
                         </CardContent>
@@ -1457,12 +1451,11 @@ export default function ProfilePage() {
                                         <div key={index} className="flex gap-2 mt-2">
                                             <div className="flex-1">                                                <Input
                                                     value={link}
-                                                    onChange={(e) => updateArrayItem('video_links', index, e.target.value)}
-                                                    placeholder="https://youtube.com/watch?v=... or https://vimeo.com/..."
-                                                    className={!isValid ? 'border-red-500 focus:border-red-500' : (!link ? "text-muted-foreground placeholder:text-muted-foreground/60" : "")}
+                                                    onChange={(e) => updateArrayItem('video_links', index, e.target.value)}                                                    placeholder="https://youtube.com/watch?v=... or https://vimeo.com/..."
+                                                    className={!isValid ? 'border-[#083e4d] focus:border-[#083e4d]' : (!link ? "text-muted-foreground placeholder:text-muted-foreground/60" : "")}
                                                 />
                                                 {!isValid && link && (
-                                                    <p className="text-xs text-red-500 mt-1">
+                                                    <p className="text-xs text-[#083e4d] mt-1">
                                                         Video link must start with https://
                                                     </p>
                                                 )}
@@ -1527,27 +1520,25 @@ export default function ProfilePage() {
                                                             }
                                                         }));
                                                         setProfileSaved(false);
-                                                    }}
-                                                    placeholder={platform.base_url || `${platform.name} URL`}
-                                                    className={!isValid ? 'border-red-500 focus:border-red-500' : (!currentValue ? "text-muted-foreground placeholder:text-muted-foreground/60" : "")}
+                                                    }}                                                    placeholder={platform.base_url || `${platform.name} URL`}
+                                                    className={!isValid ? 'border-[#083e4d] focus:border-[#083e4d]' : (!currentValue ? "text-muted-foreground placeholder:text-muted-foreground/60" : "")}
                                                 />
                                                 {!isValid && currentValue && (
-                                                    <p className="text-xs text-red-500 mt-1">
+                                                    <p className="text-xs text-[#083e4d] mt-1">
                                                         URL must start with {platform.base_url}
                                                     </p>
                                                 )}
                                             </div>
-                                        );
-                                    })}                                </div>
+                                        );                                })}                                </div>
                             </div>                            <Button
                                 onClick={saveProfile}
                                 disabled={profileLoading}
                                 variant={profileSaved ? "default" : "teal"}
-                                className={`w-full text-white transition-all duration-1000 ${
+                                className={`w-full text-white transition-all duration-700 ${
                                     profileSaved 
                                         ? "bg-green-400 hover:bg-green-500" 
                                         : ""
-                                }`}                            >
+                                }`}>
                                 {profileLoading ? 'Saving...' : profileSaved ? 'Saved ✓' : 'Save'}
                             </Button>
                         </CardContent>
@@ -1588,15 +1579,15 @@ export default function ProfilePage() {
                                         }}
                                         required
                                     />
-                                </div><Button
+                                </div>                                <Button
                                     type="submit"
                                     disabled={loading}
                                     variant={passwordSaved ? "default" : passwordError ? "destructive" : "delete"}
-                                    className={`w-full text-white transition-all duration-1000 ${
+                                    className={`w-full text-white transition-all duration-700 ${
                                         passwordSaved 
                                             ? "bg-green-400 hover:bg-green-500" 
                                             : passwordError 
-                                                ? "bg-red-500 hover:bg-red-600"
+                                                ? "bg-[#083e4d] hover:bg-[#062f3b]"
                                                 : ""
                                     }`}
                                 >
@@ -1675,7 +1666,7 @@ export default function ProfilePage() {
                         </AlertDialogCancel>                        <AlertDialogAction
                             onClick={handleProfileDelete}
                             disabled={deleteLoading || deleteConfirmText !== user?.email}
-                            className="bg-[#e62745] text-white hover:bg-[#cc2340]"
+                            className="bg-[#e62745] text-white hover:bg-[#cc2340] transition-colors duration-200"
                         >
                             {deleteLoading ? 'Deleting...' : 'Delete Account'}
                         </AlertDialogAction>

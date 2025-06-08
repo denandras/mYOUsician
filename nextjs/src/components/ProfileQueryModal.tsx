@@ -228,7 +228,7 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                                 {(musician.email || musician.phone) && (
                                     <div className="flex flex-col sm:flex-row gap-2 w-full justify-center sm:justify-start">
                                         {musician.email && (
-                                            <Button size="sm" asChild className="w-full sm:w-auto sm:min-w-[120px] sm:max-w-[160px] lg:max-w-[140px] bg-[#083e4d] hover:bg-[#0a4a59] text-white border-[#083e4d]">
+                                            <Button size="sm" asChild className="w-full sm:w-auto sm:min-w-[120px] sm:max-w-[160px] lg:max-w-[140px] bg-[#083e4d] hover:bg-[#062f3b] text-white border-[#083e4d] transition-colors duration-200">
                                                 <a href={`mailto:${musician.email}`} className="flex items-center gap-2 justify-center">
                                                     <Mail className="h-4 w-4" />
                                                     <span className="truncate">Email</span>

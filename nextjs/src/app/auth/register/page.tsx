@@ -50,9 +50,8 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            {error && (
-                <div className="mb-4 p-4 text-sm text-red-700 bg-red-100 rounded-lg">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">            {error && (
+                <div className="mb-4 p-4 text-sm text-[#083e4d] bg-[#dceaed] rounded-lg">
                     {error}
                 </div>
             )}

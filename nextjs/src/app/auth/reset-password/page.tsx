@@ -100,10 +100,8 @@ export default function ResetPasswordPage() {
                 <h2 className="text-2xl font-bold text-center text-gray-900 mb-8">
                     Create new password
                 </h2>
-            </div>
-
-            {error && (
-                <div className="mb-4 p-4 text-sm text-red-700 bg-red-100 rounded-lg">
+            </div>            {error && (
+                <div className="mb-4 p-4 text-sm text-[#083e4d] bg-[#dceaed] rounded-lg">
                     {error}
                 </div>
             )}
