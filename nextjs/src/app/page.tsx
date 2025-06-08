@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Globe, Shield, Users, Key, Database, Clock, Menu, X } from 'lucide-react';
+import { ArrowRight, Globe, Shield, Users, Key, Database, Clock, Menu, X, Search, UserCheck, MapPin, Video, Star, Music } from 'lucide-react';
 import AuthAwareButtons from '@/components/AuthAwareButtons';
 export default function Home() {
   const productName = process.env.NEXT_PUBLIC_PRODUCTNAME;
@@ -28,42 +28,40 @@ export default function Home() {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };  }, [isMenuOpen]);
-
   const features = [
     {
-      icon: Shield,
-      title: 'Secure Authentication',
-      description: 'Secure login with email/password, Multi-Factor Authentication, and SSO providers',
+      icon: Search,
+      title: 'Advanced Musician Search',
+      description: 'Find musicians by genre, instrument, experience level, location, and more with powerful filtering options',
       color: 'text-primary'
     },
     {
-      icon: Database,
-      title: 'Musician Database',
-      description: 'Easy-to-search database of musicians with advanced filtering',
+      icon: UserCheck,
+      title: 'Rich Profile Creation',
+      description: 'Create comprehensive musician profiles with education, certificates, social links, and video portfolios',
+      color: 'text-primary'
+    },    {
+      icon: MapPin,
+      title: 'Location-Based Discovery',
+      description: 'Connect with musicians in your area or worldwide with country and city-specific search capabilities (Coming Soon)',
+      color: 'text-primary'
+    },
+    {
+      icon: Video,
+      title: 'Video Portfolio Showcase',
+      description: 'Share your musical talents through video links and build a compelling online presence',
       color: 'text-primary'
     },
     {
       icon: Users,
-      title: 'Profile Editor',
-      description: 'Profile editor instead of CV uploads',
+      title: 'Direct Networking',
+      description: 'Connect with fellow musicians through secure contact options including email and phone',
       color: 'text-primary'
     },
     {
-      icon: Clock,
-      title: 'Time Saver',
-      description: 'Spare your time of asking for CVs and waiting for responses',
-      color: 'text-primary'
-    },
-    {
-      icon: Globe,
-      title: 'Legal Documents',
-      description: 'Privacy policy, terms of service, and refund policy',
-      color: 'text-primary'
-    },
-    {
-      icon: Key,
-      title: 'Cookies',
-      description: 'GDPR-compliant cookie system',
+      icon: Shield,
+      title: 'Secure & Private',
+      description: 'Professional-grade security with multi-factor authentication and privacy controls',
       color: 'text-primary'
     }
   ];
