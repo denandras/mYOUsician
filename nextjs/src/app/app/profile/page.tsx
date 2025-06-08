@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,6 +13,8 @@ import { createSPASassClient } from '@/lib/supabase/client';
 import { Key, User, CheckCircle, Briefcase, Music, Plus, Trash2, AlertTriangle } from 'lucide-react';
 import { MFASetup } from '@/components/MFASetup';
 import { Database } from '@/lib/types';
+import { useRouter } from 'next/navigation';
+import { LoadingCard } from '@/components/ui/loading-card';
 
 // Use the generated types directly
 type Instrument = Database['public']['Tables']['instruments']['Row'];
@@ -32,13 +35,19 @@ interface LocationData {
 }
 
 export default function ProfilePage() {
-    const { user } = useGlobal();
+    const { user, loading: userLoading } = useGlobal();
+    const router = useRouter();
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);    const [profileLoading, setProfileLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [profileSaved, setProfileSaved] = useState(false);
+
+    // Danger Zone state
+    const [deleteConfirmText, setDeleteConfirmText] = useState('');
+    const [deleteLoading, setDeleteLoading] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
     // Location service state
     const [locationServiceStatus, setLocationServiceStatus] = useState<'loading' | 'available' | 'unavailable'>('loading');
@@ -637,9 +646,68 @@ export default function ProfilePage() {
             } else {
                 console.error('Error updating password:', err);
                 setError('Failed to update password');
+            }        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleProfileDelete = async () => {
+        if (!user?.email || deleteConfirmText !== user.email) {
+            setError('Please type your email address to confirm deletion');
+            return;
+        }
+
+        setDeleteLoading(true);
+        setError('');
+        setSuccess('');
+
+        try {
+            const supabase = await createSPASassClient();
+            const client = supabase.getSupabaseClient();
+
+            // Get the current session token
+            const { data: { session } } = await client.auth.getSession();
+            
+            if (!session?.access_token) {
+                throw new Error('No valid session found');
+            }
+
+            // Call the API endpoint to delete the account
+            const response = await fetch('/api/profile/delete', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
+                },
+                body: JSON.stringify({
+                    confirmEmail: user.email
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to delete account');
+            }
+
+            setSuccess('Account deleted successfully. Redirecting...');
+            
+            // Close dialog and redirect after a short delay
+            setTimeout(() => {
+                setShowDeleteDialog(false);
+                router.push('/auth/login');
+            }, 2000);
+
+        } catch (err: Error | unknown) {
+            if (err instanceof Error) {
+                console.error('Error deleting account:', err);
+                setError(err.message);
+            } else {
+                console.error('Error deleting account:', err);
+                setError('Failed to delete account');
             }
         } finally {
-            setLoading(false);
+            setDeleteLoading(false);
         }
     };
 
@@ -819,6 +887,61 @@ export default function ProfilePage() {
             loadProfile();
         }
     }, [user?.id, loadReferenceData, loadLocationData, loadProfile]); // Include all dependencies
+
+    // Show loading cards when user data is being fetched
+    if (userLoading) {
+        return (
+            <div className="space-y-6 p-3 sm:p-6">
+                <div className="space-y-2">
+                    <h1 className="text-3xl font-bold tracking-tight">Profile Editor</h1>
+                    <p className="text-muted-foreground">
+                        Manage your account settings and musician profile
+                    </p>
+                </div>
+
+                <div className="grid gap-6">
+                    <div className="lg:col-span-2 space-y-6">
+                        <LoadingCard 
+                            icon={User}
+                            title="Personal Data"
+                            description="Your personal information"
+                            rows={4}
+                        />
+                        <LoadingCard 
+                            icon={Briefcase}
+                            title="About"
+                            description="Tell us about yourself"
+                            rows={5}
+                        />
+                        <LoadingCard 
+                            icon={Music}
+                            title="Artistic Profile"
+                            description="Your musical skills and presence"
+                            rows={3}
+                        />
+                        <LoadingCard 
+                            icon={Key}
+                            title="Change Password"
+                            description="Update your account password"
+                            rows={2}
+                        />
+                        <LoadingCard 
+                            icon={Key}
+                            title="Two-Factor Authentication (2FA)"
+                            description="Add an additional layer of security to your account"
+                            rows={2}
+                        />
+                        <LoadingCard 
+                            icon={AlertTriangle}
+                            title="Danger Zone"
+                            description="Permanently delete your account and all associated data"
+                            rows={1}
+                        />
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6 p-3 sm:p-6">
@@ -1438,15 +1561,77 @@ export default function ProfilePage() {
                                 </Button>
                             </form>
                         </CardContent>
-                    </Card>
-
-                    <MFASetup
+                    </Card>                    <MFASetup
                         onStatusChange={() => {
                             setSuccess('Two-factor authentication settings updated successfully');
                         }}
                     />
+
+                    {/* Danger Zone */}
+                    <Card className="border-red-200 bg-red-50">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-red-600">
+                                <AlertTriangle className="h-5 w-5" />
+                                Danger Zone
+                            </CardTitle>
+                            <CardDescription className="text-red-700">
+                                Permanently delete your account and all associated data. This action cannot be undone.
+                            </CardDescription>
+                        </CardHeader>                        <CardContent>
+                            <Button
+                                onClick={() => setShowDeleteDialog(true)}
+                                variant="delete"
+                                className="w-full"
+                            >
+                                Delete Account
+                            </Button>
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
+
+            {/* Delete Account Confirmation Dialog */}
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+                            <AlertTriangle className="h-5 w-5" />
+                            Delete Account
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className="my-4">
+                        <Label htmlFor="delete-confirm">
+                            Please type your email address <strong>{user?.email}</strong> to confirm:
+                        </Label>
+                        <Input
+                            id="delete-confirm"
+                            value={deleteConfirmText}
+                            onChange={(e) => setDeleteConfirmText(e.target.value)}
+                            placeholder="Enter your email address"
+                            className="mt-2"
+                        />
+                    </div>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel 
+                            onClick={() => {
+                                setDeleteConfirmText('');
+                                setError('');
+                            }}
+                        >
+                            Cancel
+                        </AlertDialogCancel>                        <AlertDialogAction
+                            onClick={handleProfileDelete}
+                            disabled={deleteLoading || deleteConfirmText !== user?.email}
+                            className="bg-[#e62745] text-white hover:bg-[#cc2340]"
+                        >
+                            {deleteLoading ? 'Deleting...' : 'Delete Account'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
