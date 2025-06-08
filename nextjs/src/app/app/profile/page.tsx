@@ -36,13 +36,14 @@ interface LocationData {
 
 export default function ProfilePage() {
     const { user, loading: userLoading } = useGlobal();
-    const router = useRouter();
-    const [newPassword, setNewPassword] = useState('');
+    const router = useRouter();    const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);    const [profileLoading, setProfileLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [profileSaved, setProfileSaved] = useState(false);
+    const [passwordSaved, setPasswordSaved] = useState(false);
+    const [passwordError, setPasswordError] = useState('');
 
     // Danger Zone state
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
@@ -623,18 +624,20 @@ export default function ProfilePage() {
         } finally {
             setProfileLoading(false);
         }
-    };
-
-    const handlePasswordChange = async (e: React.FormEvent) => {
+    };    const handlePasswordChange = async (e: React.FormEvent) => {
         e.preventDefault();
         if (newPassword !== confirmPassword) {
-            setError("New passwords don't match");
+            setPasswordError("Passwords don't match");
+            setError('');
+            setSuccess('');
             return;
         }
 
         setLoading(true);
         setError('');
         setSuccess('');
+        setPasswordError('');
+        setPasswordSaved(false);
 
         try {
             const supabase = await createSPASassClient();
@@ -646,17 +649,48 @@ export default function ProfilePage() {
 
             if (error) throw error;
 
+            setPasswordSaved(true);
             setSuccess('Password updated successfully');
             setNewPassword('');
             setConfirmPassword('');
-        } catch (err: Error | unknown) {
+            
+            // Reset the saved state after 2 seconds
+            setTimeout(() => {
+                setPasswordSaved(false);
+            }, 2000);        } catch (err: Error | unknown) {
             if (err instanceof Error) {
                 console.error('Error updating password:', err);
-                setError(err.message);
+                
+                // Handle specific AuthApiError cases with button feedback
+                const errorMessage = err.message.toLowerCase();
+                if (errorMessage.includes('new password should be different') || 
+                    errorMessage.includes('same_password') ||
+                    errorMessage.includes('password must be different')) {
+                    setPasswordError('Must be different from current password');
+                } else if (errorMessage.includes('password is too weak')) {
+                    setPasswordError('Password too weak');
+                } else if (errorMessage.includes('password too short')) {
+                    setPasswordError('Password too short (min 6 characters)');
+                } else {
+                    setPasswordError('Update failed');
+                    setError(err.message);
+                }
+                
+                // Clear password error after 4 seconds
+                setTimeout(() => {
+                    setPasswordError('');
+                }, 4000);
             } else {
                 console.error('Error updating password:', err);
+                setPasswordError('Update failed');
                 setError('Failed to update password');
-            }        } finally {
+                
+                // Clear password error after 4 seconds
+                setTimeout(() => {
+                    setPasswordError('');
+                }, 4000);
+            }
+        } finally {
             setLoading(false);
         }
     };
@@ -969,28 +1003,6 @@ export default function ProfilePage() {
                     Manage your account settings and musician profile
                 </p>
             </div>
-
-            {/* Rest of your existing alerts */}
-            {error && (
-                <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
-                </Alert>
-            )}
-
-            {success && (
-                <Alert>
-                    <CheckCircle className="h-4 w-4" />
-                    <AlertDescription>{success}</AlertDescription>
-                </Alert>
-            )}
-
-            {/* Location Service Status Alert */}
-            {locationError && (
-                <Alert variant={locationServiceStatus === 'unavailable' ? 'destructive' : 'default'}>
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertDescription>{locationError}</AlertDescription>
-                </Alert>
-            )}
 
             <div className="grid gap-6">
                 <div className="lg:col-span-2 space-y-6">
@@ -1548,14 +1560,16 @@ export default function ProfilePage() {
                             <CardDescription>Update your account password</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <form onSubmit={handlePasswordChange} className="space-y-4">
-                                <div>
+                            <form onSubmit={handlePasswordChange} className="space-y-4">                                <div>
                                     <Label htmlFor="new-password">New Password</Label>
                                     <Input
                                         type="password"
                                         id="new-password"
                                         value={newPassword}
-                                        onChange={(e) => setNewPassword(e.target.value)}
+                                        onChange={(e) => {
+                                            setNewPassword(e.target.value);
+                                            if (passwordError) setPasswordError('');
+                                        }}
                                         required
                                     />
                                 </div>
@@ -1565,17 +1579,32 @@ export default function ProfilePage() {
                                         type="password"
                                         id="confirm-password"
                                         value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        onChange={(e) => {
+                                            setConfirmPassword(e.target.value);
+                                            if (passwordError) setPasswordError('');
+                                        }}
                                         required
                                     />
-                                </div>
-                                <Button
+                                </div><Button
                                     type="submit"
                                     disabled={loading}
-                                    variant="delete"
-                                    className="w-full text-white"
+                                    variant={passwordSaved ? "default" : passwordError ? "destructive" : "delete"}
+                                    className={`w-full text-white transition-all duration-1000 ${
+                                        passwordSaved 
+                                            ? "bg-green-400 hover:bg-green-500" 
+                                            : passwordError 
+                                                ? "bg-red-500 hover:bg-red-600"
+                                                : ""
+                                    }`}
                                 >
-                                    {loading ? 'Updating...' : 'Update Password'}
+                                    {loading 
+                                        ? 'Updating...' 
+                                        : passwordSaved 
+                                            ? 'Updated ✓' 
+                                            : passwordError 
+                                                ? passwordError
+                                                : 'Update Password'
+                                    }
                                 </Button>
                             </form>
                         </CardContent>
