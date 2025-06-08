@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -122,7 +122,18 @@ export default function DatabasePage() {
     const [selectedMusician, setSelectedMusician] = useState<MusicianProfile | null>(null);
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
     const [profileLoading, setProfileLoading] = useState(false);
-    const [profileError, setProfileError] = useState<string | null>(null);
+    const [profileError, setProfileError] = useState<string | null>(null);    // Ref for scrolling to results
+    const resultsRef = useRef<HTMLDivElement>(null);
+
+    // Helper function to scroll to results
+    const scrollToResults = () => {
+        setTimeout(() => {
+            resultsRef.current?.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        }, 100); // Small delay to ensure results are rendered
+    };
 
     const openProfileModal = async (musician: MusicianProfile) => {
         setSelectedMusician(musician);
@@ -395,11 +406,12 @@ export default function DatabasePage() {
                 };
 
                 return normalizedMusician;
-            });
-
-            // Apply sorting
+            });            // Apply sorting
             const sortedMusicians = applySorting(parsedMusicians, filters.sortBy);
             setMusicians(sortedMusicians);
+
+            // Scroll to results after search completes
+            scrollToResults();
 
         } catch (error) {
             console.error('Error searching musicians:', error);
@@ -697,10 +709,13 @@ export default function DatabasePage() {
                 video_links: parseArrayField(musician.video_links),
                 social: parseSocialField(musician.social)
             }));
-            
-            // Apply sorting
+              // Apply sorting
             const sortedMusicians = applySorting(parsedMusicians, newFilters.sortBy);
             setMusicians(sortedMusicians);
+
+            // Scroll to results after search completes
+            scrollToResults();
+
         } catch (error) {
             console.error('Error in full tag search:', error);
             setMusicians([]);
@@ -777,10 +792,13 @@ export default function DatabasePage() {
                 video_links: parseArrayField(musician.video_links),
                 social: parseSocialField(musician.social)
             }));
-            
-            // Apply sorting
+              // Apply sorting
             const sortedMusicians = applySorting(parsedMusicians, newFilters.sortBy);
             setMusicians(sortedMusicians);
+
+            // Scroll to results after search completes
+            scrollToResults();
+
         } catch (error) {
             console.error('Error in genre search:', error);
             setMusicians([]);
@@ -856,16 +874,19 @@ export default function DatabasePage() {
                 video_links: parseArrayField(musician.video_links),
                 social: parseSocialField(musician.social)
             }));
-            
-            // Apply sorting
+              // Apply sorting
             const sortedMusicians = applySorting(parsedMusicians, newFilters.sortBy);
             setMusicians(sortedMusicians);
+
+            // Scroll to results after search completes
+            scrollToResults();
+
         } catch (error) {
             console.error('Error in instrument search:', error);
             setMusicians([]);
         } finally {
             setLoading(false);
-        }    };
+        }};
 
     // Memoize instrumentsByCategory with ranking
     const instrumentsByCategory = useMemo(() => {
@@ -1106,11 +1127,9 @@ export default function DatabasePage() {
                         </Button>
                     </div>
                 </CardContent>
-            </Card>
-
-            {/* Results */}
+            </Card>            {/* Results */}
             {hasSearched && (
-                <Card>
+                <Card ref={resultsRef}>
                     <CardHeader>
                         <CardTitle>Search Results</CardTitle>
                         <CardDescription>

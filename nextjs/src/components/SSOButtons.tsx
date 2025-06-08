@@ -1,8 +1,5 @@
 'use client';
 
-import { createSPAClient } from '@/lib/supabase/client';
-import Link from "next/link";
-
 type Provider = 'github' | 'google' | 'facebook' | 'apple';
 
 interface SSOButtonsProps {
