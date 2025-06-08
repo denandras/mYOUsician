@@ -39,37 +39,41 @@ export default function RegisterPage() {
                 setError('A registration attempt for this email was already made recently. Please check your email for a verification link or wait before trying again.');
                 return;
             }
-        }
-
-        setLoading(true);try {
+        }        setLoading(true);        try {
             const supabase = await createSPASassClient();
-            const { error } = await supabase.registerEmail(email, password);
+            const { data, error } = await supabase.registerEmail(email, password);
 
             if (error) {
                 // Handle specific signup errors
-                if (error.message.includes('User already registered') || 
+                if (error.message.includes('already exists') || 
+                    error.message.includes('User already registered') || 
                     error.message.includes('already registered') ||
-                    error.message.includes('Email rate limit exceeded') ||
-                    error.message.includes('already exists')) {
-                    setError('An account with this email address already exists. Please sign in instead or check your email for a verification link.');
+                    error.status === 409) {
+                    setError(error.message);
+                } else if (error.message.includes('Email rate limit exceeded')) {
+                    setError('Too many email attempts. Please wait a few minutes before trying again.');
                 } else if (error.message.includes('Signup is disabled')) {
                     setError('Account registration is currently disabled. Please contact support.');
                 } else if (error.message.includes('Password')) {
                     setError('Password does not meet security requirements. Please use a stronger password.');
                 } else {
                     setError(error.message);
-                }                return;
+                }
+                return;
             }
 
-            // Store the registration attempt timestamp
-            localStorage.setItem(`registration_attempt_${email}`, new Date().toISOString());
-
-            router.push('/auth/verify-email');
+            // Only proceed if no error occurred
+            if (data && !error) {
+                // Store the registration attempt timestamp
+                localStorage.setItem(`registration_attempt_${email}`, new Date().toISOString());
+                router.push('/auth/verify-email');
+            }
         } catch (err: Error | unknown) {
+            console.error('Registration error:', err);
             if(err instanceof Error) {
                 setError(err.message);
             } else {
-                setError('An unknown error occurred');
+                setError('An unknown error occurred during registration');
             }
         } finally {
             setLoading(false);
@@ -183,14 +187,21 @@ export default function RegisterPage() {
                 </div>
             </form>
 
-            <SSOButtons onError={setError}/>
-
-            <div className="mt-6 text-center text-sm">
-                <span className="text-gray-600">Already have an account?</span>
-                {' '}
-                <Link href="/auth/login" className="font-medium text-primary-600 hover:text-primary-500">
-                    Sign in
-                </Link>
+            <SSOButtons onError={setError}/>            <div className="mt-6 text-center text-sm space-y-2">
+                <div>
+                    <span className="text-gray-600">Already have an account?</span>
+                    {' '}
+                    <Link href="/auth/login" className="font-medium text-primary-600 hover:text-primary-500">
+                        Sign in
+                    </Link>
+                </div>
+                <div>
+                    <span className="text-gray-600">Need to resend verification email?</span>
+                    {' '}
+                    <Link href="/auth/verify-email" className="font-medium text-primary-600 hover:text-primary-500">
+                        Resend verification
+                    </Link>
+                </div>
             </div>
         </div>
     );

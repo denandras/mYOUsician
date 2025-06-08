@@ -25,24 +25,62 @@ export class SassClient {
 
     async registerEmail(email: string, password: string) {
         // Attempt to sign up
-        const result = await this.client.auth.signUp({
+        const signUpResult = await this.client.auth.signUp({
             email: email,
             password: password
         });
 
-        // Check if the signup was successful but user already exists
-        if (result.data?.user && !result.data.user.email_confirmed_at && result.data.user.id) {
-            // Check if this user was created just now or already existed
-            const userCreatedAt = new Date(result.data.user.created_at);
-            const now = new Date();
-            const timeDiff = now.getTime() - userCreatedAt.getTime();
+        // Handle explicit Supabase errors first
+        if (signUpResult.error) {
+            const errorMessage = signUpResult.error.message.toLowerCase();
             
-            // If the user was created more than 10 seconds ago, it's likely a duplicate signup attempt
-            if (timeDiff > 10000) {
+            if (errorMessage.includes('user already registered') || 
+                errorMessage.includes('already registered') ||
+                errorMessage.includes('email address already in use') ||
+                errorMessage.includes('email rate limit exceeded')) {
                 return {
                     data: { user: null, session: null },
                     error: {
-                        message: 'An account with this email address already exists. Please check your email for a verification link or try signing in.',
+                        message: 'An account with this email address already exists. Please sign in instead or check your email for a verification link.',
+                        status: 409,
+                        name: 'AuthError'
+                    } as any
+                };
+            }
+            
+            return signUpResult;
+        }
+
+        // When confirmations are enabled and there's a user but no session,
+        // we need to determine if this is a new signup or existing user
+        if (signUpResult.data?.user && !signUpResult.data.session) {
+            const user = signUpResult.data.user;
+            
+            // If email is not confirmed, check if this is an existing user
+            if (!user.email_confirmed_at) {
+                const userCreatedAt = new Date(user.created_at);
+                const now = new Date();
+                const timeDiff = now.getTime() - userCreatedAt.getTime();
+                
+                // If user was created more than 10 seconds ago, it's an existing user
+                if (timeDiff > 10000) {
+                    return {
+                        data: { user: null, session: null },
+                        error: {
+                            message: 'An account with this email address already exists but has not been verified. Please check your email for a verification link, or click the "Resend verification" link if you need a new one.',
+                            status: 409,
+                            name: 'AuthError'
+                        } as any
+                    };
+                }
+            }
+            
+            // If email is already confirmed, definitely a duplicate
+            if (user.email_confirmed_at) {
+                return {
+                    data: { user: null, session: null },
+                    error: {
+                        message: 'An account with this email address already exists and is verified. Please sign in instead.',
                         status: 409,
                         name: 'AuthError'
                     } as any
@@ -50,7 +88,7 @@ export class SassClient {
             }
         }
 
-        return result;
+        return signUpResult;
     }
 
     async exchangeCodeForSession(code: string) {
