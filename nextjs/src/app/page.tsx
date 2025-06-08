@@ -219,8 +219,7 @@ export default function Home() {
                     </Link>
                   </li>
                 </ul>
-              </div>
-              <div>
+              </div>              <div>
                 <h4 className="text-sm font-semibold text-foreground">Legal</h4>
                 <ul className="mt-4 space-y-2">
                   <li>
@@ -231,6 +230,21 @@ export default function Home() {
                   <li>
                     <Link href="/legal/terms" className="text-foreground/70 hover:text-foreground">
                       Terms
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-foreground">Support</h4>
+                <ul className="mt-4 space-y-2">
+                  <li>
+                    <Link 
+                      href="https://tally.so/r/wkQAZd" 
+                      className="text-foreground/70 hover:text-foreground"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Report an Issue
                     </Link>
                   </li>
                 </ul>

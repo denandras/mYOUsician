@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Avatar } from '@/components/ui/avatar';
 import { Mail, Phone, Video, ExternalLink, User, BookOpen, MapPin, Award, Youtube, Instagram, Facebook, Twitter, Linkedin, Music, Globe, AlertCircle, Loader2 } from 'lucide-react';
 
 interface MusicianProfile {
@@ -114,12 +115,14 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                             Incomplete Profile
                         </DialogTitle>
                     </DialogHeader>
-                    
-                    <div className="space-y-4">
+                      <div className="space-y-4">
                         <div className="text-center space-y-4 py-4">
-                            <div className="h-16 w-16 mx-auto rounded-full bg-amber-100 flex items-center justify-center">
-                                <User className="h-8 w-8 text-amber-600" />
-                            </div>
+                            <Avatar
+                                forename={musician.forename}
+                                surname={musician.surname}
+                                size="xl"
+                                className="mx-auto bg-amber-100 text-amber-600 hover:bg-amber-200"
+                            />
                             <div className="space-y-2">
                                 <h3 className="text-lg font-semibold text-amber-600">Profile Incomplete</h3>                                <p className="text-sm text-muted-foreground">
                                     This musician hasn&apos;t completed their profile yet. Only basic account information is available.
@@ -197,11 +200,13 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                     <div className="space-y-4 xs:space-y-5 sm:space-y-6 pt-2 md:pt-4">
                     {/* Header Section */}
                     <Card>
-                        <CardContent className="pt-4 xs:pt-5 sm:pt-6">
-                            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 xs:gap-4 sm:gap-4 mb-4">
-                                <div className="h-10 w-10 xs:h-12 xs:w-12 sm:h-12 sm:w-12 md:h-16 md:w-16 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                    <User className="h-5 w-5 xs:h-6 xs:w-6 sm:h-6 sm:w-6 md:h-8 md:w-8 text-primary" />
-                                </div>
+                        <CardContent className="pt-4 xs:pt-5 sm:pt-6">                            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 xs:gap-4 sm:gap-4 mb-4">
+                                <Avatar
+                                    forename={musician.forename}
+                                    surname={musician.surname}
+                                    size="lg"
+                                    className="xs:h-12 xs:w-12 sm:h-12 sm:w-12 md:h-16 md:w-16"
+                                />
                                 <div className="flex-1 text-center sm:text-left">
                                     <h1 className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-bold break-words">{fullName}</h1>
                                     {musician.bio && (

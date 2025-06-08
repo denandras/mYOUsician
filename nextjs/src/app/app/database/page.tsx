@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGr
 import { Search, Trash2, Mail, Phone, Video, ExternalLink, User, BookOpen, Youtube, Instagram, Facebook, Twitter, Linkedin, Music, Globe } from "lucide-react";
 import { createSPASassClient } from '@/lib/supabase/client';
 import { ProfileQueryModal } from '@/components/ProfileQueryModal';
+import { Avatar } from '@/components/ui/avatar';
 
 // Local Badge component to avoid import issues
 const Badge = ({ children, variant = "default", className = "", onClick }: { 
@@ -1120,15 +1121,14 @@ export default function DatabasePage() {
                         {musicians.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {musicians.map((musician) => (
-                                    <Card key={musician.id} className="h-fit">                                        <CardHeader className="pb-3">
-                                            <div className="flex items-center gap-3">
-                                                <button 
-                                                    className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors cursor-pointer"
+                                    <Card key={musician.id} className="h-fit">                                        <CardHeader className="pb-3">                                            <div className="flex items-center gap-3">
+                                                <Avatar
+                                                    forename={musician.forename}
+                                                    surname={musician.surname}
+                                                    size="md"
                                                     onClick={() => openProfileModal(musician)}
                                                     title="View full profile"
-                                                >
-                                                    <User className="h-6 w-6 text-primary" />
-                                                </button>
+                                                />
                                                 <div className="flex-1 min-w-0">
                                                     <button 
                                                         className="text-left w-full"
