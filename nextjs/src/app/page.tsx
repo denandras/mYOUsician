@@ -114,9 +114,8 @@ export default function Home() {
         </nav>
 
         <section className="relative pt-32 pb-24 overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-6 mb-6 min-h-[4.5rem] md:min-h-[6.5rem]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">            <div className="text-center">
+              <div className="flex items-center justify-center gap-3 mb-6 min-h-[4.5rem] md:min-h-[6.5rem]">
                 <div>
                   <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground">
                     Welcome to
@@ -131,7 +130,7 @@ export default function Home() {
                   className="self-center"
                   style={{ height: '100%', width: 'auto', maxHeight: '6.5rem' }}
                 />
-              </div>              <p className="mt-6 text-xl text-foreground/70 max-w-3xl mx-auto">
+              </div><p className="mt-6 text-xl text-foreground/70 max-w-3xl mx-auto">
                 A database of musicians, for musicians!
               </p>
               <div className="mt-10 flex gap-4 justify-center">

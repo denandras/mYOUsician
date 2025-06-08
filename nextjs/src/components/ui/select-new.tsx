@@ -13,16 +13,25 @@ const Select = React.forwardRef<
 >(({ className, children, onValueChange, onChange, value, disabled, ...props }, ref) => {
   // Use a ref to control the select value directly
   const selectRef = React.useRef<HTMLSelectElement>(null);
-  
-  // Track if we're in the middle of a user-initiated change
+    // Track if we're in the middle of a user-initiated change
   const isUserChanging = React.useRef(false);
-  // Set initial value
+  
+  // Set initial value and handle prop updates
   React.useEffect(() => {
-    if (selectRef.current && !isUserChanging.current) {
-      console.log('SELECT UPDATE - Setting value from prop:', { newValue: value, reason: 'Prop value changed' });
-      selectRef.current.value = value ?? '';
+    if (selectRef.current) {
+      const newValue = value ?? '';
+      // Always update the DOM value to match the prop
+      if (selectRef.current.value !== newValue) {
+        console.log('SELECT UPDATE - Setting value from prop:', { newValue, reason: 'Prop value changed', userChanging: isUserChanging.current });
+        selectRef.current.value = newValue;
+        
+        // Reset user changing flag if value is programmatically set to empty
+        if (newValue === '' && isUserChanging.current) {
+          isUserChanging.current = false;
+        }
+      }
     }
-  }, [value]);  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  }, [value]);const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newValue = e.target.value;
     console.log('SELECT UPDATE - User changed selection:', { newValue, reason: 'User interaction' });
     
@@ -33,16 +42,15 @@ const Select = React.forwardRef<
     if (onValueChange) {
       onValueChange(newValue);
     }
-    
-    // Call original onChange if provided
+      // Call original onChange if provided
     if (onChange) {
       onChange(e);
     }
     
-    // Reset the flag after a short delay
+    // Reset the flag after a short delay to allow for any state updates
     setTimeout(() => {
       isUserChanging.current = false;
-    }, 50);
+    }, 100); // Increased timeout to 100ms for better reliability
   }  // Extract options from nested children (inside SelectContent)
   const extractOptions = (children: React.ReactNode): React.ReactNode[] => {
     const options: React.ReactNode[] = [];
@@ -98,7 +106,7 @@ const Select = React.forwardRef<
     <select
       className={`flex h-10 w-full rounded-none border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none [-webkit-appearance:none] [background-image:url("data:image/svg+xml;charset=US-ASCII,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e")] bg-no-repeat [background-position:right_0.75rem_center] [background-size:16px_12px] pr-10 [border-radius:0!important] [-webkit-border-radius:0!important] ${className || ''}`}
       ref={combinedRef}
-      defaultValue={value ?? ''}
+      value={value ?? ''}
       onChange={handleChange}
       disabled={disabled}
       {...props}

@@ -13,15 +13,21 @@ const Select = React.forwardRef<
 >(({ className, children, onValueChange, onChange, value, disabled, ...props }, ref) => {  // Store the current selected value in local state to prevent flickering
   const [internalValue, setInternalValue] = React.useState(value ?? '');
   const [userHasInteracted, setUserHasInteracted] = React.useState(false);
-    // Only update internal value from prop if user hasn't interacted or if it's a genuine external update
+  // Only update internal value from prop if user hasn't interacted or if it's a genuine external update
   React.useEffect(() => {
     const propValue = value ?? '';
-    console.log('🔥 Select useEffect:', { propValue, internalValue, userHasInteracted, willUpdate: !userHasInteracted || (propValue !== internalValue && propValue !== '') });
-    // Only sync if user hasn't interacted yet, or if the prop value is different from what we expect
-    if (!userHasInteracted || (propValue !== internalValue && propValue !== '')) {
+    console.log('🔥 Select useEffect:', { propValue, internalValue, userHasInteracted, willUpdate: propValue !== internalValue });
+    
+    // Always sync the value - let the parent control the state
+    // The userHasInteracted flag was causing issues with location selectors
+    if (propValue !== internalValue) {
       setInternalValue(propValue);
+      // Reset user interaction flag when value is programmatically changed to empty
+      if (propValue === '' && userHasInteracted) {
+        setUserHasInteracted(false);
+      }
     }
-  }, [value, userHasInteracted, internalValue]);
+  }, [value, internalValue, userHasInteracted]);
   
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newValue = e.target.value;

@@ -248,22 +248,33 @@ export default function ProfilePage() {
                 setLocationData({ countries: [], cities: {} });
             }
         }
-    }, []);
-
-    // Load cities for a specific country with enhanced error handling
+    }, []);    // Load cities for a specific country with enhanced error handling
     const loadCitiesForCountry = useCallback(async (countryCode: string) => {
         // Check if service is available first
         if (locationServiceStatus === 'unavailable') {
             return; // Don't proceed if service is unavailable
         }
         
-        // If cities already loaded, don't load again
-        if (locationData.cities[countryCode]) {
+        // Check current state to see if cities already loaded
+        setLocationData(current => {
+            // If cities already loaded, don't load again
+            if (current.cities[countryCode]) {
+                return current; // Return unchanged state
+            }
+            
+            // Start loading
+            setLoadingLocations(true);
+            
+            // Return current state, actual loading happens below
+            return current;
+        });
+        
+        // If we already have cities, exit early
+        const currentCities = locationData.cities[countryCode];
+        if (currentCities) {
             return;
         }
     
-        setLoadingLocations(true);
-        
         const cacheKey = `geonames_cities_${countryCode}`;
         const cacheExpiry = 7 * 24 * 60 * 60 * 1000; // 7 days
         
@@ -341,11 +352,10 @@ export default function ProfilePage() {
                     cities: { ...prev.cities, [countryCode]: [] }
                 }));
                 setLocationError(`Unable to load cities for this country. Please try again later.`);
-            }
-        } finally {
+            }        } finally {
             setLoadingLocations(false);
         }
-    }, [locationData.cities, locationServiceStatus]);
+    }, [locationServiceStatus]); // Removed locationData.cities dependency to prevent conflicts
 
     const loadProfile = useCallback(async () => {
         try {
@@ -783,7 +793,11 @@ export default function ProfilePage() {
             )
         }));
         setProfileSaved(false);
-    };const handleCountryChange = useCallback((countryName: string) => {        const country = locationData.countries.find(c => c.countryName === countryName);
+    };    const handleCountryChange = useCallback((countryName: string) => {
+        console.log('🌍 PROFILE: Country changed to:', countryName);
+        console.log('🌍 PROFILE: Before change - current country:', profile.location.country, 'current city:', profile.location.city);
+        
+        const country = locationData.countries.find(c => c.countryName === countryName);
         if (country) {
             // Use functional update to ensure we have the latest state
             setProfile(prev => {
@@ -792,22 +806,26 @@ export default function ProfilePage() {
                     location: { 
                         country: countryName, 
                         countryCode: country.countryCode, 
-                        city: '' 
+                        city: '' // Clear city when country changes
                     }
                 };
+                console.log('🌍 PROFILE: New profile state set:', newProfile.location);
                 return newProfile;
             });
             setProfileSaved(false);
             
             // Load cities for the new country
+            console.log('🌍 PROFILE: Loading cities for country code:', country.countryCode);
             loadCitiesForCountry(country.countryCode);
         }
-    }, [locationData.countries, loadCitiesForCountry]);    const handleCityChange = useCallback((value: string) => {
+    }, [locationData.countries, loadCitiesForCountry, profile.location.country, profile.location.city]);const handleCityChange = useCallback((value: string) => {
+        console.log('🏙️ PROFILE: City changed to:', value);
         setProfile(prev => {
             const newProfile = {
                 ...prev,
                 location: { ...prev.location, city: value }
             };
+            console.log('🏙️ PROFILE: New city in profile:', newProfile.location.city);
             return newProfile;
         });
         setProfileSaved(false);
