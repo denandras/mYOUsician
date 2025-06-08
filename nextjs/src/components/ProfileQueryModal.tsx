@@ -191,7 +191,7 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
     };const fullName = musician.forename || musician.surname 
         ? `${musician.forename || ''} ${musician.surname || ''}`.trim() 
         : 'Anonymous Musician';    return (        <Dialog open={isOpen} onOpenChange={onClose}>            <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden w-[98vw] xs:w-[95vw] sm:w-[95vw] md:w-[90vw] lg:w-[85vw] p-0 flex flex-col">
-                <DialogHeader className="px-3 py-3 xs:px-4 xs:py-4 sm:px-4 sm:py-4 md:px-6 md:py-4 flex-shrink-0">
+                <DialogHeader className="px-3 pt-6 pb-3 xs:px-4 xs:pt-7 xs:pb-4 sm:px-4 sm:pt-8 sm:pb-4 md:px-6 md:pt-8 md:pb-4 flex-shrink-0">
                     <DialogTitle className="sr-only">
                         {fullName} - Musician Profile
                     </DialogTitle>
