@@ -172,8 +172,8 @@ export default function DatabasePage() {
         try {
             const supabase = await createSPASassClient();
             const client = supabase.getSupabaseClient();
-            const { data: { user } } = await client.auth.getUser();
-            setCurrentUserEmail(user?.email || '');
+            const { data } = await client.auth.getUser();
+            setCurrentUserEmail(data?.user?.email || '');
         } catch (error) {
             console.error('Error loading current user:', error);
         }
@@ -1278,30 +1278,55 @@ export default function DatabasePage() {
                                                         </Button>
                                                     ))
                                                 )}                                                {/* Social links */}
-                                                {musician.social && typeof musician.social === 'object' && (
-                                                    Object.entries(musician.social).map(([platform, url]) => {
-                                                        // Skip empty values
-                                                        if (!url || url === '') return null;
-                                                        
-                                                        return (
-                                                            <Button
-                                                                key={platform}
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                asChild
-                                                                className="h-8 w-8"
-                                                            >
-                                                                <a 
-                                                                    href={url as string} 
-                                                                    target="_blank" 
-                                                                    rel="noopener noreferrer"
-                                                                    title={`${platform.charAt(0).toUpperCase() + platform.slice(1)}: ${url}`}
+                                                {musician.social && (
+                                                    Array.isArray(musician.social)
+                                                        ? musician.social.map((item, idx) => {
+                                                            if (!item || typeof item !== 'object') return null;
+                                                            const platform = item.platform || item.name || '';
+                                                            const url = item.link || item.url || '';
+                                                            if (!platform || !url) return null;
+                                                            return (
+                                                                <Button
+                                                                    key={platform + idx}
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    asChild
+                                                                    className="h-8 w-8"
                                                                 >
-                                                                    {getSocialIcon(platform)}
-                                                                </a>
-                                                            </Button>
-                                                        );
-                                                    }).filter(Boolean)
+                                                                    <a
+                                                                        href={url}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        title={`${platform.charAt(0).toUpperCase() + platform.slice(1)}: ${url}`}
+                                                                    >
+                                                                        {getSocialIcon(platform)}
+                                                                    </a>
+                                                                </Button>
+                                                            );
+                                                        })
+                                                        : typeof musician.social === 'object'
+                                                            ? Object.entries(musician.social).map(([platform, url]) => {
+                                                                if (!url || url === '') return null;
+                                                                return (
+                                                                    <Button
+                                                                        key={platform}
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        asChild
+                                                                        className="h-8 w-8"
+                                                                    >
+                                                                        <a
+                                                                            href={url as string}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            title={`${platform.charAt(0).toUpperCase() + platform.slice(1)}: ${url}`}
+                                                                        >
+                                                                            {getSocialIcon(platform)}
+                                                                        </a>
+                                                                    </Button>
+                                                                );
+                                                            }).filter(Boolean)
+                                                            : null
                                                 )}
                                             </div>
                                         </CardContent>
