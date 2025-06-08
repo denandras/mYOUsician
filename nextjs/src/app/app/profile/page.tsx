@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup } from '@/components/ui/select-new';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { createSPASassClient } from '@/lib/supabase/client';
-import { Key, User, CheckCircle, Briefcase, Music, Plus, Trash2, AlertTriangle } from 'lucide-react';
+import { Key, User, Briefcase, Music, Plus, Trash2, AlertTriangle } from 'lucide-react';
 import { MFASetup } from '@/components/MFASetup';
 import { Database } from '@/lib/types';
 import { useRouter } from 'next/navigation';
@@ -39,7 +38,9 @@ export default function ProfilePage() {
     const router = useRouter();    const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);    const [profileLoading, setProfileLoading] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [error, setError] = useState('');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [success, setSuccess] = useState('');
     const [profileSaved, setProfileSaved] = useState(false);
     const [passwordSaved, setPasswordSaved] = useState(false);
@@ -52,6 +53,7 @@ export default function ProfilePage() {
 
     // Location service state
     const [locationServiceStatus, setLocationServiceStatus] = useState<'loading' | 'available' | 'unavailable'>('loading');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [locationError, setLocationError] = useState('');
 
     // Reference data state
@@ -356,7 +358,8 @@ export default function ProfilePage() {
             }        } finally {
             setLoadingLocations(false);
         }
-    }, [locationServiceStatus]); // Removed locationData.cities dependency to prevent conflicts
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [locationServiceStatus]); // locationData.cities intentionally omitted to prevent infinite loops
 
     const loadProfile = useCallback(async () => {
         try {
