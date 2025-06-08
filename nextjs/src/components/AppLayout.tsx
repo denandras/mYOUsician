@@ -193,7 +193,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         )}
                     </div>
                 </div>                <main className="p-2 sm:p-4">
-                    {children}
+                    <div className="max-w-4xl mx-auto">
+                        {children}
+                    </div>
                 </main>
             </div>
         </div>
