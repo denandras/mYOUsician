@@ -39,10 +39,12 @@ export default function ProfilePage() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);    const [profileLoading, setProfileLoading] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [error, setError] = useState('');
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [error, setError] = useState('');    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [success, setSuccess] = useState('');
-    const [profileSaved, setProfileSaved] = useState(false);
+
+    const [personalDataSaved, setPersonalDataSaved] = useState(false);
+    const [aboutSaved, setAboutSaved] = useState(false);
+    const [artisticProfileSaved, setArtisticProfileSaved] = useState(false);
     const [passwordSaved, setPasswordSaved] = useState(false);
     const [passwordError, setPasswordError] = useState('');
 
@@ -507,10 +509,10 @@ export default function ProfilePage() {
             }
         } catch (err) {
             console.error('Error loading profile:', err);
-        }
-    }, [user?.id, loadCitiesForCountry]); // Now safe to include loadCitiesForCountry since it has no dependencies
+        }    }, [user?.id, loadCitiesForCountry]); // Now safe to include loadCitiesForCountry since it has no dependencies
 
-    const saveProfile = async () => {
+    // Section-specific save functions
+    const savePersonalData = async () => {
         setProfileLoading(true);
         setError('');
         setSuccess('');
@@ -523,6 +525,102 @@ export default function ProfilePage() {
                 return;
             }
 
+            const supabase = await createSPASassClient();
+            const client = supabase.getSupabaseClient();
+
+            if (!user?.id || !user?.email) {
+                throw new Error('User ID and email are required');
+            }
+
+            const { error } = await client
+                .from('musician_profiles')
+                .upsert({
+                    id: user.id,
+                    email: user.email,
+                    forename: profile.forename,
+                    surname: profile.surname,
+                    location: profile.location,
+                    phone: profile.phone
+                });
+
+            if (error) throw error;
+            setPersonalDataSaved(true);
+            
+            // Reset the saved state after 2 seconds
+            setTimeout(() => {
+                setPersonalDataSaved(false);
+            }, 2000);
+        } catch (err: unknown) {
+            console.error('Error saving personal data:', err);
+            const errorMessage = err instanceof Error ? err.message : 'Failed to save personal data';
+            setError(errorMessage);
+        } finally {
+            setProfileLoading(false);
+        }
+    };
+
+    const saveAboutSection = async () => {
+        setProfileLoading(true);
+        setError('');
+        setSuccess('');
+
+        try {
+            const supabase = await createSPASassClient();
+            const client = supabase.getSupabaseClient();
+
+            if (!user?.id || !user?.email) {
+                throw new Error('User ID and email are required');
+            }
+
+            // Clean up empty entries for about section
+            const cleanedOccupation = profile.occupation.filter(item => item && item.trim() && item !== '[]');
+            const cleanedEducation = profile.education.filter(item => 
+                item.type && item.type.trim() || item.school && item.school.trim()
+            );
+            const cleanedCertificates = profile.certificates.filter(item => item && item.trim());
+
+            const { error } = await client
+                .from('musician_profiles')
+                .upsert({
+                    id: user.id,
+                    email: user.email,
+                    bio: profile.bio,
+                    occupation: cleanedOccupation.length === 0 ? [] : cleanedOccupation,
+                    education: cleanedEducation.map(edu => {
+                        if (edu.type && edu.school) {
+                            return `${edu.type} at ${edu.school}`;
+                        } else if (edu.type) {
+                            return edu.type;
+                        } else if (edu.school) {
+                            return edu.school;
+                        }
+                        return '';
+                    }).filter(Boolean),
+                    certificates: cleanedCertificates.length === 0 ? [] : cleanedCertificates
+                });
+
+            if (error) throw error;
+            setAboutSaved(true);
+            
+            // Reset the saved state after 2 seconds
+            setTimeout(() => {
+                setAboutSaved(false);
+            }, 2000);
+        } catch (err: unknown) {
+            console.error('Error saving about section:', err);
+            const errorMessage = err instanceof Error ? err.message : 'Failed to save about section';
+            setError(errorMessage);
+        } finally {
+            setProfileLoading(false);
+        }
+    };
+
+    const saveArtisticProfile = async () => {
+        setProfileLoading(true);
+        setError('');
+        setSuccess('');
+
+        try {
             // Validate social links before saving
             const invalidSocialLinks = [];
             for (const [platformName, url] of Object.entries(profile.social)) {
@@ -532,7 +630,9 @@ export default function ProfilePage() {
                     );
                     invalidSocialLinks.push(`${platform?.name || platformName}: must start with ${platform?.base_url}`);
                 }
-            }            if (invalidSocialLinks.length > 0) {
+            }
+
+            if (invalidSocialLinks.length > 0) {
                 setError(`Invalid social links:\n${invalidSocialLinks.join('\n')}`);
                 setProfileLoading(false);
                 return;
@@ -555,78 +655,46 @@ export default function ProfilePage() {
             const supabase = await createSPASassClient();
             const client = supabase.getSupabaseClient();
 
-            // Clean up empty entries and ensure proper array format
-            const cleanedProfile = {
-                ...profile,
-                // Filter out empty strings and ensure it's a proper array
-                occupation: profile.occupation.filter(item => item && item.trim() && item !== '[]'),
-                // Filter education entries where both type and school are empty
-                education: profile.education.filter(item => 
-                    item.type && item.type.trim() || item.school && item.school.trim()
-                ),
-                certificates: profile.certificates.filter(item => item && item.trim()),
-                genre_instrument: profile.genre_instrument.filter(item => 
-                    item.genre || item.instrument || item.category // Keep if any field has value
-                ),
-                video_links: profile.video_links.filter(item => item && item.trim()),
-                social: Object.fromEntries(
-                    Object.entries(profile.social).filter(([, value]) => value && value.trim())
-                )
-            };
-
-            // Ensure arrays have at least empty array instead of null
-            if (cleanedProfile.occupation.length === 0) {
-                cleanedProfile.occupation = [];
-            }
-            if (cleanedProfile.education.length === 0) {
-                cleanedProfile.education = [];
-            }
-
             if (!user?.id || !user?.email) {
                 throw new Error('User ID and email are required');
             }
+
+            // Clean up empty entries for artistic profile
+            const cleanedGenreInstrument = profile.genre_instrument.filter(item => 
+                item.genre || item.instrument || item.category
+            );
+            const cleanedVideoLinks = profile.video_links.filter(item => item && item.trim());
+            const cleanedSocial = Object.fromEntries(
+                Object.entries(profile.social).filter(([, value]) => value && value.trim())
+            );
 
             const { error } = await client
                 .from('musician_profiles')
                 .upsert({
                     id: user.id,
                     email: user.email,
-                    forename: cleanedProfile.forename,
-                    surname: cleanedProfile.surname,
-                    location: cleanedProfile.location,
-                    phone: cleanedProfile.phone,
-                    bio: cleanedProfile.bio,
-                    occupation: cleanedProfile.occupation,
-                    // Convert education objects to strings for database storage
-                    education: cleanedProfile.education.map(edu => {
-                        if (edu.type && edu.school) {
-                            return `${edu.type} at ${edu.school}`;
-                        } else if (edu.type) {
-                            return edu.type;
-                        } else if (edu.school) {
-                            return edu.school;
-                        }
-                        return '';
-                    }).filter(Boolean),
-                    certificates: cleanedProfile.certificates,
-                    genre_instrument: cleanedProfile.genre_instrument,
-                    video_links: cleanedProfile.video_links,
-                    social: cleanedProfile.social
-                });            if (error) throw error;
-              setProfileSaved(true);
+                    genre_instrument: cleanedGenreInstrument.length === 0 ? [] : cleanedGenreInstrument,
+                    video_links: cleanedVideoLinks.length === 0 ? [] : cleanedVideoLinks,
+                    social: cleanedSocial
+                });
+
+            if (error) throw error;
+            setArtisticProfileSaved(true);
             
             // Reset the saved state after 2 seconds
             setTimeout(() => {
-                setProfileSaved(false);
+                setArtisticProfileSaved(false);
             }, 2000);
         } catch (err: unknown) {
-            console.error('Error saving profile:', err);
-            const errorMessage = err instanceof Error ? err.message : 'Failed to save profile';
+            console.error('Error saving artistic profile:', err);
+            const errorMessage = err instanceof Error ? err.message : 'Failed to save artistic profile';
             setError(errorMessage);
         } finally {
             setProfileLoading(false);
         }
-    };    const handlePasswordChange = async (e: React.FormEvent) => {
+    };
+
+    const handlePasswordChange = async (e: React.FormEvent) => {
         e.preventDefault();
         if (newPassword !== confirmPassword) {
             setPasswordError("Passwords don't match");
@@ -776,7 +844,13 @@ export default function ProfilePage() {
                 i === index ? value : item
             )
         }));
-        setProfileSaved(false);
+        
+        // Set the appropriate save state based on the field
+        if (field === 'occupation' || field === 'certificates') {
+            setAboutSaved(false);
+        } else if (field === 'video_links') {
+            setArtisticProfileSaved(false);
+        }
     };
 
     const addGenreInstrument = () => {
@@ -800,7 +874,7 @@ export default function ProfilePage() {
                 i === index ? { ...item, [field]: value } : item
             )
         }));
-        setProfileSaved(false);
+        setArtisticProfileSaved(false);
     };
 
     // Add these helper functions for education
@@ -825,14 +899,13 @@ export default function ProfilePage() {
                 i === index ? { ...item, [field]: value } : item
             )
         }));
-        setProfileSaved(false);
-    };    const handleCountryChange = useCallback((countryName: string) => {
+        setAboutSaved(false);
+    };const handleCountryChange = useCallback((countryName: string) => {
         console.log('🌍 PROFILE: Country changed to:', countryName);
         console.log('🌍 PROFILE: Before change - current country:', profile.location.country, 'current city:', profile.location.city);
         
         const country = locationData.countries.find(c => c.countryName === countryName);
-        if (country) {
-            // Use functional update to ensure we have the latest state
+        if (country) {            // Use functional update to ensure we have the latest state
             setProfile(prev => {
                 const newProfile = {
                     ...prev,
@@ -845,15 +918,14 @@ export default function ProfilePage() {
                 console.log('🌍 PROFILE: New profile state set:', newProfile.location);
                 return newProfile;
             });
-            setProfileSaved(false);
+            setPersonalDataSaved(false);
             
             // Load cities for the new country
             console.log('🌍 PROFILE: Loading cities for country code:', country.countryCode);
             loadCitiesForCountry(country.countryCode);
         }
     }, [locationData.countries, loadCitiesForCountry, profile.location.country, profile.location.city]);const handleCityChange = useCallback((value: string) => {
-        console.log('🏙️ PROFILE: City changed to:', value);
-        setProfile(prev => {
+        console.log('🏙️ PROFILE: City changed to:', value);        setProfile(prev => {
             const newProfile = {
                 ...prev,
                 location: { ...prev.location, city: value }
@@ -861,7 +933,7 @@ export default function ProfilePage() {
             console.log('🏙️ PROFILE: New city in profile:', newProfile.location.city);
             return newProfile;
         });
-        setProfileSaved(false);
+        setPersonalDataSaved(false);
     }, []);
 
     // Add validation function
@@ -1019,11 +1091,10 @@ export default function ProfilePage() {
                                     <Label htmlFor="forename">First Name</Label>
                                     <Input
                                         id="forename"
-                                        value={profile.forename}                                        onChange={(e) => {
-                                            setProfile(prev => ({ 
-                                                ...prev, forename: e.target.value 
-                                            }));
-                                            setProfileSaved(false);
+                                        value={profile.forename}                                        onChange={(e) => {                            setProfile(prev => ({ 
+                                ...prev, forename: e.target.value 
+                            }));
+                            setPersonalDataSaved(false);
                                         }}
                                         placeholder="Enter your first name"
                                         className={!profile.forename ? "text-muted-foreground placeholder:text-muted-foreground/60" : ""}
@@ -1033,11 +1104,10 @@ export default function ProfilePage() {
                                     <Label htmlFor="surname">Last Name</Label>
                                     <Input
                                         id="surname"
-                                        value={profile.surname}                                        onChange={(e) => {
-                                            setProfile(prev => ({ 
-                                                ...prev, surname: e.target.value 
-                                            }));
-                                            setProfileSaved(false);
+                                        value={profile.surname}                                        onChange={(e) => {                            setProfile(prev => ({ 
+                                ...prev, surname: e.target.value 
+                            }));
+                            setPersonalDataSaved(false);
                                         }}
                                         placeholder="Enter your last name"
                                         className={!profile.surname ? "text-muted-foreground placeholder:text-muted-foreground/60" : ""}
@@ -1105,24 +1175,22 @@ export default function ProfilePage() {
                                 <div>
                                     <Label htmlFor="phone">Phone</Label>                                    <Input
                                         id="phone"
-                                        value={profile.phone}                                        onChange={(e) => {
-                                            setProfile(prev => ({ 
-                                                ...prev, phone: e.target.value 
-                                            }));
-                                            setProfileSaved(false);                                }}placeholder="e.g. +1234567890"
+                                        value={profile.phone}                                        onChange={(e) => {                            setProfile(prev => ({ 
+                                ...prev, phone: e.target.value 
+                            }));
+                            setPersonalDataSaved(false);}}placeholder="e.g. +1234567890"
                                         className={!profile.phone ? "text-muted-foreground placeholder:text-muted-foreground/60" : ""}
                                     />
-                                </div>
-                            </div>                            <Button
-                                onClick={saveProfile}
+                                </div>                            </div>                            <Button
+                                onClick={savePersonalData}
                                 disabled={profileLoading}
-                                variant={profileSaved ? "default" : "teal"}
+                                variant={personalDataSaved ? "default" : "teal"}
                                 className={`w-full text-white transition-all duration-700 ${
-                                    profileSaved 
+                                    personalDataSaved 
                                         ? "bg-green-400 hover:bg-green-500" 
                                         : ""
                                 }`}>
-                                {profileLoading ? 'Saving...' : profileSaved ? 'Saved ✓' : 'Save'}
+                                {profileLoading ? 'Saving...' : personalDataSaved ? 'Saved ✓' : 'Save'}
                             </Button>
                         </CardContent>
                     </Card>
@@ -1141,11 +1209,10 @@ export default function ProfilePage() {
                                 <Label htmlFor="bio">Bio</Label>                                <Textarea
                                     id="bio"
                                     rows={4}
-                                    value={profile.bio}                                    onChange={(e) => {
-                                        setProfile(prev => ({ 
-                                            ...prev, bio: e.target.value 
-                                        }));
-                                        setProfileSaved(false);
+                                    value={profile.bio}                                    onChange={(e) => {                        setProfile(prev => ({ 
+                            ...prev, bio: e.target.value 
+                        }));
+                        setAboutSaved(false);
                                     }}
                                     placeholder="Tell us about your musical journey, style, and experience..."
                                     className={`mt-2 ${!profile.bio ? "text-muted-foreground placeholder:text-muted-foreground/60" : ""}`}
@@ -1317,18 +1384,17 @@ export default function ProfilePage() {
                                     variant="outline"
                                     onClick={() => addArrayItem('certificates')}
                                     className="mt-2"
-                                >                                    <Plus className="h-4 w-4 mr-2" />                                    Add Certificate
-                                </Button>
+                                >                                    <Plus className="h-4 w-4 mr-2" />                                    Add Certificate                                </Button>
                             </div>                            <Button
-                                onClick={saveProfile}
+                                onClick={saveAboutSection}
                                 disabled={profileLoading}
-                                variant={profileSaved ? "default" : "teal"}
+                                variant={aboutSaved ? "default" : "teal"}
                                 className={`w-full text-white transition-all duration-700 ${
-                                    profileSaved 
+                                    aboutSaved 
                                         ? "bg-green-400 hover:bg-green-500" 
                                         : ""
                                 }`}>
-                                {profileLoading ? 'Saving...' : profileSaved ? 'Saved ✓' : 'Save'}
+                                {profileLoading ? 'Saving...' : aboutSaved ? 'Saved ✓' : 'Save'}
                             </Button>
                         </CardContent>
                     </Card>
@@ -1511,15 +1577,14 @@ export default function ProfilePage() {
                                                 </Label>                                                <Input
                                                     id={platform.name.toLowerCase()}
                                                     value={currentValue}                                                    onChange={(e) => {
-                                                        const newValue = e.target.value;
-                                                        setProfile(prev => ({
-                                                            ...prev,
-                                                            social: { 
-                                                                ...prev.social, 
-                                                                [platform.name.toLowerCase()]: newValue 
-                                                            }
-                                                        }));
-                                                        setProfileSaved(false);
+                                                        const newValue = e.target.value;                                        setProfile(prev => ({
+                                            ...prev,
+                                            social: { 
+                                                ...prev.social, 
+                                                [platform.name.toLowerCase()]: newValue 
+                                            }
+                                        }));
+                                        setArtisticProfileSaved(false);
                                                     }}                                                    placeholder={platform.base_url || `${platform.name} URL`}
                                                     className={!isValid ? 'border-[#083e4d] focus:border-[#083e4d]' : (!currentValue ? "text-muted-foreground placeholder:text-muted-foreground/60" : "")}
                                                 />
@@ -1529,17 +1594,16 @@ export default function ProfilePage() {
                                                     </p>
                                                 )}
                                             </div>
-                                        );                                })}                                </div>
-                            </div>                            <Button
-                                onClick={saveProfile}
+                                        );                                })}                                </div>                            </div>                            <Button
+                                onClick={saveArtisticProfile}
                                 disabled={profileLoading}
-                                variant={profileSaved ? "default" : "teal"}
+                                variant={artisticProfileSaved ? "default" : "teal"}
                                 className={`w-full text-white transition-all duration-700 ${
-                                    profileSaved 
+                                    artisticProfileSaved 
                                         ? "bg-green-400 hover:bg-green-500" 
                                         : ""
                                 }`}>
-                                {profileLoading ? 'Saving...' : profileSaved ? 'Saved ✓' : 'Save'}
+                                {profileLoading ? 'Saving...' : artisticProfileSaved ? 'Saved ✓' : 'Save'}
                             </Button>
                         </CardContent>
                     </Card>
@@ -1655,12 +1719,12 @@ export default function ProfilePage() {
                             className="mt-2"
                         />
                     </div>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel 
+                    <AlertDialogFooter>                        <AlertDialogCancel 
                             onClick={() => {
                                 setDeleteConfirmText('');
                                 setError('');
                             }}
+                            className="bg-[#083e4d] text-white hover:bg-[#062f3b] border-[#083e4d] transition-colors duration-200"
                         >
                             Cancel
                         </AlertDialogCancel>                        <AlertDialogAction
