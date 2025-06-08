@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft } from 'lucide-react';
 
 export default function AuthLayout({
@@ -29,9 +30,11 @@ export default function AuthLayout({
 
                 <div className="sm:mx-auto sm:w-full sm:max-w-md">
                     <Link href="/" className="block text-center">
-                      <img 
+                      <Image 
                         src="/branding/text_teal.svg" 
-                        alt={productName}
+                        alt={productName || "mYOUsician"}
+                        width={120}
+                        height={48}
                         className="h-12 w-auto mx-auto"
                       />
                     </Link>

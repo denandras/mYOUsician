@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Globe, Shield, Users, Key, Database, Clock, Menu, X, Search, UserCheck, MapPin, Video, Star, Music } from 'lucide-react';
+import { ArrowRight, Shield, Users, Menu, X, Search, UserCheck, MapPin, Video } from 'lucide-react';
 import AuthAwareButtons from '@/components/AuthAwareButtons';
 export default function Home() {
   const productName = process.env.NEXT_PUBLIC_PRODUCTNAME;
@@ -76,12 +76,13 @@ export default function Home() {
   return (
       <div className="min-h-screen">
         <nav className="fixed top-0 w-full bg-[#083e4d] z-50 border-b border-[#062f3b] shadow-md">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">            <div className="flex justify-between h-16 items-center">
-              <div className="flex-shrink-0">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">            <div className="flex justify-between h-16 items-center">              <div className="flex-shrink-0">
                 <Link href="/" className="block">
-                  <img 
+                  <Image 
                     src="/branding/text_vanilla.svg" 
-                    alt={productName}
+                    alt={productName || "mYOUsician"}
+                    width={120}
+                    height={32}
                     className="h-8 w-auto"
                   />
                 </Link>

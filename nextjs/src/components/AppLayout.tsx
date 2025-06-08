@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {usePathname} from 'next/navigation';
 import {
     Home,
@@ -95,9 +96,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
             >                <div className="h-16 flex items-center justify-between px-4 border-b border-border bg-[#083e4d]">
                     <Link href="/" className="block">
-                      <img 
+                      <Image 
                         src="/branding/text_vanilla.svg" 
-                        alt={productName}
+                        alt={productName || "mYOUsician"}
+                        width={120}
+                        height={24}
                         className="h-6 w-auto"
                       />
                     </Link><button
@@ -142,11 +145,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                             className="text-white hover:text-[#26545c] transition-colors"
                             aria-label="Toggle sidebar"
                         >
-                            <Menu className="h-6 w-6"/>                        </button>
-                          <Link href="/" className="block">
-                            <img 
+                            <Menu className="h-6 w-6"/>                        </button>                          <Link href="/" className="block">
+                            <Image 
                                 src="/branding/text_vanilla.svg" 
-                                alt={productName}
+                                alt={productName || "mYOUsician"}
+                                width={120}
+                                height={20}
                                 className="h-5 w-auto"
                             />
                         </Link>
