@@ -861,8 +861,7 @@ export default function ProfilePage() {
                             </CardTitle>
                             <CardDescription>Your personal information</CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <CardContent className="space-y-4">                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <Label htmlFor="forename">First Name</Label>
                                     <Input
@@ -871,6 +870,8 @@ export default function ProfilePage() {
                                         onChange={(e) => setProfile(prev => ({ 
                                             ...prev, forename: e.target.value 
                                         }))}
+                                        placeholder="Enter your first name"
+                                        className={!profile.forename ? "text-muted-foreground placeholder:text-muted-foreground/60" : ""}
                                     />
                                 </div>
                                 <div>
@@ -881,6 +882,8 @@ export default function ProfilePage() {
                                         onChange={(e) => setProfile(prev => ({ 
                                             ...prev, surname: e.target.value 
                                         }))}
+                                        placeholder="Enter your last name"
+                                        className={!profile.surname ? "text-muted-foreground placeholder:text-muted-foreground/60" : ""}
                                     />
                                 </div>
                             </div>
@@ -892,8 +895,7 @@ export default function ProfilePage() {
                                         value={profile.location.country}
                                         onValueChange={handleCountryChange}
                                         disabled={locationServiceStatus === 'unavailable'}
-                                    >
-                                        <SelectTrigger className={locationServiceStatus === 'unavailable' ? 'opacity-50' : ''}>
+                                    >                                        <SelectTrigger className={!profile.location.country ? "text-muted-foreground" : (locationServiceStatus === 'unavailable' ? 'opacity-50' : '')}>
                                             <SelectValue placeholder={getCountryPlaceholder()} />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -915,10 +917,9 @@ export default function ProfilePage() {
                                             !profile.location.countryCode || 
                                             loadingLocations
                                         }
-                                    >
-                                        <SelectTrigger className={
-                                            locationServiceStatus === 'unavailable' || !profile.location.countryCode 
-                                                ? 'opacity-50' : ''
+                                    >                                        <SelectTrigger className={
+                                            !profile.location.city ? "text-muted-foreground" : (locationServiceStatus === 'unavailable' || !profile.location.countryCode 
+                                                ? 'opacity-50' : '')
                                         }>
                                             <SelectValue placeholder={getCityPlaceholder()} />
                                         </SelectTrigger>
@@ -945,13 +946,14 @@ export default function ProfilePage() {
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="phone">Phone</Label>
-                                    <Input
+                                    <Label htmlFor="phone">Phone</Label>                                    <Input
                                         id="phone"
                                         value={profile.phone}
                                         onChange={(e) => setProfile(prev => ({ 
                                             ...prev, phone: e.target.value 
                                         }))}
+                                        placeholder="e.g. +1234567890"
+                                        className={!profile.phone ? "text-muted-foreground placeholder:text-muted-foreground/60" : ""}
                                     />
                                 </div>
                             </div>
@@ -978,26 +980,26 @@ export default function ProfilePage() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div>
-                                <Label htmlFor="bio">Bio</Label>
-                                <Textarea
+                                <Label htmlFor="bio">Bio</Label>                                <Textarea
                                     id="bio"
                                     rows={4}
                                     value={profile.bio}
                                     onChange={(e) => setProfile(prev => ({ 
                                         ...prev, bio: e.target.value 
                                     }))}
-                                    className="mt-2"
+                                    placeholder="Tell us about your musical journey, style, and experience..."
+                                    className={`mt-2 ${!profile.bio ? "text-muted-foreground placeholder:text-muted-foreground/60" : ""}`}
                                 />
                             </div>                            <div>
                                 <Label>Occupation</Label>                                {profile.occupation.map((occupation, index) => {
                                     const hasData = occupation && occupation.trim();
                                       return (
                                         <div key={index} className="flex gap-2 mt-2">
-                                            <div className="flex-1">
-                                                <Input
+                                            <div className="flex-1">                                                <Input
                                                     value={occupation}
                                                     onChange={(e) => updateArrayItem('occupation', index, e.target.value)}
                                                     placeholder="e.g., Music Teacher, Session Musician"
+                                                    className={!occupation ? "text-muted-foreground placeholder:text-muted-foreground/60" : ""}
                                                 />
                                             </div>
                                             {/* Trash button box */}
@@ -1047,10 +1049,9 @@ export default function ProfilePage() {
                                                         <Select
                                                             value={education.type}
                                                             onValueChange={(value) => updateEducation(index, 'type', value)}
-                                                        >
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder="Select education level" />
-                                                            </SelectTrigger>
+                                                        >                                                        <SelectTrigger className={!education.type ? "text-muted-foreground" : ""}>
+                                                            <SelectValue placeholder="Select education level" />
+                                                        </SelectTrigger>
                                                             <SelectContent>
                                                                 {(() => {
                                                                     // Safety check for education_types availability
@@ -1067,12 +1068,11 @@ export default function ProfilePage() {
                                                                 })()}
                                                             </SelectContent>
                                                         </Select>
-                                                    </div>
-                                                    <Input
+                                                    </div>                                                    <Input
                                                         value={education.school}
                                                         onChange={(e) => updateEducation(index, 'school', e.target.value)}
                                                         placeholder="School/Institution name"
-                                                        className="flex-1"
+                                                        className={`flex-1 ${!education.school ? "text-muted-foreground placeholder:text-muted-foreground/60" : ""}`}
                                                     />
                                                 </div>
                                             </div>
@@ -1119,11 +1119,11 @@ export default function ProfilePage() {
                                     const hasData = certificate && certificate.trim();
                                       return (
                                         <div key={index} className="flex gap-2 mt-2">
-                                            <div className="flex-1">
-                                                <Input
+                                            <div className="flex-1">                                                <Input
                                                     value={certificate}
                                                     onChange={(e) => updateArrayItem('certificates', index, e.target.value)}
                                                     placeholder="e.g. Music Competition, Young Artist Award"
+                                                    className={!certificate ? "text-muted-foreground placeholder:text-muted-foreground/60" : ""}
                                                 />
                                             </div>
                                             {/* Trash button box */}
@@ -1188,12 +1188,11 @@ export default function ProfilePage() {
                                     const hasData = item.genre || item.instrument || item.category;                                    return (
                                         <div key={index} className="flex gap-2 mt-2">
                                             <div className="flex-1">
-                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                                                    <Select
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">                                                    <Select
                                                         value={item.genre}
                                                         onValueChange={(value) => updateGenreInstrument(index, 'genre', value)}
                                                     >
-                                                        <SelectTrigger>
+                                                        <SelectTrigger className={!item.genre ? "text-muted-foreground" : ""}>
                                                             <SelectValue placeholder="Genre" />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -1207,14 +1206,13 @@ export default function ProfilePage() {
                                                             }
                                                         </SelectContent>
                                                     </Select>
-                                                    
-                                                    <Select
+                                                      <Select
                                                         value={item.instrument}
                                                         onValueChange={(value) => updateGenreInstrument(index, 'instrument', value)}
                                                     >
-                                                        <SelectTrigger>
+                                                        <SelectTrigger className={!item.instrument ? "text-muted-foreground" : ""}>
                                                             <SelectValue placeholder="Instrument" />
-                                                        </SelectTrigger>                                                        <SelectContent>
+                                                        </SelectTrigger><SelectContent>
                                                             {sortedCategories.length > 0 ? (
                                                                 sortedCategories.map(category => (
                                                                     <SelectGroup key={category} label={category}>
@@ -1235,13 +1233,11 @@ export default function ProfilePage() {
                                                                     : null
                                                             )}
                                                         </SelectContent>
-                                                    </Select>
-
-                                                    <Select
+                                                    </Select>                                                    <Select
                                                         value={item.category}
                                                         onValueChange={(value) => updateGenreInstrument(index, 'category', value)}
                                                     >
-                                                        <SelectTrigger>
+                                                        <SelectTrigger className={!item.category ? "text-muted-foreground" : ""}>
                                                             <SelectValue placeholder="Category" />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -1294,12 +1290,11 @@ export default function ProfilePage() {
                                     const isValid = validateVideoUrl(link);
                                       return (
                                         <div key={index} className="flex gap-2 mt-2">
-                                            <div className="flex-1">
-                                                <Input
+                                            <div className="flex-1">                                                <Input
                                                     value={link}
                                                     onChange={(e) => updateArrayItem('video_links', index, e.target.value)}
                                                     placeholder="https://youtube.com/watch?v=... or https://vimeo.com/..."
-                                                    className={!isValid ? 'border-red-500 focus:border-red-500' : ''}
+                                                    className={!isValid ? 'border-red-500 focus:border-red-500' : (!link ? "text-muted-foreground placeholder:text-muted-foreground/60" : "")}
                                                 />
                                                 {!isValid && link && (
                                                     <p className="text-xs text-red-500 mt-1">
@@ -1355,8 +1350,7 @@ export default function ProfilePage() {
                                             <div key={platform.id}>
                                                 <Label htmlFor={platform.name.toLowerCase()}>
                                                     {platform.name}
-                                                </Label>
-                                                <Input
+                                                </Label>                                                <Input
                                                     id={platform.name.toLowerCase()}
                                                     value={currentValue}
                                                     onChange={(e) => {
@@ -1370,7 +1364,7 @@ export default function ProfilePage() {
                                                         }));
                                                     }}
                                                     placeholder={platform.base_url || `${platform.name} URL`}
-                                                    className={!isValid ? 'border-red-500 focus:border-red-500' : ''}
+                                                    className={!isValid ? 'border-red-500 focus:border-red-500' : (!currentValue ? "text-muted-foreground placeholder:text-muted-foreground/60" : "")}
                                                 />
                                                 {!isValid && currentValue && (
                                                     <p className="text-xs text-red-500 mt-1">
