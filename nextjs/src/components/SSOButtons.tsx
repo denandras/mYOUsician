@@ -67,24 +67,10 @@ function getEnabledProviders(): Provider[] {
 }
 
 export default function SSOButtons({ onError }: SSOButtonsProps) {
+    // Temporarily disabled - showing "Coming Soon" message
     const handleSSOLogin = async (provider: Provider) => {
-        try {
-            const supabase = createSPAClient();
-            const { error } = await supabase.auth.signInWithOAuth({
-                provider,
-                options: {
-                    redirectTo: `${window.location.origin}/api/auth/callback`,
-                },
-            });
-
-            if (error) throw error;
-        } catch (err: Error | unknown) {
-            if (err instanceof Error) {
-                onError?.(err.message);
-            } else {
-                onError?.('An unknown error occurred');
-            }
-        }
+        // Disabled for now
+        onError?.(`${PROVIDER_CONFIGS[provider].name} sign-in coming soon!`);
     };
 
     const enabledProviders = getEnabledProviders();
@@ -100,7 +86,7 @@ export default function SSOButtons({ onError }: SSOButtonsProps) {
                     <div className="w-full border-t border-gray-300"/>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                    <span className="bg-white px-2 text-gray-500">Or continue with</span>
+                    <span className="bg-white px-2 text-gray-500">Social Sign-In Coming Soon</span>
                 </div>
             </div>
 
@@ -111,29 +97,22 @@ export default function SSOButtons({ onError }: SSOButtonsProps) {
                         <button
                             key={provider}
                             onClick={() => handleSSOLogin(provider)}
-                            className={`group relative flex h-11 items-center rounded-md border ${config.borderColor} px-6 transition-colors duration-200 ${config.bgColor} ${config.textColor}`}
+                            disabled
+                            className={`group relative flex h-11 items-center rounded-md border border-gray-300 px-6 transition-colors duration-200 bg-gray-100 text-gray-400 cursor-not-allowed opacity-60`}
                         >
                             <div className="absolute left-6">
-                                <div className="flex h-5 w-5 items-center justify-center">
+                                <div className="flex h-5 w-5 items-center justify-center opacity-50">
                                     {config.icon}
                                 </div>
-                            </div>
-                            <span className="mx-auto text-sm font-semibold">
-                Continue with {config.name}
-              </span>
+                            </div>                            <span className="mx-auto text-sm font-semibold">
+                                Continue with {config.name}
+                            </span>
                         </button>
                     );
                 })}
             </div>
             <div className="mt-4 text-center text-xs text-gray-500">
-                By creating an account via selected provider, you agree to our{' '}
-                <Link href="/legal/terms" className="text-primary hover:text-primary/80 underline">
-                    Terms and Conditions
-                </Link>
-                {' '}and{' '}
-                <Link href="/legal/privacy" className="text-primary hover:text-primary/80 underline">
-                    Privacy Policy
-                </Link>
+                Social sign-in will be available soon. For now, please use email registration.
             </div>
         </div>
     );
