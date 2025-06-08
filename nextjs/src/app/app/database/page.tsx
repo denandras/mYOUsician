@@ -10,6 +10,7 @@ import { Search, Trash2, Mail, Phone, Video, ExternalLink, User, BookOpen, Youtu
 import { createSPASassClient } from '@/lib/supabase/client';
 import { ProfileQueryModal } from '@/components/ProfileQueryModal';
 import { Avatar } from '@/components/ui/avatar';
+import { SOCIAL_PLATFORMS } from '@/lib/socialPlatforms';
 
 // Local Badge component to avoid import issues
 const Badge = ({ children, variant = "default", className = "", onClick }: { 
@@ -103,9 +104,8 @@ export default function DatabasePage() {
     // State for data
     const [musicians, setMusicians] = useState<MusicianProfile[]>([]);
     const [genres, setGenres] = useState<Genre[]>([]);
-    const [instruments, setInstruments] = useState<Instrument[]>([]);
-    const [educationTypes, setEducationTypes] = useState<Education[]>([]);
-    const [socialPlatforms, setSocialPlatforms] = useState<any[]>([]);
+    const [instruments, setInstruments] = useState<Instrument[]>([]);    const [educationTypes, setEducationTypes] = useState<Education[]>([]);
+    // Note: socialPlatforms state removed - now using hard-coded SOCIAL_PLATFORMS
 
     // State for filters
     const [filters, setFilters] = useState<SearchFilters>({
@@ -193,28 +193,25 @@ export default function DatabasePage() {
         try {
             // Check localStorage first for cached reference data
             const cacheKey = 'musician_reference_data';
-            const cached = localStorage.getItem(cacheKey);
-              if (cached) {
+            const cached = localStorage.getItem(cacheKey);              if (cached) {
                 const { data, timestamp } = JSON.parse(cached);
                 // Use cached data if less than 24 hours old
                 if (Date.now() - timestamp < 24 * 60 * 60 * 1000) {
                     setGenres(data.genres || []);
                     setInstruments(data.instruments || []);
                     setEducationTypes(data.education_types || []);
-                    setSocialPlatforms(data.social_platforms || []);
+                    // Note: social platforms now use hard-coded SOCIAL_PLATFORMS
                     return;
                 }
             }
 
             const supabase = await createSPASassClient();
-            const client = supabase.getSupabaseClient();            // Load all reference data in parallel
-            const [instrumentsRes, genresRes, educationRes, socialRes] = await Promise.all([
+            const client = supabase.getSupabaseClient();            // Load all reference data in parallel (removed social query)
+            const [instrumentsRes, genresRes, educationRes] = await Promise.all([
                 client.from('instruments').select('*').order('category_rank', { ascending: true }).order('instrument_rank', { ascending: true }),
                 client.from('genres').select('*').order('name'),
-                client.from('education').select('*').order('rank', { ascending: false }),
-                client.from('social').select('*').order('name')
-            ]);
-              // Add detailed error logging for database responses
+                client.from('education').select('*').order('rank', { ascending: false })
+            ]);            // Add detailed error logging for database responses (removed social)
             if (instrumentsRes.error) {
                 console.error('Instruments DB error:', instrumentsRes.error);
             }
@@ -224,37 +221,28 @@ export default function DatabasePage() {
             if (educationRes.error) {
                 console.error('Education DB error:', educationRes.error);
             }
-            if (socialRes.error) {
-                console.error('Social platforms DB error:', socialRes.error);
-            }
 
             console.log('Instruments response:', instrumentsRes);
             console.log('Genres response:', genresRes);
             console.log('Education response:', educationRes);
-            console.log('Social platforms response:', socialRes);
-            
-            // Set state with response data
+              // Set state with response data
             setInstruments(instrumentsRes.data || []);
             setGenres(genresRes.data || []);
             setEducationTypes(educationRes.data || []);
-            setSocialPlatforms(socialRes.data || []);
               // Cache the reference data
             localStorage.setItem(cacheKey, JSON.stringify({
                 data: {
                     instruments: instrumentsRes.data || [],
                     genres: genresRes.data || [],
-                    education_types: educationRes.data || [],
-                    social_platforms: socialRes.data || []
+                    education_types: educationRes.data || []
                 },
                 timestamp: Date.now()
-            }));
-        } catch (error) {
+            }));        } catch (error) {
             console.error('Error loading reference data:', error);
             // Reset to empty arrays if there's an error
             setGenres([]);
             setInstruments([]);
             setEducationTypes([]);
-            setSocialPlatforms([]);
         }
     };    const searchMusicians = async () => {
         // Only require sortBy to be selected, genre can be "Any"
@@ -929,12 +917,12 @@ export default function DatabasePage() {
     }, [instrumentsByCategory, sortedCategories]);const getSocialIcon = (platform: string) => {
         if (!platform) return <ExternalLink className="h-4 w-4" />;
         
-        // First, try to match against platforms from the database
-        const dbPlatform = socialPlatforms.find(p => 
+        // Use hard-coded SOCIAL_PLATFORMS instead of database socialPlatforms
+        const dbPlatform = SOCIAL_PLATFORMS.find(p => 
             p.name && p.name.toLowerCase() === platform.toLowerCase()
         );
         
-        // If found in database, use appropriate icon based on name
+        // If found in platform list, use appropriate icon based on name
         if (dbPlatform) {
             const platformLower = dbPlatform.name.toLowerCase();
             switch (platformLower) {

@@ -14,17 +14,16 @@ import { MFASetup } from '@/components/MFASetup';
 import { Database } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 import { LoadingCard } from '@/components/ui/loading-card';
+import { SOCIAL_PLATFORMS, validateSocialUrl as validateSocialUrlHelper } from '@/lib/socialPlatforms';
 
 // Use the generated types directly
 type Instrument = Database['public']['Tables']['instruments']['Row'];
 type Genre = Database['public']['Tables']['genres']['Row'];
-type SocialPlatform = Database['public']['Tables']['social']['Row'];
 type EducationType = Database['public']['Tables']['education']['Row'];
 
 interface ReferenceData {
     instruments: Instrument[];
     genres: Genre[];
-    social_platforms: SocialPlatform[];
     education_types: EducationType[];
 }
 
@@ -56,13 +55,10 @@ export default function ProfilePage() {
     // Location service state
     const [locationServiceStatus, setLocationServiceStatus] = useState<'loading' | 'available' | 'unavailable'>('loading');
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [locationError, setLocationError] = useState('');
-
-    // Reference data state
+    const [locationError, setLocationError] = useState('');    // Reference data state
     const [referenceData, setReferenceData] = useState<ReferenceData>({
         instruments: [],
         genres: [],
-        social_platforms: [],
         education_types: []
     });
 
@@ -143,19 +139,15 @@ export default function ProfilePage() {
 
         try {
             const supabase = await createSPASassClient();
-            const client = supabase.getSupabaseClient();
-
-            const [instrumentsRes, genresRes, socialRes, educationRes] = await Promise.all([
+            const client = supabase.getSupabaseClient();            const [instrumentsRes, genresRes, educationRes] = await Promise.all([
                 client.from('instruments').select('*').order('name'),
                 client.from('genres').select('*').order('name'),
-                client.from('social').select('*').order('name'),
                 client.from('education').select('*').order('rank', { nullsFirst: false }) // Order by rank, nulls last
             ]);
 
             const newReferenceData = {
                 instruments: instrumentsRes.data || [],
                 genres: genresRes.data || [],
-                social_platforms: socialRes.data || [],
                 education_types: educationRes.data || []
             };
 
@@ -620,12 +612,11 @@ export default function ProfilePage() {
         setError('');
         setSuccess('');
 
-        try {
-            // Validate social links before saving
+        try {            // Validate social links before saving
             const invalidSocialLinks = [];
             for (const [platformName, url] of Object.entries(profile.social)) {
                 if (url && !validateSocialUrl(platformName, url)) {
-                    const platform = referenceData.social_platforms?.find(
+                    const platform = SOCIAL_PLATFORMS.find(
                         p => p.name.toLowerCase() === platformName.toLowerCase()
                     );
                     invalidSocialLinks.push(`${platform?.name || platformName}: must start with ${platform?.base_url}`);
@@ -934,32 +925,19 @@ export default function ProfilePage() {
             return newProfile;
         });
         setPersonalDataSaved(false);
-    }, []);
-
-    // Add validation function
+    }, []);    // Add validation function
     const validateSocialUrl = (platformName: string, url: string): boolean => {
         if (!url.trim()) return true; // Empty URLs are allowed
         
-        // Safety check for social_platforms availability
-        if (!referenceData.social_platforms || !Array.isArray(referenceData.social_platforms)) {
-            return true; // Allow any URL if reference data is not loaded
-        }
-        
-        const platform = referenceData.social_platforms.find(
-            p => p.name.toLowerCase() === platformName.toLowerCase()
-        );
-        
-        if (!platform?.base_url) return true; // No base URL restriction
-          return url.toLowerCase().startsWith(platform.base_url.toLowerCase());
+        // Use the imported validateSocialUrlHelper function
+        return validateSocialUrlHelper(platformName, url);
     };
 
     // Add validation function for video links
     const validateVideoUrl = (url: string): boolean => {
         if (!url.trim()) return true; // Empty URLs are allowed
         return url.trim().startsWith('https://');
-    };
-
-    // Add this helper function to sort social platforms
+    };    // Add this helper function to sort social platforms
     const getSortedSocialPlatforms = () => {
         const desiredOrder = [
             'instagram',
@@ -969,15 +947,12 @@ export default function ProfilePage() {
             'spotify',
             'soundcloud',
             'tiktok',
-            'x'
+            'x',
+            'linkedin'
         ];
         
-        // Safety check to ensure social_platforms is available and is an array
-        if (!referenceData.social_platforms || !Array.isArray(referenceData.social_platforms)) {
-            return [];
-        }
-        
-        return [...referenceData.social_platforms].sort((a, b) => {
+        // Use hard-coded SOCIAL_PLATFORMS instead of database
+        return [...SOCIAL_PLATFORMS].sort((a, b) => {
             const aIndex = desiredOrder.indexOf(a.name.toLowerCase());
             const bIndex = desiredOrder.indexOf(b.name.toLowerCase());
             
