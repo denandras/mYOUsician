@@ -359,8 +359,7 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                                         <h2 className="text-base sm:text-lg md:text-xl font-semibold mb-2 sm:mb-3 md:mb-4 flex items-center gap-2">
                                             <Video className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
                                             <span className="break-words">Video Portfolio</span>
-                                        </h2>
-                                        <div className="space-y-2">
+                                        </h2>                                        <div className="space-y-2">
                                             {musician.video_links.map((link, index) => (
                                                 <Button
                                                     key={index}
