@@ -111,13 +111,11 @@ export default function Home() {
               </div>
             )}
           </div>
-        </nav>
-
-        <section className="relative pt-32 pb-24 overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">            <div className="text-center">
-              <div className="flex items-center justify-center gap-3 mb-6 min-h-[4.5rem] md:min-h-[6.5rem]">
-                <div>
-                  <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground">
+        </nav>        <section className="relative pt-32 pb-24 overflow-hidden">
+          <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">            <div className="text-center">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-6 min-h-[4.5rem] md:min-h-[6.5rem]">
+                <div className="order-2 sm:order-1">
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground">
                     Welcome to
                     <span className="block text-primary">{productName}</span>
                   </h1>
@@ -125,10 +123,10 @@ export default function Home() {
                 <Image
                   src="/branding/logo_red-teal.svg"
                   alt={`${productName} logo`}
-                  width={120}
-                  height={120}
-                  className="self-center"
-                  style={{ height: '100%', width: 'auto', maxHeight: '6.5rem' }}
+                  width={80}
+                  height={80}
+                  className="self-center order-1 sm:order-2"
+                  style={{ height: 'auto', width: 'auto', maxWidth: '5rem', maxHeight: '5rem' }}
                 />
               </div><p className="mt-6 text-xl text-foreground/70 max-w-3xl mx-auto">
                 A database of musicians, for musicians!
