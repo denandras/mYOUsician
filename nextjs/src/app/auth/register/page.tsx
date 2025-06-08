@@ -22,20 +22,47 @@ export default function RegisterPage() {
         if (!acceptedTerms) {
             setError('You must accept the Terms of Service and Privacy Policy');
             return;
-        }
-
-        if (password !== confirmPassword) {
+        }        if (password !== confirmPassword) {
             setError("Passwords don't match");
             return;
         }
 
-        setLoading(true);
+        // Check if user has already attempted to register with this email
+        const registrationAttempt = localStorage.getItem(`registration_attempt_${email}`);
+        if (registrationAttempt) {
+            const attemptTime = new Date(registrationAttempt);
+            const now = new Date();
+            const timeDiff = now.getTime() - attemptTime.getTime();
+            
+            // If attempt was made within the last 5 minutes, prevent duplicate registration
+            if (timeDiff < 300000) { // 5 minutes in milliseconds
+                setError('A registration attempt for this email was already made recently. Please check your email for a verification link or wait before trying again.');
+                return;
+            }
+        }
 
-        try {
+        setLoading(true);try {
             const supabase = await createSPASassClient();
             const { error } = await supabase.registerEmail(email, password);
 
-            if (error) throw error;
+            if (error) {
+                // Handle specific signup errors
+                if (error.message.includes('User already registered') || 
+                    error.message.includes('already registered') ||
+                    error.message.includes('Email rate limit exceeded') ||
+                    error.message.includes('already exists')) {
+                    setError('An account with this email address already exists. Please sign in instead or check your email for a verification link.');
+                } else if (error.message.includes('Signup is disabled')) {
+                    setError('Account registration is currently disabled. Please contact support.');
+                } else if (error.message.includes('Password')) {
+                    setError('Password does not meet security requirements. Please use a stronger password.');
+                } else {
+                    setError(error.message);
+                }                return;
+            }
+
+            // Store the registration attempt timestamp
+            localStorage.setItem(`registration_attempt_${email}`, new Date().toISOString());
 
             router.push('/auth/verify-email');
         } catch (err: Error | unknown) {

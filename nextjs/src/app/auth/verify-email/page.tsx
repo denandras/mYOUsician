@@ -9,13 +9,14 @@ export default function VerifyEmailPage() {
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [success, setSuccess] = useState(false);
-
-    const resendVerificationEmail = async () => {
+    const [success, setSuccess] = useState(false);    const resendVerificationEmail = async () => {
         if (!email) {
             setError('Please enter your email address');
             return;
         }
+
+        // Clear any previous registration attempt for this email
+        localStorage.removeItem(`registration_attempt_${email}`);
 
         try {
             setLoading(true);

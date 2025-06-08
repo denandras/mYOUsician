@@ -24,10 +24,33 @@ export class SassClient {
     }
 
     async registerEmail(email: string, password: string) {
-        return this.client.auth.signUp({
+        // Attempt to sign up
+        const result = await this.client.auth.signUp({
             email: email,
             password: password
         });
+
+        // Check if the signup was successful but user already exists
+        if (result.data?.user && !result.data.user.email_confirmed_at && result.data.user.id) {
+            // Check if this user was created just now or already existed
+            const userCreatedAt = new Date(result.data.user.created_at);
+            const now = new Date();
+            const timeDiff = now.getTime() - userCreatedAt.getTime();
+            
+            // If the user was created more than 10 seconds ago, it's likely a duplicate signup attempt
+            if (timeDiff > 10000) {
+                return {
+                    data: { user: null, session: null },
+                    error: {
+                        message: 'An account with this email address already exists. Please check your email for a verification link or try signing in.',
+                        status: 409,
+                        name: 'AuthError'
+                    } as any
+                };
+            }
+        }
+
+        return result;
     }
 
     async exchangeCodeForSession(code: string) {
