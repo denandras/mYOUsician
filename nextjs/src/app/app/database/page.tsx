@@ -573,7 +573,142 @@ export default function DatabasePage() {
         // Let users keep seeing previous results until they search again
     };
 
-    const canSearch = filters.sortBy;  // Only require sorting to be selected, genre can be "Any"    // Search callback functions for ProfileQueryModal
+    const canSearch = filters.sortBy;  // Only require sorting to be selected, genre can be "Any"    // New search function for complete tag data (genre + instrument + category)
+    const handleFullTagSearch = async (genre: string, instrument: string, category: string) => {
+        const newFilters = {
+            genre: genre || 'any',
+            instrument: instrument || 'any', 
+            category: category || 'any',
+            nameSearch: '',
+            sortBy: 'name_asc' // Set a default sorting
+        };
+        setFilters(newFilters);
+        
+        // Perform search immediately with the new filters
+        setLoading(true);
+        setHasSearched(true);
+        
+        try {
+            const supabase = await createSPASassClient();
+            const client = supabase.getSupabaseClient();
+            
+            const { data: allProfiles, error: profilesError } = await client
+                .from('musician_profiles')
+                .select('*');
+            
+            if (profilesError) {
+                console.error('Error querying musician_profiles:', profilesError);
+                setMusicians([]);
+                return;
+            }
+            
+            // Apply filters for complete tag search
+            let filteredData = allProfiles || [];
+            
+            // Apply genre, instrument, and category filters if specified
+            if (genre && genre !== 'any') {
+                filteredData = filteredData.filter((profile: any) => {
+                    let genreInstrumentData = profile.genre_instrument;
+                    if (typeof genreInstrumentData === 'string') {
+                        try {
+                            genreInstrumentData = JSON.parse(genreInstrumentData);
+                        } catch {
+                            genreInstrumentData = [genreInstrumentData];
+                        }
+                    }
+                    
+                    if (!Array.isArray(genreInstrumentData)) return false;
+                    
+                    return genreInstrumentData.some((item: any) => {
+                        if (typeof item === 'string') {
+                            return item.toLowerCase().includes(genre.toLowerCase());
+                        }
+                        if (item && typeof item === 'object') {
+                            const itemGenre = String(item.genre || '').toLowerCase();
+                            return itemGenre === genre.toLowerCase();
+                        }
+                        return false;
+                    });
+                });
+            }
+            
+            if (instrument && instrument !== 'any') {
+                filteredData = filteredData.filter((profile: any) => {
+                    let genreInstrumentData = profile.genre_instrument;
+                    if (typeof genreInstrumentData === 'string') {
+                        try {
+                            genreInstrumentData = JSON.parse(genreInstrumentData);
+                        } catch {
+                            genreInstrumentData = [genreInstrumentData];
+                        }
+                    }
+                    
+                    if (!Array.isArray(genreInstrumentData)) return false;
+                    
+                    return genreInstrumentData.some((item: any) => {
+                        if (typeof item === 'string') {
+                            return item.toLowerCase().includes(instrument.toLowerCase());
+                        }
+                        if (item && typeof item === 'object') {
+                            const itemInstrument = String(item.instrument || '').toLowerCase();
+                            return itemInstrument === instrument.toLowerCase();
+                        }
+                        return false;
+                    });
+                });
+            }
+            
+            if (category && category !== 'any') {
+                filteredData = filteredData.filter((profile: any) => {
+                    let genreInstrumentData = profile.genre_instrument;
+                    if (typeof genreInstrumentData === 'string') {
+                        try {
+                            genreInstrumentData = JSON.parse(genreInstrumentData);
+                        } catch {
+                            genreInstrumentData = [genreInstrumentData];
+                        }
+                    }
+                    
+                    if (!Array.isArray(genreInstrumentData)) return false;
+                    
+                    return genreInstrumentData.some((item: any) => {
+                        if (item && typeof item === 'object') {
+                            const itemCategory = String(item.category || '').toLowerCase();
+                            return itemCategory === category.toLowerCase();
+                        }
+                        return false;
+                    });
+                });
+            }
+            
+            // Filter out current user if needed
+            const finalFilteredMusicians = filteredData.filter((musician: any) => {
+                return !currentUserEmail || musician.email !== currentUserEmail;
+            });
+            
+            // Parse and normalize data
+            const parsedMusicians = finalFilteredMusicians.map((musician: any) => ({
+                ...musician,
+                occupation: parseArrayField(musician.occupation),
+                education: parseEducationField(musician.education),
+                certificates: parseArrayField(musician.certificates),
+                genre_instrument: parseArrayField(musician.genre_instrument),
+                video_links: parseArrayField(musician.video_links),
+                social: parseSocialField(musician.social)
+            }));
+            
+            // Apply sorting
+            const sortedMusicians = applySorting(parsedMusicians, newFilters.sortBy);
+            setMusicians(sortedMusicians);
+        } catch (error) {
+            console.error('Error in full tag search:', error);
+            setMusicians([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Search callback functions for ProfileQueryModal
     const handleGenreSearch = async (genre: string) => {        const newFilters = {
             genre: genre,
             instrument: 'any',
@@ -729,75 +864,9 @@ export default function DatabasePage() {
             setMusicians([]);
         } finally {
             setLoading(false);
-        }
-    };
+        }    };
 
-    const handleOccupationSearch = async (occupation: string) => {
-        const newFilters = {
-            genre: 'any',
-            instrument: 'any',
-            category: 'any',
-            nameSearch: occupation,
-            sortBy: 'name_asc'
-        };
-        setFilters(newFilters);
-        
-        // Perform search immediately with the new filters
-        setLoading(true);
-        setHasSearched(true);
-        
-        try {
-            const supabase = await createSPASassClient();
-            const client = supabase.getSupabaseClient();
-            
-            const { data: allProfiles, error: profilesError } = await client
-                .from('musician_profiles')
-                .select('*');
-            
-            if (profilesError) {
-                console.error('Error querying musician_profiles:', profilesError);
-                setMusicians([]);
-                return;
-            }
-            
-            // Apply name/occupation search filter
-            const filteredData = (allProfiles || []).filter((profile: any) => {
-                const fullName = `${profile.forename || ''} ${profile.surname || ''}`.toLowerCase();
-                const bio = (profile.bio || '').toLowerCase();
-                const occupations = parseArrayField(profile.occupation);
-                
-                const searchTerm = occupation.toLowerCase();
-                
-                return fullName.includes(searchTerm) ||
-                       bio.includes(searchTerm) ||                       occupations.some((occ: string) => occ.toLowerCase().includes(searchTerm));
-            });
-            
-            // Filter out current user if needed
-            const finalFilteredMusicians = filteredData.filter((musician: any) => {
-                return !currentUserEmail || musician.email !== currentUserEmail;
-            });
-            
-            // Parse and normalize data
-            const parsedMusicians = finalFilteredMusicians.map((musician: any) => ({
-                ...musician,
-                occupation: parseArrayField(musician.occupation),
-                education: parseEducationField(musician.education),
-                certificates: parseArrayField(musician.certificates),
-                genre_instrument: parseArrayField(musician.genre_instrument),
-                video_links: parseArrayField(musician.video_links),
-                social: parseSocialField(musician.social)
-            }));
-            
-            // Apply sorting
-            const sortedMusicians = applySorting(parsedMusicians, newFilters.sortBy);
-            setMusicians(sortedMusicians);
-        } catch (error) {
-            console.error('Error in occupation search:', error);
-            setMusicians([]);
-        } finally {
-            setLoading(false);
-        }
-    };    // Memoize instrumentsByCategory with ranking
+    // Memoize instrumentsByCategory with ranking
     const instrumentsByCategory = useMemo(() => {
         return instruments.reduce((acc, instrument) => {
             const category = instrument.category || 'Other'; // Default to 'Other' if category is missing
@@ -1102,17 +1171,25 @@ export default function DatabasePage() {
                                                                 displayText = `${genre} ${instrument}${category}`.trim();
                                                             } else {
                                                                 displayText = String(item || '');
-                                                            }
-
-                                                            return (
+                                                            }                                                            return (
                                                                 <Badge 
                                                                     key={index} 
                                                                     variant="secondary" 
-                                                                    className="text-xs"
+                                                                    className="text-xs cursor-pointer hover:bg-accent transition-colors"
                                                                     onClick={() => {
-                                                                        if (genre && handleGenreSearch) {
+                                                                        // Extract category from displayText if it's in parentheses
+                                                                        let category = '';
+                                                                        if (item && typeof item === 'object') {
+                                                                            const itemObj = item as Record<string, unknown>;
+                                                                            category = String(itemObj.category || '');
+                                                                        }
+                                                                        
+                                                                        // Use full tag search for complete data
+                                                                        if (genre && instrument) {
+                                                                            handleFullTagSearch(genre, instrument, category);
+                                                                        } else if (genre) {
                                                                             handleGenreSearch(genre);
-                                                                        } else if (instrument && handleInstrumentSearch) {
+                                                                        } else if (instrument) {
                                                                             handleInstrumentSearch(instrument);
                                                                         }
                                                                     }}
@@ -1237,8 +1314,7 @@ export default function DatabasePage() {
                             </div>
                         )}
                     </CardContent>
-                </Card>            )}
-              {/* Profile Query Modal */}            <ProfileQueryModal 
+                </Card>            )}              {/* Profile Query Modal */}            <ProfileQueryModal 
                 isOpen={isProfileModalOpen}
                 onClose={closeProfileModal}
                 musician={selectedMusician}
@@ -1246,7 +1322,7 @@ export default function DatabasePage() {
                 error={profileError}
                 onGenreSearch={handleGenreSearch}
                 onInstrumentSearch={handleInstrumentSearch}
-                onOccupationSearch={handleOccupationSearch}
+                onFullTagSearch={handleFullTagSearch}
             />
         </div>
     );

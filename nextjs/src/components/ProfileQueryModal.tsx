@@ -32,10 +32,10 @@ interface ProfileQueryModalProps {
     error?: string | null;
     onGenreSearch?: (genre: string) => void;
     onInstrumentSearch?: (instrument: string) => void;
-    onOccupationSearch?: (occupation: string) => void;
+    onFullTagSearch?: (genre: string, instrument: string, category: string) => void;
 }
 
-export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false, error = null, onGenreSearch, onInstrumentSearch, onOccupationSearch }: ProfileQueryModalProps) {
+export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false, error = null, onGenreSearch, onInstrumentSearch, onFullTagSearch }: ProfileQueryModalProps) {
     // Loading state
     if (isLoading) {
         return (
@@ -248,15 +248,12 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                         <div className="space-y-3 sm:space-y-4 md:space-y-6">
                             {/* Skills & Instruments */}
                             <Card>
-                                <CardContent className="pt-3 sm:pt-4 md:pt-6">                                    <h2 className="text-base sm:text-lg md:text-xl font-semibold mb-2 sm:mb-3 md:mb-4 flex items-center gap-2">
+                                <CardContent className="pt-3 sm:pt-4 md:pt-6">
+                                    <h2 className="text-base sm:text-lg md:text-xl font-semibold mb-2 sm:mb-3 md:mb-4 flex items-center gap-2">
                                         <Music className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
                                         <span className="break-words">Skills & Instruments</span>
-                                        {(onGenreSearch || onInstrumentSearch) && (
-                                            <div className="ml-auto" title="Click tags to search">
-                                                <Search className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
-                                            </div>
-                                        )}
-                                    </h2>{musician.genre_instrument && musician.genre_instrument.length > 0 ? (
+                                    </h2>
+                                    {musician.genre_instrument && musician.genre_instrument.length > 0 ? (
                                         <div className="flex flex-wrap gap-1 sm:gap-2">
                                             {musician.genre_instrument.map((item, index) => {
                                                 let displayText: string;
@@ -270,8 +267,7 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                                                     if (parts.length >= 2) {
                                                         genre = parts[0];
                                                         instrument = parts.slice(1).join(' ');
-                                                    }
-                                                } else if (item && typeof item === 'object') {
+                                                    }                                                } else if (item && typeof item === 'object') {
                                                     const itemObj = item as Record<string, unknown>;
                                                     genre = String(itemObj.genre || '');
                                                     instrument = String(itemObj.instrument || '');
@@ -284,9 +280,19 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                                                 return (                                                    <Badge 
                                                         key={index} 
                                                         variant="secondary" 
-                                                        className="text-xs sm:text-sm break-words cursor-pointer hover:bg-accent transition-colors duration-200"
-                                                        onClick={() => {
-                                                            if (genre && onGenreSearch) {
+                                                        className="text-xs sm:text-sm break-words cursor-pointer hover:bg-accent transition-colors duration-200"                                                        onClick={() => {
+                                                            // Extract category from item object for search
+                                                            let category = '';
+                                                            if (item && typeof item === 'object') {
+                                                                const itemObj = item as Record<string, unknown>;
+                                                                category = String(itemObj.category || '');
+                                                            }
+                                                            
+                                                            // Use full tag search if we have both genre and instrument
+                                                            if (genre && instrument && onFullTagSearch) {
+                                                                onFullTagSearch(genre, instrument, category);
+                                                                onClose();
+                                                            } else if (genre && onGenreSearch) {
                                                                 onGenreSearch(genre);
                                                                 onClose();
                                                             } else if (instrument && onInstrumentSearch) {
@@ -294,7 +300,6 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                                                                 onClose();
                                                             }
                                                         }}
-                                                        title={`Click to search for ${genre ? `genre: ${genre}` : instrument ? `instrument: ${instrument}` : 'this skill'}`}
                                                     >
                                                         {displayText}
                                                     </Badge>
@@ -305,39 +310,7 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                                         <p className="text-sm text-muted-foreground">No skills listed</p>
                                     )}
                                 </CardContent>
-                            </Card>                            {/* Occupation */}
-                            {musician.occupation && musician.occupation.length > 0 && (
-                                <Card>
-                                    <CardContent className="pt-3 sm:pt-4 md:pt-6">                                        <h2 className="text-base sm:text-lg md:text-xl font-semibold mb-2 sm:mb-3 md:mb-4 flex items-center gap-2">
-                                            <Briefcase className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
-                                            <span className="break-words">Current Occupation</span>
-                                            {onOccupationSearch && (
-                                                <div className="ml-auto" title="Click tags to search">
-                                                    <Search className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
-                                                </div>
-                                            )}
-                                        </h2>                        <div className="space-y-2">
-                            {musician.occupation.map((job, index) => (
-                                <div 
-                                    key={index} 
-                                    className={`text-xs sm:text-sm border border-input bg-background p-2 md:p-3 rounded-md break-words ${
-                                        onOccupationSearch ? 'cursor-pointer hover:bg-accent transition-colors duration-200' : 'hover:bg-accent/50 transition-colors'
-                                    }`}
-                                    onClick={() => {
-                                        if (onOccupationSearch) {
-                                            onOccupationSearch(job);
-                                            onClose();
-                                        }
-                                    }}
-                                    title={onOccupationSearch ? `Click to search for occupation: ${job}` : undefined}
-                                >
-                                    {job}
-                                </div>
-                            ))}
-                        </div>
-                                    </CardContent>
-                                </Card>
-                            )}
+                            </Card>
 
                             {/* Certificates */}
                             {musician.certificates && musician.certificates.length > 0 && (
@@ -448,15 +421,6 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                         </div>
                     </div>                    {/* Footer with Profile Dates */}
                     <div className="border-t pt-3 sm:pt-4 mt-4 sm:mt-6" />
-                      {/* Search hint */}
-                    {(onGenreSearch || onInstrumentSearch) && (
-                        <div className="text-center mb-3">
-                            <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                                <Search className="h-3 w-3" />
-                                Click on skills or instruments to search for similar musicians
-                            </p>
-                        </div>
-                    )}
                     
                     <div className="text-xs text-muted-foreground text-center px-2">
                         <div className="flex flex-col sm:flex-row sm:justify-center sm:gap-2">
