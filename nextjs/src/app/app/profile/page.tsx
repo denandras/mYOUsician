@@ -1160,7 +1160,7 @@ export default function ProfilePage() {
                                 onClick={savePersonalData}
                                 disabled={profileLoading}
                                 variant={personalDataSaved ? "default" : "teal"}
-                                className={`w-full text-white transition-all duration-700 ${
+                                className={`w-full text-white transition-all duration-200 ${
                                     personalDataSaved 
                                         ? "bg-green-400 hover:bg-green-500" 
                                         : ""
@@ -1364,7 +1364,7 @@ export default function ProfilePage() {
                                 onClick={saveAboutSection}
                                 disabled={profileLoading}
                                 variant={aboutSaved ? "default" : "teal"}
-                                className={`w-full text-white transition-all duration-700 ${
+                                className={`w-full text-white transition-all duration-200 ${
                                     aboutSaved 
                                         ? "bg-green-400 hover:bg-green-500" 
                                         : ""
@@ -1573,7 +1573,7 @@ export default function ProfilePage() {
                                 onClick={saveArtisticProfile}
                                 disabled={profileLoading}
                                 variant={artisticProfileSaved ? "default" : "teal"}
-                                className={`w-full text-white transition-all duration-700 ${
+                                className={`w-full text-white transition-all duration-200 ${
                                     artisticProfileSaved 
                                         ? "bg-green-400 hover:bg-green-500" 
                                         : ""
@@ -1622,7 +1622,7 @@ export default function ProfilePage() {
                                     type="submit"
                                     disabled={loading}
                                     variant={passwordSaved ? "default" : passwordError ? "destructive" : "delete"}
-                                    className={`w-full text-white transition-all duration-700 ${
+                                    className={`w-full text-white transition-all duration-200 ${
                                         passwordSaved 
                                             ? "bg-green-400 hover:bg-green-500" 
                                             : passwordError 
