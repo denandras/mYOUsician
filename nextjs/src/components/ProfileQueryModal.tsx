@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar } from '@/components/ui/avatar';
-import { Mail, Phone, Video, ExternalLink, User, BookOpen, MapPin, Award, Youtube, Instagram, Facebook, Twitter, Linkedin, Music, Globe, AlertCircle, Loader2 } from 'lucide-react';
+import { Mail, Phone, Video, ExternalLink, BookOpen, MapPin, Award, Youtube, Instagram, Facebook, Twitter, Linkedin, Music, Globe, AlertCircle, Loader2 } from 'lucide-react';
 
 interface MusicianProfile {
     id: string;
