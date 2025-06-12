@@ -891,10 +891,7 @@ export default function ProfilePage() {
             )
         }));
         setAboutSaved(false);
-    };const handleCountryChange = useCallback((countryName: string) => {
-        console.log('🌍 PROFILE: Country changed to:', countryName);
-        console.log('🌍 PROFILE: Before change - current country:', profile.location.country, 'current city:', profile.location.city);
-        
+    };    const handleCountryChange = useCallback((countryName: string) => {
         const country = locationData.countries.find(c => c.countryName === countryName);
         if (country) {            // Use functional update to ensure we have the latest state
             setProfile(prev => {
@@ -906,22 +903,21 @@ export default function ProfilePage() {
                         city: '' // Clear city when country changes
                     }
                 };
-                console.log('🌍 PROFILE: New profile state set:', newProfile.location);
                 return newProfile;
             });
             setPersonalDataSaved(false);
             
             // Load cities for the new country
-            console.log('🌍 PROFILE: Loading cities for country code:', country.countryCode);
             loadCitiesForCountry(country.countryCode);
         }
-    }, [locationData.countries, loadCitiesForCountry, profile.location.country, profile.location.city]);const handleCityChange = useCallback((value: string) => {
-        console.log('🏙️ PROFILE: City changed to:', value);        setProfile(prev => {
+    }, [locationData.countries, loadCitiesForCountry, profile.location.country, profile.location.city]);
+
+    const handleCityChange = useCallback((value: string) => {
+        setProfile(prev => {
             const newProfile = {
                 ...prev,
                 location: { ...prev.location, city: value }
             };
-            console.log('🏙️ PROFILE: New city in profile:', newProfile.location.city);
             return newProfile;
         });
         setPersonalDataSaved(false);

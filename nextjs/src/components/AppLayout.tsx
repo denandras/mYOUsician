@@ -81,9 +81,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         { name: 'Homepage', href: '/app', icon: Home },
         { name: 'Profile Editor', href: '/app/profile', icon: User },
         { name: 'Database', href: '/app/database', icon: Database },
-    ];    const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
-
-    return (<div className="min-h-screen bg-background">            {isSidebarOpen && (
+    ];    const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);    return (<div className="min-h-screen bg-background flex flex-col">            {isSidebarOpen && (
                 <div
                     className="fixed inset-0 bg-gray-600 bg-opacity-75 z-20"
                     data-sidebar-backdrop
@@ -137,7 +135,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     })}
                 </nav>
 
-            </div>            <div className="">
+            </div>            <div className="flex-1">
                 <div className="sticky top-0 z-10 flex items-center justify-between h-16 bg-[#083e4d] bg-opacity-100 border-b border-[#062f3b] px-4 shadow-md">                    <div className="flex items-center space-x-4">
                         <button
                             onClick={toggleSidebar}
@@ -192,7 +190,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                             </div>
                         )}
                     </div>
-                </div>                <main className="p-2 sm:p-4">
+                </div>                <main className="p-2 sm:p-4 flex-1">
                     <div className="max-w-4xl mx-auto">
                         {children}
                     </div>

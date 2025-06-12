@@ -19,10 +19,8 @@ const Select = React.forwardRef<
   // Set initial value and handle prop updates
   React.useEffect(() => {
     if (selectRef.current) {
-      const newValue = value ?? '';
-      // Always update the DOM value to match the prop
+      const newValue = value ?? '';      // Always update the DOM value to match the prop
       if (selectRef.current.value !== newValue) {
-        console.log('SELECT UPDATE - Setting value from prop:', { newValue, reason: 'Prop value changed', userChanging: isUserChanging.current });
         selectRef.current.value = newValue;
         
         // Reset user changing flag if value is programmatically set to empty
@@ -31,9 +29,8 @@ const Select = React.forwardRef<
         }
       }
     }
-  }, [value]);const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  }, [value]);  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newValue = e.target.value;
-    console.log('SELECT UPDATE - User changed selection:', { newValue, reason: 'User interaction' });
     
     // Mark that we're in a user change
     isUserChanging.current = true;

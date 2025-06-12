@@ -51,8 +51,6 @@ export default function FileManagementPage() {
             setUploading(true);
             setError('');
 
-            console.log(user)
-
             const supabase = await createSPASassClient();
             const { error } = await supabase.uploadFile(user!.id!, file.name, file);
 

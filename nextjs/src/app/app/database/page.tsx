@@ -172,11 +172,9 @@ export default function DatabasePage() {
     useEffect(() => {
         loadReferenceData();
         loadCurrentUser();
-    }, []);    // Log when instruments or genres change
+    }, []);    // Track when instruments or genres change for UI updates
     useEffect(() => {
-        console.log('Instruments updated:', instruments);
-        console.log('Genres updated:', genres);
-        // instrumentsByCategory will be logged separately when it changes
+        // Data loaded, trigger any necessary UI updates
     }, [instruments, genres]);
 
     const loadCurrentUser = async () => {
@@ -219,13 +217,9 @@ export default function DatabasePage() {
                 console.error('Genres DB error:', genresRes.error);
             }
             if (educationRes.error) {
-                console.error('Education DB error:', educationRes.error);
-            }
+                console.error('Education DB error:', educationRes.error);            }
 
-            console.log('Instruments response:', instrumentsRes);
-            console.log('Genres response:', genresRes);
-            console.log('Education response:', educationRes);
-              // Set state with response data
+            // Set state with response data
             setInstruments(instrumentsRes.data || []);
             setGenres(genresRes.data || []);
             setEducationTypes(educationRes.data || []);
@@ -248,44 +242,25 @@ export default function DatabasePage() {
         // Only require sortBy to be selected, genre can be "Any"
         if (!filters.sortBy) {
             return;
-        }
-
-        setLoading(true);
+        }        setLoading(true);
         setHasSearched(true);
         
-        console.log('=== SIMPLIFIED DATABASE SEARCH ===');
-        console.log('Starting search with filters:', filters);
-
         try {
             const supabase = await createSPASassClient();
             const client = supabase.getSupabaseClient();
             
             // Only query musician_profiles table (no users table fallback)
-            console.log('Querying musician_profiles table...');
-            
             const { data: allProfiles, error: profilesError } = await client
                 .from('musician_profiles')
                 .select('*');
-            
-            console.log('musician_profiles query result:', {
-                dataLength: allProfiles?.length || 0,
-                error: profilesError,
-                errorDetails: profilesError ? {
-                    message: (profilesError as any)?.message,
-                    details: (profilesError as any)?.details,
-                    hint: (profilesError as any)?.hint,
-                    code: (profilesError as any)?.code
-                } : null,
-                sampleData: allProfiles?.slice(0, 2) // First 2 records for debugging
-            });
             
             if (profilesError) {
                 console.error('Error querying musician_profiles:', profilesError);
                 setMusicians([]);
                 setLoading(false);
-                return;
-            }
-              console.log('Successfully retrieved all profiles, now filtering...');            // Filter in JavaScript to avoid complex SQL queries
+                return;            }
+              
+            // Filter in JavaScript to avoid complex SQL queries
             const filteredData = (allProfiles || []).filter((profile: any) => {
                 // If no genre filter is specified (Any), return all profiles
                 if (!filters.genre || filters.genre === 'any') return true;
@@ -325,45 +300,31 @@ export default function DatabasePage() {
                         return false;
                     }
                     
-                    return true;
-                });
+                    return true;                });
             });
-              console.log(`Filtered ${filteredData.length} profiles matching genre criteria`);
-              // Debug the filtering steps
-            console.log('Current user email:', currentUserEmail);
-            console.log('Profile emails:', filteredData.map(m => m.email));
-              // Filter out current user (but only if we have a current user email and includeCurrentUser is false)
+              
+            // Filter out current user (but only if we have a current user email and includeCurrentUser is false)
             let finalFilteredMusicians = filteredData.filter((musician: any) => {
                 // If includeCurrentUser is true, don't filter out any profiles
                 if (filters.includeCurrentUser) {
-                    console.log(`Including current user due to debug flag`);
                     return true;
                 }
                 
                 // If no current user email, don't filter out any profiles
                 if (!currentUserEmail) {
-                    console.log(`No current user email set, keeping all profiles`);
                     return true;
                 }
                 
                 const isCurrentUser = musician.email === currentUserEmail;
-                console.log(`Profile ${musician.email} is current user: ${isCurrentUser}`);
                 return !isCurrentUser;
-            });
-
-            console.log(`After removing current user: ${finalFilteredMusicians.length} musicians`);
-
-            // Apply name search filter
+            });            // Apply name search filter
             if (filters.nameSearch.trim()) {
                 const searchTerm = filters.nameSearch.toLowerCase().trim();
                 finalFilteredMusicians = finalFilteredMusicians.filter((musician: any) => {
                     const fullName = `${musician.forename || ''} ${musician.surname || ''}`.toLowerCase();
                     return fullName.includes(searchTerm);
                 });
-                console.log(`After name search filter: ${finalFilteredMusicians.length} musicians`);
             }
-
-            console.log(`Final result: ${finalFilteredMusicians.length} musicians`);
 
             // Parse and normalize data to MusicianProfile format
             const parsedMusicians = finalFilteredMusicians.map((musician: any) => {

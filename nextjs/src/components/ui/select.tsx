@@ -10,13 +10,14 @@ const Select = React.forwardRef<
     value?: string
     children?: React.ReactNode
   }
->(({ className, children, onValueChange, onChange, value, disabled, ...props }, ref) => {  // Store the current selected value in local state to prevent flickering
+>(({ className, children, onValueChange, onChange, value, disabled, ...props }, ref) => {
+  // Store the current selected value in local state to prevent flickering
   const [internalValue, setInternalValue] = React.useState(value ?? '');
   const [userHasInteracted, setUserHasInteracted] = React.useState(false);
+
   // Only update internal value from prop if user hasn't interacted or if it's a genuine external update
   React.useEffect(() => {
     const propValue = value ?? '';
-    console.log('🔥 Select useEffect:', { propValue, internalValue, userHasInteracted, willUpdate: propValue !== internalValue });
     
     // Always sync the value - let the parent control the state
     // The userHasInteracted flag was causing issues with location selectors
@@ -31,7 +32,6 @@ const Select = React.forwardRef<
   
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newValue = e.target.value;
-    console.log('🚀 Select handleChange:', { newValue, oldInternalValue: internalValue });
     
     // Mark that user has interacted
     setUserHasInteracted(true);
@@ -48,7 +48,7 @@ const Select = React.forwardRef<
     if (onChange) {
       onChange(e);
     }
-  }
+  };
 
   // Extract options from nested children (inside SelectContent)
   const extractOptions = (children: React.ReactNode): React.ReactNode[] => {
@@ -82,7 +82,10 @@ const Select = React.forwardRef<
     if (React.isValidElement(child) && child.type === SelectValue) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       placeholder = (child.props as any).placeholder || placeholder;
-    }  });  return (
+    }
+  });
+
+  return (
     <select
       className={`flex h-10 w-full rounded-none border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none [-webkit-appearance:none] [background-image:url("data:image/svg+xml;charset=US-ASCII,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e")] bg-no-repeat [background-position:right_0.75rem_center] [background-size:16px_12px] pr-10 [border-radius:0!important] [-webkit-border-radius:0!important] ${className || ''}`}
       ref={ref}
@@ -94,7 +97,8 @@ const Select = React.forwardRef<
       <option value="" disabled hidden>
         {placeholder}
       </option>
-      {options}    </select>
+      {options}
+    </select>
   )
 })
 Select.displayName = "Select"

@@ -71,10 +71,9 @@ export default function Home() {
     { label: 'Organizations', value: '2K+' },
     { label: 'Countries', value: '50+' },
     { label: 'Uptime', value: '99.9%' }
-  ];*/
-
-  return (
-      <div className="min-h-screen">
+  ];*/  return (
+      <div className="min-h-screen flex flex-col">
+        <div className="flex-1">
         <nav className="fixed top-0 w-full bg-[#083e4d] z-50 border-b border-[#062f3b] shadow-md">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">            <div className="flex justify-between h-16 items-center">              <div className="flex-shrink-0">
                 <Link href="/" className="block">
@@ -192,67 +191,8 @@ export default function Home() {
               Sign up
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
-          </div>
-        </section>        <footer className="bg-background border-t border-gray-200">
-          <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
-              <div>
-                <h4 className="text-sm font-semibold text-foreground">Resources</h4>
-                <ul className="mt-4 space-y-2">
-                  <li>
-                    <Link href="#features" className="text-foreground/70 hover:text-foreground">
-                      Features
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="https://github.com/Razikus/supabase-nextjs-template"
-                      className="text-foreground/70 hover:text-foreground"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Documentation
-                    </Link>
-                  </li>
-                </ul>
-              </div>              <div>
-                <h4 className="text-sm font-semibold text-foreground">Legal</h4>
-                <ul className="mt-4 space-y-2">
-                  <li>
-                    <Link href="/legal/privacy" className="text-foreground/70 hover:text-foreground">
-                      Privacy
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/legal/terms" className="text-foreground/70 hover:text-foreground">
-                      Terms
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="text-sm font-semibold text-foreground">Support</h4>
-                <ul className="mt-4 space-y-2">
-                  <li>
-                    <Link 
-                      href="https://tally.so/r/wkQAZd" 
-                      className="text-foreground/70 hover:text-foreground"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Report an Issue
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div className="mt-8 pt-8 border-t border-gray-200">
-              <p className="text-center text-foreground/70">
-                © {new Date().getFullYear()} {productName}. All rights reserved.
-              </p>
-            </div>
-          </div>
-        </footer>
+          </div>        </section>
+        </div>
       </div>
   );
 }

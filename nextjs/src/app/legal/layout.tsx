@@ -23,8 +23,8 @@ export default function LegalLayout({ children } : { children: React.ReactNode }
     const router = useRouter();
 
     return (
-        <div className="min-h-screen bg-background">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-background flex flex-col">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1">
                 <div className="py-6">
                     <button
                         onClick={() => router.back()}
