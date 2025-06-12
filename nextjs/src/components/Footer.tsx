@@ -20,10 +20,9 @@ const Footer = () => {
         legal: [
             { name: 'Privacy Policy', href: '/legal/privacy' },
             { name: 'Terms of Service', href: '/legal/terms' },
-        ],
-        social: [
+        ],        social: [
             { name: 'Twitter', href: '#', icon: Twitter },
-            { name: 'GitHub', href: 'https://github.com/Razikus/supabase-nextjs-template', icon: Github },
+            { name: 'GitHub', href: 'https://github.com/denandras/mYOUsician/', icon: Github },
             { name: 'LinkedIn', href: '#', icon: Linkedin },
         ],
     };

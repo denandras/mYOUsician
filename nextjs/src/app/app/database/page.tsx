@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup } from "@/components/ui/select-new";
-import { Search, Trash2, Mail, Phone, Video, ExternalLink, User, BookOpen, Youtube, Instagram, Facebook, Twitter, Linkedin, Music, Globe, Briefcase } from "lucide-react";
+import { Search, Trash2, Mail, Phone, Video, ExternalLink, User, BookOpen, Youtube, Instagram, Facebook, Twitter, Linkedin, Music, Globe, Briefcase, MapPin } from "lucide-react";
 import { createSPASassClient } from '@/lib/supabase/client';
 import { ProfileQueryModal } from '@/components/ProfileQueryModal';
 import { Avatar } from '@/components/ui/avatar';
@@ -1103,9 +1103,8 @@ export default function DatabasePage() {
                                                             {musician.forename || musician.surname 
                                                                 ? `${musician.forename || ''} ${musician.surname || ''}`.trim() 
                                                                 : 'Anonymous'}
-                                                        </CardTitle>                                                    </button>
-                                                    <CardDescription className="truncate text-gray-500 flex items-center gap-1">
-                                                        <User className="h-3 w-3" />
+                                                        </CardTitle>                                                    </button>                                                    <CardDescription className="truncate text-gray-500 flex items-center gap-1">
+                                                        <MapPin className="h-3 w-3" />
                                                         {formatLocation(musician.location)}
                                                     </CardDescription>
                                                 </div>

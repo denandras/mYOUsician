@@ -908,9 +908,8 @@ export default function ProfilePage() {
             setPersonalDataSaved(false);
             
             // Load cities for the new country
-            loadCitiesForCountry(country.countryCode);
-        }
-    }, [locationData.countries, loadCitiesForCountry, profile.location.country, profile.location.city]);
+            loadCitiesForCountry(country.countryCode);        }
+    }, [locationData.countries, loadCitiesForCountry]);
 
     const handleCityChange = useCallback((value: string) => {
         setProfile(prev => {

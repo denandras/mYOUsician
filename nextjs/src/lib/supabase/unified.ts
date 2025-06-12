@@ -44,7 +44,7 @@ export class SassClient {
                         message: 'An account with this email address already exists. Please sign in instead or check your email for a verification link.',
                         status: 409,
                         name: 'AuthError'
-                    } as any
+                    }
                 };
             }
             
@@ -70,7 +70,7 @@ export class SassClient {
                             message: 'An account with this email address already exists but has not been verified. Please check your email for a verification link, or click the "Resend verification" link if you need a new one.',
                             status: 409,
                             name: 'AuthError'
-                        } as any
+                        }
                     };
                 }
             }
@@ -83,7 +83,7 @@ export class SassClient {
                         message: 'An account with this email address already exists and is verified. Please sign in instead.',
                         status: 409,
                         name: 'AuthError'
-                    } as any
+                    }
                 };
             }
         }
