@@ -1099,9 +1099,10 @@ export default function ProfilePage() {
                                         disabled={locationServiceStatus === 'unavailable'}
                                     >                                        <SelectTrigger className={!profile.location.country ? "text-muted-foreground" : (locationServiceStatus === 'unavailable' ? 'opacity-50' : '')}>
                                             <SelectValue placeholder={getCountryPlaceholder()} />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {locationData.countries.map(country => (
+                                        </SelectTrigger>                                        <SelectContent>
+                                            {locationData.countries
+                                                .sort((a, b) => a.countryName.localeCompare(b.countryName))
+                                                .map(country => (
                                                 <SelectItem key={country.geonameId} value={country.countryName}>
                                                     {country.countryName}
                                                 </SelectItem>
@@ -1124,10 +1125,11 @@ export default function ProfilePage() {
                                                 ? 'opacity-50' : '')
                                         }>
                                             <SelectValue placeholder={getCityPlaceholder()} />
-                                        </SelectTrigger>
-                                        <SelectContent>
+                                        </SelectTrigger>                                        <SelectContent>
                                             {profile.location.countryCode && 
-                                             locationData.cities[profile.location.countryCode]?.map(city => (
+                                             locationData.cities[profile.location.countryCode]
+                                                ?.sort((a, b) => a.name.localeCompare(b.name))
+                                                .map(city => (
                                                 <SelectItem key={city.geonameId} value={city.name}>
                                                     {city.name}
                                                 </SelectItem>
