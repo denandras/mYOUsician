@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup } from "@/components/ui/select-new";
-import { Search, Trash2, Mail, Phone, Video, ExternalLink, User, BookOpen, Youtube, Instagram, Facebook, Twitter, Linkedin, Music, Globe } from "lucide-react";
+import { Search, Trash2, Mail, Phone, Video, ExternalLink, User, BookOpen, Youtube, Instagram, Facebook, Twitter, Linkedin, Music, Globe, Briefcase } from "lucide-react";
 import { createSPASassClient } from '@/lib/supabase/client';
 import { ProfileQueryModal } from '@/components/ProfileQueryModal';
 import { Avatar } from '@/components/ui/avatar';
@@ -21,7 +21,7 @@ const Badge = ({ children, variant = "default", className = "", onClick }: {
 }) => {
   const baseClasses = "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors";
   const variantClasses = {
-    default: "border-transparent bg-blue-600 text-white hover:bg-blue-700",
+    default: "border-transparent bg-red-600 text-white hover:bg-red-700",
     secondary: "border-transparent bg-gray-200 text-gray-800 hover:bg-gray-300",
     destructive: "border-transparent bg-red-600 text-white hover:bg-red-700",
     outline: "border-gray-300 bg-transparent text-gray-700 hover:bg-gray-50"
@@ -407,9 +407,7 @@ export default function DatabasePage() {
         } finally {
             setLoading(false);
         }
-    };
-
-    // Helper function to parse array fields properly
+    };    // Helper function to parse array fields properly
     const parseArrayField = (field: unknown): string[] => {
         if (!field) return [];
         
@@ -420,14 +418,14 @@ export default function DatabasePage() {
                 try {
                     const parsed = JSON.parse(field[0]);
                     if (Array.isArray(parsed)) {
-                        return parsed.length > 0 ? parsed.filter(Boolean) : [];
+                        return parsed.length > 0 ? parsed.filter(item => item && item.trim() && item !== 'Student' && item !== '[]') : [];
                     }
                 } catch {
                     // If parsing fails, treat as regular string
-                    return field[0] ? [field[0]] : [];
+                    return field[0] && field[0].trim() && field[0] !== 'Student' && field[0] !== '[]' ? [field[0]] : [];
                 }
             }
-            return field.filter(Boolean);
+            return field.filter(item => item && item.trim() && item !== 'Student' && item !== '[]');
         }
         
         // If it's a string, try to parse it
@@ -435,11 +433,11 @@ export default function DatabasePage() {
             try {
                 const parsed = JSON.parse(field);
                 if (Array.isArray(parsed)) {
-                    return parsed.filter(Boolean);
+                    return parsed.filter(item => item && item.trim() && item !== 'Student' && item !== '[]');
                 }
-                return field ? [field] : [];
+                return field && field.trim() && field !== 'Student' && field !== '[]' ? [field] : [];
             } catch {
-                return field ? [field] : [];
+                return field && field.trim() && field !== 'Student' && field !== '[]' ? [field] : [];
             }
         }
         
@@ -1123,12 +1121,11 @@ export default function DatabasePage() {
                         <CardDescription>
                             {musicians.length} musician{musicians.length !== 1 ? 's' : ''} found
                         </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {musicians.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    </CardHeader>                    <CardContent>
+                        {musicians.length > 0 ? (                            <div className="dynamic-masonry">
                                 {musicians.map((musician) => (
-                                    <Card key={musician.id} className="h-fit">                                        <CardHeader className="pb-3">                                            <div className="flex items-center gap-3">
+                                    <div key={musician.id} className="masonry-item">
+                                        <Card className="musician-card break-inside-avoid shadow-lg hover:shadow-xl bg-gradient-to-br from-white to-gray-50 border-0 ring-1 ring-gray-200 hover:ring-teal-300 overflow-hidden"><CardHeader className="pb-3 bg-gradient-to-r from-teal-50 to-blue-50 rounded-t-lg">                                            <div className="flex items-center gap-3">
                                                 <Avatar
                                                     forename={musician.forename}
                                                     surname={musician.surname}
@@ -1141,22 +1138,23 @@ export default function DatabasePage() {
                                                         className="text-left w-full"
                                                         onClick={() => openProfileModal(musician)}
                                                         title="View full profile"
-                                                    >
-                                                        <CardTitle className="text-lg truncate hover:text-primary transition-colors cursor-pointer">
+                                                    >                                                        <CardTitle className="text-lg truncate hover:text-teal-600 transition-colors cursor-pointer font-semibold text-gray-800">
                                                             {musician.forename || musician.surname 
                                                                 ? `${musician.forename || ''} ${musician.surname || ''}`.trim() 
                                                                 : 'Anonymous'}
                                                         </CardTitle>                                                    </button>
-                                                    <CardDescription className="truncate">
+                                                    <CardDescription className="truncate text-gray-500 flex items-center gap-1">
+                                                        <User className="h-3 w-3" />
                                                         {formatLocation(musician.location)}
                                                     </CardDescription>
                                                 </div>
                                             </div>
-                                        </CardHeader>
-                                        <CardContent className="pt-0 space-y-4">                                            {/* Skills Section */}
-                                            <div>
-                                                <h4 className="text-sm font-medium mb-2">Skills & Instruments</h4>
-                                                <div className="flex flex-wrap gap-1">                                                    {musician.genre_instrument && musician.genre_instrument.length > 0 ? (
+                                        </CardHeader>                                        <CardContent className="pt-0 space-y-4 p-4">                                            {/* Skills Section */}
+                                            <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                                                <h4 className="text-sm font-semibold mb-2 text-gray-700 flex items-center gap-2">
+                                                    <Music className="h-4 w-4 text-teal-600" />
+                                                    Skills & Instruments
+                                                </h4>                                                <div className="flex flex-wrap gap-1.5">                                                    {musician.genre_instrument && musician.genre_instrument.length > 0 ? (
                                                         musician.genre_instrument.map((item, index) => {
                                                             let displayText: string;
                                                             let genre: string = '';
@@ -1182,7 +1180,7 @@ export default function DatabasePage() {
                                                                 <Badge 
                                                                     key={index} 
                                                                     variant="secondary" 
-                                                                    className="text-xs cursor-pointer hover:bg-accent transition-colors"
+                                                                    className="text-xs cursor-pointer hover:bg-teal-100 hover:text-teal-800 transition-all duration-200 transform hover:scale-105 bg-white border border-gray-200 text-gray-700 font-medium"
                                                                     onClick={() => {
                                                                         // Extract category from displayText if it's in parentheses
                                                                         let category = '';
@@ -1204,29 +1202,31 @@ export default function DatabasePage() {
                                                                     {displayText}
                                                                 </Badge>
                                                             );
-                                                        })
-                                                    ) : (
-                                                        <span className="text-sm text-muted-foreground">No skills listed</span>
+                                                        })                                                    ) : (
+                                                        <span className="text-sm text-gray-400 italic bg-gray-100 px-3 py-1 rounded-full">No skills listed</span>
                                                     )}
                                                 </div>
                                             </div>                                            {/* Occupation */}
-                                            {musician.occupation && musician.occupation.length > 0 && (
-                                                <div>
-                                                    <h4 className="text-sm font-medium mb-2">Current Occupation</h4>
-                                                    <div className="text-sm text-muted-foreground">
-                                                        {musician.occupation.join(', ')}
+                                            {musician.occupation && musician.occupation.length > 0 && musician.occupation.filter(occ => occ && occ.trim()).length > 0 && (
+                                                <div className="bg-red-50 rounded-lg p-3 border border-red-100">
+                                                    <h4 className="text-sm font-semibold mb-2 text-gray-700 flex items-center gap-2">
+                                                        <Briefcase className="h-4 w-4 text-red-600" />
+                                                        Current Occupation
+                                                    </h4>
+                                                    <div className="text-sm text-gray-600 font-medium">
+                                                        {musician.occupation.filter(occ => occ && occ.trim()).join(', ')}
                                                     </div>
                                                 </div>
                                             )}
 
                                             {/* Education */}
                                             {musician.education && musician.education.length > 0 && (
-                                                <div>
-                                                    <h4 className="text-sm font-medium mb-2 flex items-center gap-1">
-                                                        <BookOpen className="h-4 w-4" />
+                                                <div className="bg-purple-50 rounded-lg p-3 border border-purple-100">
+                                                    <h4 className="text-sm font-semibold mb-2 text-gray-700 flex items-center gap-2">
+                                                        <BookOpen className="h-4 w-4 text-purple-600" />
                                                         Education
                                                     </h4>
-                                                    <div className="text-sm text-muted-foreground">
+                                                    <div className="text-sm text-gray-600 space-y-1">
                                                         {musician.education.slice(0, 2).map((edu, index) => (
                                                             <div key={index}>{edu}</div>
                                                         ))}
@@ -1235,16 +1235,14 @@ export default function DatabasePage() {
                                                         )}
                                                     </div>
                                                 </div>
-                                            )}
-
-                                            {/* Contact & Links */}
-                                            <div className="flex items-center gap-2 pt-2 border-t">                                                {/* Email */}
+                                            )}                                            {/* Contact & Links */}
+                                            <div className="flex items-center gap-2 pt-3 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-transparent p-3 rounded-b-lg -mx-4 -mb-4 mt-4">                                                {/* Email */}
                                                 {musician.email && (
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
                                                         asChild
-                                                        className="h-8 w-8"
+                                                        className="h-8 w-8 hover:bg-red-100 hover:text-red-600 transition-all duration-200"
                                                     >
                                                         <a href={`mailto:${musician.email}`} title={`Email: ${musician.email}`}>
                                                             <Mail className="h-4 w-4" />
@@ -1258,13 +1256,13 @@ export default function DatabasePage() {
                                                         variant="ghost"
                                                         size="icon"
                                                         asChild
-                                                        className="h-8 w-8"
+                                                        className="h-8 w-8 hover:bg-red-100 hover:text-red-600 transition-all duration-200"
                                                     >
                                                         <a href={`tel:${musician.phone}`} title={`Phone: ${musician.phone}`}>
                                                             <Phone className="h-4 w-4" />
                                                         </a>
                                                     </Button>
-                                                )}                                                {/* Video links */}
+                                                )}{/* Video links */}
                                                 {musician.video_links && musician.video_links.length > 0 && (
                                                     musician.video_links.slice(0, 5).map((link, index) => (
                                                         <Button
@@ -1272,7 +1270,7 @@ export default function DatabasePage() {
                                                             variant="ghost"
                                                             size="icon"
                                                             asChild
-                                                            className="h-8 w-8"
+                                                            className="h-8 w-8 hover:bg-red-100 hover:text-red-600 transition-all duration-200"
                                                         >
                                                             <a 
                                                                 href={link} 
@@ -1292,14 +1290,13 @@ export default function DatabasePage() {
                                                             const platform = item.platform || item.name || '';
                                                             const url = item.link || item.url || '';
                                                             if (!platform || !url) return null;
-                                                            return (
-                                                                <Button
-                                                                    key={platform + idx}
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    asChild
-                                                                    className="h-8 w-8"
-                                                                >
+                                                            return (                                                                    <Button
+                                                                        key={platform + idx}
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        asChild
+                                                                        className="h-8 w-8 hover:bg-purple-100 hover:text-purple-600 transition-all duration-200"
+                                                                    >
                                                                     <a
                                                                         href={url}
                                                                         target="_blank"
@@ -1314,13 +1311,12 @@ export default function DatabasePage() {
                                                         : typeof musician.social === 'object'
                                                             ? Object.entries(musician.social).map(([platform, url]) => {
                                                                 if (!url || url === '') return null;
-                                                                return (
-                                                                    <Button
+                                                                return (                                                                    <Button
                                                                         key={platform}
                                                                         variant="ghost"
                                                                         size="icon"
                                                                         asChild
-                                                                        className="h-8 w-8"
+                                                                        className="h-8 w-8 hover:bg-purple-100 hover:text-purple-600 transition-all duration-200"
                                                                     >
                                                                         <a
                                                                             href={url as string}
@@ -1335,14 +1331,17 @@ export default function DatabasePage() {
                                                             }).filter(Boolean)
                                                             : null
                                                 )}
-                                            </div>
-                                        </CardContent>
-                                    </Card>
+                                            </div>                                                        </CardContent>
+                                                    </Card>
+                                                </div>
                                 ))}
-                            </div>
-                        ) : (
-                            <div className="text-center py-8">
-                                <p className="text-muted-foreground">No musicians found matching your criteria.</p>
+                            </div>) : (
+                            <div className="text-center py-12 px-6">
+                                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 shadow-sm">
+                                    <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                    <p className="text-gray-500 text-lg font-medium mb-2">No musicians found</p>
+                                    <p className="text-gray-400 text-sm">Try adjusting your search criteria or clear filters to see more results.</p>
+                                </div>
                             </div>
                         )}
                     </CardContent>

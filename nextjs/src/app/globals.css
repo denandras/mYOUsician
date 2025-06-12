@@ -447,3 +447,55 @@ select:focus {
   -webkit-tap-highlight-color: transparent;
   outline: none;
 }
+
+/* Enhanced Masonry Layout for Musician Cards */
+.dynamic-masonry {
+  column-fill: balance;
+  column-gap: 1.5rem;
+}
+
+/* Prevent card content from breaking across columns */
+.dynamic-masonry .card-container {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+}
+
+/* Smooth transitions for card interactions */
+.musician-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, box-shadow;
+  /* Fix text blur by using transform3d instead of regular transform */
+  transform: translate3d(0, 0, 0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-perspective: 1000;
+  perspective: 1000;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.musician-card:hover {
+  /* Use translate3d instead of translateY to prevent text blur */
+  transform: translate3d(0, -4px, 0) scale(1.02);
+}
+
+/* Improved spacing for masonry items */
+@media (min-width: 768px) {
+  .dynamic-masonry {
+    column-count: 2;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dynamic-masonry {
+    column-count: 3;
+  }
+}
+
+/* Ensure proper spacing between masonry items */
+.masonry-item {
+  margin-bottom: 1.5rem;
+  display: inline-block;
+  width: 100%;
+}
