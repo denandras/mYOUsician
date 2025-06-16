@@ -1,12 +1,29 @@
 "use client";
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/routing';
 import { createSPASassClient } from '@/lib/supabase/client';
 import { ArrowRight, ChevronRight } from 'lucide-react';
-import Link from "next/link";
 
 export default function AuthAwareButtons({ variant = 'primary' }) {
+    const t = useTranslations();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loading, setLoading] = useState(true);
+
+    // Debug logging for translation debugging
+    useEffect(() => {
+        console.log('🔐 AuthAwareButtons Debug:', {
+            variant,
+            isAuthenticated,
+            loading,
+            translationsLoaded: !!t,
+            sampleTranslations: {
+                login: t('navigation.login'),
+                register: t('navigation.register'),
+                goDashboard: t('navigation.goDashboard')
+            }
+        });
+    }, [t, variant, isAuthenticated, loading]);
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -50,20 +67,18 @@ export default function AuthAwareButtons({ variant = 'primary' }) {
     if (variant === 'nav') {
         return isAuthenticated ? (
             <Link
-                href="/app"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg transition-colors"
-            >
-                Go to Dashboard
+                href="/app"                className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg transition-colors"            >
+                {t('navigation.goDashboard')}
             </Link>        ) : (
             <>
                 <Link href="/auth/login" className="text-white hover:text-[#b5d1d6]">
-                    Login
+                    {t('navigation.login')}
                 </Link>
                 <Link
                     href="/auth/register"
                     className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg transition-colors"
                 >
-                    Sign Up
+                    {t('navigation.register')}
                 </Link>
             </>
         );
@@ -72,10 +87,8 @@ export default function AuthAwareButtons({ variant = 'primary' }) {
         return isAuthenticated ? (
             <div className="flex flex-col space-y-2 w-full min-h-[96px] justify-center">
                 <Link
-                    href="/app"
-                    className="block w-full text-center bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-3 rounded-lg transition-colors"
-                >
-                    Go to Dashboard
+                    href="/app"                    className="block w-full text-center bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-3 rounded-lg transition-colors"                >
+                    {t('navigation.goDashboard')}
                 </Link>
             </div>
         ) : (
@@ -84,13 +97,13 @@ export default function AuthAwareButtons({ variant = 'primary' }) {
                     href="/auth/login"
                     className="block w-full text-center px-4 py-3 rounded-lg border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
                 >
-                    Login
+                    {t('navigation.login')}
                 </Link>
                 <Link 
                     href="/auth/register"
                     className="block w-full text-center px-4 py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
                 >
-                    Sign Up
+                    {t('navigation.register')}
                 </Link>
             </div>
         );
@@ -100,9 +113,8 @@ export default function AuthAwareButtons({ variant = 'primary' }) {
     return isAuthenticated ? (
         <Link
             href="/app"
-            className="inline-flex items-center px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
-        >
-            Go to Dashboard
+            className="inline-flex items-center px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"        >
+            {t('navigation.goDashboard')}
             <ArrowRight className="ml-2 h-5 w-5" />
         </Link>
     ) : (
@@ -111,13 +123,13 @@ export default function AuthAwareButtons({ variant = 'primary' }) {
                 href="/auth/register"
                 className="inline-flex items-center px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
             >
-                Sign Up
+                {t('navigation.register')}
                 <ArrowRight className="ml-2 h-5 w-5" />
             </Link>            <Link
                 href="/auth/login"
                 className="inline-flex items-center px-6 py-3 rounded-lg border border-border text-foreground font-medium hover:bg-accent transition-colors"
             >
-                Login
+                {t('navigation.login')}
                 <ChevronRight className="ml-2 h-5 w-5" />
             </Link>
         </>

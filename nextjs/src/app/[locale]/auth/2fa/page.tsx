@@ -5,8 +5,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSPASassClient } from '@/lib/supabase/client';
 import { MFAVerification } from '@/components/MFAVerification';
+import { useTranslations } from 'next-intl';
 
 export default function TwoFactorAuthPage() {
+    const t = useTranslations('auth.twoFactor');
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -33,10 +35,10 @@ export default function TwoFactorAuthPage() {
 
             setLoading(false);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'An error occurred');
+            setError(err instanceof Error ? err.message : t('error'));
             setLoading(false);
         }
-    }, [router]);
+    }, [router, t]);
 
     useEffect(() => {
         checkMFAStatus();
@@ -50,6 +52,7 @@ export default function TwoFactorAuthPage() {
         return (
             <div className="flex justify-center items-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                <span className="ml-2">{t('loading')}</span>
             </div>
         );
     }

@@ -34,9 +34,82 @@ interface ProfileQueryModalProps {
     onGenreSearch?: (genre: string) => void;
     onInstrumentSearch?: (instrument: string) => void;
     onFullTagSearch?: (genre: string, instrument: string, category: string) => void;
+    locale?: string;    instruments?: Array<{
+        id: string;
+        name: string;
+        category: string;
+        name_hun: string | null;
+        category_hun: string | null;
+        category_rank: number | null;
+        instrument_rank: number | null;
+    }>;
+    genres?: Array<{
+        id: string;
+        name: string;
+        name_HUN: string | null;
+    }>;
 }
 
-export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false, error = null, onGenreSearch, onInstrumentSearch, onFullTagSearch }: ProfileQueryModalProps) {
+export function ProfileQueryModal({ 
+    isOpen, 
+    onClose, 
+    musician, 
+    isLoading = false, 
+    error = null, 
+    onGenreSearch, 
+    onInstrumentSearch, 
+    onFullTagSearch,
+    locale = 'en',
+    instruments = [],
+    genres = []
+}: ProfileQueryModalProps) {    // Helper function to get localized category for instruments
+    const getLocalizedCategory = (instrumentName: string, storedCategory: string): string => {
+        if (locale === 'hu' && instruments.length > 0) {
+            // First try to find by instrument name to get its Hungarian category
+            const foundInstrument = instruments.find(inst => 
+                inst.name.toLowerCase() === instrumentName.toLowerCase()
+            );
+            if (foundInstrument && foundInstrument.category_hun) {
+                return foundInstrument.category_hun;
+            }
+            
+            // If not found by instrument name, try to find by English category
+            const foundByCategory = instruments.find(inst => 
+                inst.category.toLowerCase() === storedCategory.toLowerCase()
+            );
+            if (foundByCategory && foundByCategory.category_hun) {
+                return foundByCategory.category_hun;
+            }
+        }
+        return storedCategory;
+    };
+
+    // Helper function to get localized instrument name
+    const getLocalizedInstrumentName = (instrumentName: string): string => {
+        if (locale === 'hu' && instruments.length > 0) {
+            const foundInstrument = instruments.find(inst => 
+                inst.name.toLowerCase() === instrumentName.toLowerCase()
+            );
+            if (foundInstrument && foundInstrument.name_hun) {
+                return foundInstrument.name_hun;
+            }
+        }
+        return instrumentName;
+    };
+
+    // Helper function to get localized genre name
+    const getLocalizedGenreName = (genreName: string): string => {
+        if (locale === 'hu' && genres.length > 0) {
+            const foundGenre = genres.find(genre => 
+                genre.name.toLowerCase() === genreName.toLowerCase()
+            );
+            if (foundGenre && foundGenre.name_HUN) {
+                return foundGenre.name_HUN;
+            }
+        }
+        return genreName;
+    };
+
     // Loading state
     if (isLoading) {
         return (
@@ -188,9 +261,22 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
         }
         
         return String(location);
-    };const fullName = musician.forename || musician.surname 
-        ? `${musician.forename || ''} ${musician.surname || ''}`.trim() 
-        : 'Anonymous Musician';    return (        <Dialog open={isOpen} onOpenChange={onClose}>            <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden w-[98vw] xs:w-[95vw] sm:w-[95vw] md:w-[90vw] lg:w-[85vw] p-0 flex flex-col">
+    };    // Helper function to format name based on locale
+    const formatName = (forename: string | null, surname: string | null, locale: string): string => {
+        if (!forename && !surname) {
+            return locale === 'hu' ? 'Névtelen zenész' : 'Anonymous Musician';
+        }
+        
+        if (locale === 'hu') {
+            // Hungarian format: Surname Forename
+            return `${surname || ''} ${forename || ''}`.trim();
+        } else {
+            // English format: Forename Surname
+            return `${forename || ''} ${surname || ''}`.trim();
+        }
+    };
+
+    const fullName = formatName(musician.forename, musician.surname, locale);return (        <Dialog open={isOpen} onOpenChange={onClose}>            <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden w-[98vw] xs:w-[95vw] sm:w-[95vw] md:w-[90vw] lg:w-[85vw] p-0 flex flex-col">
                 <DialogHeader className="px-3 pt-6 pb-3 xs:px-4 xs:pt-7 xs:pb-4 sm:px-4 sm:pt-8 sm:pb-4 md:px-6 md:pt-8 md:pb-4 flex-shrink-0">
                     <DialogTitle className="sr-only">
                         {fullName} - Musician Profile
@@ -276,8 +362,16 @@ export function ProfileQueryModal({ isOpen, onClose, musician, isLoading = false
                                                     const itemObj = item as Record<string, unknown>;
                                                     genre = String(itemObj.genre || '');
                                                     instrument = String(itemObj.instrument || '');
-                                                    const category = itemObj.category ? ` (${String(itemObj.category)})` : '';
-                                                    displayText = `${genre} ${instrument}${category}`.trim();
+                                                    
+                                                    // Get localized names
+                                                    const localizedGenre = getLocalizedGenreName(genre);
+                                                    const localizedInstrument = getLocalizedInstrumentName(instrument);
+                                                    
+                                                    // Get localized category
+                                                    const storedCategory = String(itemObj.category || '');
+                                                    const localizedCategory = getLocalizedCategory(instrument, storedCategory);
+                                                    const category = localizedCategory ? ` (${localizedCategory})` : '';
+                                                    displayText = `${localizedGenre} ${localizedInstrument}${category}`.trim();
                                                 } else {
                                                     displayText = String(item || '');
                                                 }

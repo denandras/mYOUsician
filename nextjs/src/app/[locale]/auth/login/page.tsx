@@ -4,10 +4,12 @@
 import { createSPASassClient } from '@/lib/supabase/client';
 import {useEffect, useState} from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/routing';
 import SSOButtons from '@/components/SSOButtons';
 
 export default function LoginPage() {
+    const t = useTranslations('auth.login');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -55,19 +57,22 @@ export default function LoginPage() {
             router.push('/auth/2fa');
         }
     }, [showMFAPrompt, router]);
-
-
     return (
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">            {error && (
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <div className="mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">{t('title')}</h2>
+                <p className="mt-2 text-sm text-gray-600">{t('subtitle')}</p>
+            </div>
+
+            {error && (
                 <div className="mb-4 p-4 text-sm text-[#083e4d] bg-[#dceaed] rounded-lg">
                     {error}
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
+            <form onSubmit={handleSubmit} className="space-y-6">                <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                        Email address
+                        {t('email')}
                     </label>
                     <div className="mt-1">
                         <input
@@ -81,11 +86,9 @@ export default function LoginPage() {
                             className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500"
                         />
                     </div>
-                </div>
-
-                <div>
+                </div>                <div>
                     <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                        Password
+                        {t('password')}
                     </label>
                     <div className="mt-1">
                         <input
@@ -99,34 +102,29 @@ export default function LoginPage() {
                             className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500"
                         />
                     </div>
-                </div>
-
-                <div className="flex items-center justify-between">
+                </div>                <div className="flex items-center justify-between">
                     <div className="text-sm">
                         <Link href="/auth/forgot-password" className="font-medium text-primary-600 hover:text-primary-500">
-                            Forgot your password?
+                            {t('forgotPassword')}
                         </Link>
                     </div>
                 </div>
 
-                <div>
-                    <button
+                <div>                    <button
                         type="submit"
                         disabled={loading}
                         className="flex w-full justify-center rounded-md border border-transparent bg-primary-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50"
                     >
-                        {loading ? 'Signing in...' : 'Sign in'}
+                        {loading ? t('signingIn') : t('title')}
                     </button>
                 </div>
             </form>
 
-            <SSOButtons onError={setError} />
-
-            <div className="mt-6 text-center text-sm">
-                <span className="text-gray-600">Don&#39;t have an account?</span>
+            <SSOButtons onError={setError} />            <div className="mt-6 text-center text-sm">
+                <span className="text-gray-600">{t('noAccount')}</span>
                 {' '}
                 <Link href="/auth/register" className="font-medium text-primary-600 hover:text-primary-500">
-                    Sign up
+                    {t('signUp')}
                 </Link>
             </div>
         </div>

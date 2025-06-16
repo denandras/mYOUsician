@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from '@/i18n/routing';
 import Image from 'next/image';
-import {usePathname} from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
+import { Link } from '@/i18n/routing';
 import {
     Home,
     User,
@@ -14,19 +15,27 @@ import {
 } from 'lucide-react';
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default function AppLayoutIntl({ children }: { children: React.ReactNode }) {
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     const [isUserDropdownOpen, setUserDropdownOpen] = useState(false);
-    const [mounted, setMounted] = useState(false);    const pathname = usePathname();
+    const [mounted, setMounted] = useState(false);
+    
+    const pathname = usePathname();
     const userDropdownRef = useRef<HTMLDivElement>(null);
     const sidebarRef = useRef<HTMLDivElement>(null);
+    const locale = useLocale();
+    const t = useTranslations('common');
+    const tNav = useTranslations('navigation');
 
     const { user, loading } = useGlobal();
 
     useEffect(() => {
         setMounted(true);
-    }, []);    // Handle click outside user dropdown
+    }, []);
+
+    // Handle click outside user dropdown
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
@@ -62,12 +71,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [isSidebarOpen]);    const handleLogout = async () => {
+    }, [isSidebarOpen]);
+
+    const handleLogout = async () => {
         try {
             const client = await createSPASassClient();
             await client.logout();
         } catch (error) {
-            console.error('Error logging out:', error);        }
+            console.error('Error logging out:', error);
+        }
     };
 
     const getInitials = (email: string) => {
@@ -78,30 +90,39 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     };
 
     const productName = process.env.NEXT_PUBLIC_PRODUCTNAME;    const navigation = [
-        { name: 'Homepage', href: '/app', icon: Home },
-        { name: 'Profile Editor', href: '/app/profile', icon: User },
-        { name: 'Database', href: '/app/database', icon: Database },
-    ];    const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);    return (<div className="min-h-screen bg-background flex flex-col">            {isSidebarOpen && (
+        { name: tNav('homepage'), href: '/app' as const, icon: Home },
+        { name: tNav('profile'), href: '/app/profile' as const, icon: User },
+        { name: tNav('database'), href: '/app/database' as const, icon: Database },
+    ];
+
+    const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
+
+    return (
+        <div className="min-h-screen bg-background flex flex-col">
+            {isSidebarOpen && (
                 <div
                     className="fixed inset-0 bg-gray-600 bg-opacity-75 z-20"
                     data-sidebar-backdrop
                     onClick={toggleSidebar}
                 />
-            )}{/* Sidebar */}
+            )}
+
+            {/* Sidebar */}
             <div 
                 ref={sidebarRef}
                 className={`fixed inset-y-0 left-0 w-64 bg-white backdrop-blur-sm shadow-lg border-r border-border transform transition-transform duration-200 ease-in-out z-30 
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
             >                <div className="h-16 flex items-center justify-between px-4 border-b border-border bg-[#083e4d]">
                     <Link href="/" className="block">
-                      <Image 
-                        src="/branding/text_vanilla.svg" 
-                        alt={productName || "mYOUsician"}
-                        width={120}
-                        height={24}
-                        className="h-6 w-auto"
-                      />
-                    </Link><button
+                        <Image 
+                            src="/branding/text_vanilla.svg" 
+                            alt={productName || "mYOUsician"}
+                            width={120}
+                            height={24}
+                            className="h-6 w-auto"
+                        />
+                    </Link>
+                    <button
                         onClick={toggleSidebar}
                         className="text-white hover:text-[#b5d1d6] transition-colors"
                         aria-label="Close sidebar"
@@ -111,8 +132,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </div>
                 {/* Navigation */}
                 <nav className="mt-4 px-2 space-y-1">
-                    {navigation.map((item) => {
-                        const isActive = pathname === item.href;
+                    {navigation.map((item) => {                        const isActive = pathname === `/${locale}${item.href}`;
                         return (
                             <Link
                                 key={item.name}
@@ -134,16 +154,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         );
                     })}
                 </nav>
+            </div>
 
-            </div>            <div className="flex-1">
-                <div className="sticky top-0 z-10 flex items-center justify-between h-16 bg-[#083e4d] bg-opacity-100 border-b border-[#062f3b] px-4 shadow-md">                    <div className="flex items-center space-x-4">
+            <div className="flex-1">
+                <div className="sticky top-0 z-10 flex items-center justify-between h-16 bg-[#083e4d] bg-opacity-100 border-b border-[#062f3b] px-4 shadow-md">
+                    <div className="flex items-center space-x-4">
                         <button
                             onClick={toggleSidebar}
                             data-sidebar-trigger
                             className="text-white hover:text-[#26545c] transition-colors"
                             aria-label="Toggle sidebar"
                         >
-                            <Menu className="h-6 w-6"/>                        </button>                          <Link href="/" className="block">
+                            <Menu className="h-6 w-6"/>
+                        </button>
+                          <Link href="/" className="block">
                             <Image 
                                 src="/branding/text_vanilla.svg" 
                                 alt={productName || "mYOUsician"}
@@ -154,43 +178,54 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         </Link>
                     </div>
 
-                    <div className="relative ml-auto" ref={userDropdownRef}>
-                        <button
-                            onClick={() => setUserDropdownOpen(!isUserDropdownOpen)}
-                            className="flex items-center space-x-2 text-sm text-white hover:text-[#b5d1d6] transition-colors"
-                        >
-                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border border-[#dceaed]">
-                                <span className="text-[#083e4d] font-medium">
-                                    {!mounted || loading ? '...' : user ? getInitials(user.email) : '??'}
-                                </span>
-                            </div>
-                            <span className="hidden sm:inline">
-                                {!mounted || loading ? 'Loading...' : user?.email || 'Not signed in'}
-                            </span>
-                            <ChevronDown className="h-4 w-4"/>
-                        </button>{isUserDropdownOpen && mounted && !loading && (
-                            <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg border border-border">
-                                <div className="p-3 border-b border-border/50">
-                                    <p className="text-xs text-muted-foreground">Signed in as</p>
-                                    <p className="text-sm font-medium text-foreground truncate">
-                                        {user?.email || 'Not signed in'}
-                                    </p>                                </div>
-                                <div className="py-1">
-                                    <button
-                                        onClick={() => {
-                                            handleLogout();
-                                            setUserDropdownOpen(false);
-                                        }}
-                                        className="w-full flex items-center px-4 py-3 text-sm text-destructive hover:bg-destructive/10 transition-colors"
-                                    >
-                                        <LogOut className="mr-3 h-4 w-4 text-destructive"/>
-                                        Sign Out
-                                    </button>
+                    <div className="flex items-center space-x-3">
+                        {/* Language Switcher */}
+                        <LanguageSwitcher variant="buttons" />
+                        
+                        {/* User Dropdown */}
+                        <div className="relative" ref={userDropdownRef}>
+                            <button
+                                onClick={() => setUserDropdownOpen(!isUserDropdownOpen)}
+                                className="flex items-center space-x-2 text-sm text-white hover:text-[#b5d1d6] transition-colors"
+                            >
+                                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border border-[#dceaed]">
+                                    <span className="text-[#083e4d] font-medium">
+                                        {!mounted || loading ? '...' : user ? getInitials(user.email) : '??'}
+                                    </span>
                                 </div>
-                            </div>
-                        )}
+                                <span className="hidden sm:inline">
+                                    {!mounted || loading ? t('loading') : user?.email || t('notSignedIn')}
+                                </span>
+                                <ChevronDown className="h-4 w-4"/>
+                            </button>
+
+                            {isUserDropdownOpen && mounted && !loading && (
+                                <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg border border-border">
+                                    <div className="p-3 border-b border-border/50">
+                                        <p className="text-xs text-muted-foreground">{t('signedInAs')}</p>
+                                        <p className="text-sm font-medium text-foreground truncate">
+                                            {user?.email || t('notSignedIn')}
+                                        </p>
+                                    </div>
+                                    <div className="py-1">
+                                        <button
+                                            onClick={() => {
+                                                handleLogout();
+                                                setUserDropdownOpen(false);
+                                            }}
+                                            className="w-full flex items-center px-4 py-3 text-sm text-destructive hover:bg-destructive/10 transition-colors"
+                                        >
+                                            <LogOut className="mr-3 h-4 w-4 text-destructive"/>
+                                            {t('signOut')}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                </div>                <main className="p-2 sm:p-4 flex-1">
+                </div>
+
+                <main className="p-2 sm:p-4 flex-1">
                     <div className="max-w-4xl mx-auto">
                         {children}
                     </div>

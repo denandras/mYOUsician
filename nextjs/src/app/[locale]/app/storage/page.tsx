@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -10,6 +11,8 @@ import { createSPASassClient } from '@/lib/supabase/client';
 import { FileObject } from '@supabase/storage-js';
 
 export default function FileManagementPage() {
+    const t = useTranslations('storage');
+    const tCommon = useTranslations('common');
     const { user } = useGlobal();
     const [files, setFiles] = useState<FileObject[]>([]);
     const [uploading, setUploading] = useState(false);
@@ -173,8 +176,8 @@ export default function FileManagementPage() {
         <div className="space-y-6 p-6">
             <Card>
                 <CardHeader>
-                    <CardTitle>File Management</CardTitle>
-                    <CardDescription>Upload, download, and share your files</CardDescription>
+                    <CardTitle>{t('title')}</CardTitle>
+                    <CardDescription>{t('subtitle')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     {error && (
@@ -206,10 +209,10 @@ export default function FileManagementPage() {
                             <Upload className="w-8 h-8"/>
                             <span className="mt-2 text-base">
                                 {uploading
-                                    ? 'Uploading...'
+                                    ? t('uploading')
                                     : isDragging
-                                        ? 'Drop your file here'
-                                        : 'Drag and drop or click to select a file (max 50mb)'}
+                                        ? t('dropFile')
+                                        : t('uploadInstruction')}
                             </span>
                             <input
                                 type="file"
@@ -227,7 +230,7 @@ export default function FileManagementPage() {
                             </div>
                         )}
                         {files.length === 0 ? (
-                            <p className="text-center text-gray-500">No files uploaded yet</p>
+                            <p className="text-center text-gray-500">{t('noFiles')}</p>
                         ) : (
                             files.map((file) => (
                                 <div
@@ -242,7 +245,7 @@ export default function FileManagementPage() {
                                         <button
                                             onClick={() => handleDownload(file.name)}
                                             className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-                                            title="Download"
+                                            title={t('download')}
                                         >
                                             <Download className="h-5 w-5"/>
                                         </button>
@@ -276,9 +279,9 @@ export default function FileManagementPage() {
                     }}>
                         <DialogContent>
                             <DialogHeader>
-                                <DialogTitle>Share {selectedFile?.split('/').pop()}</DialogTitle>
+                                <DialogTitle>{t('shareFile')} {selectedFile?.split('/').pop()}</DialogTitle>
                                 <DialogDescription>
-                                    Copy the link below to share your file. This link will expire in 24 hours.
+                                    {t('shareDescription')}
                                 </DialogDescription>
                             </DialogHeader>
                             <div className="flex items-center space-x-2">
@@ -296,7 +299,7 @@ export default function FileManagementPage() {
                                     {showCopiedMessage && (
                                         <span
                                             className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded">
-                                            Copied!
+                                            {t('copied')}
                                         </span>
                                     )}
                                 </button>
@@ -308,15 +311,15 @@ export default function FileManagementPage() {
                     <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Delete File</AlertDialogTitle>
+                                <AlertDialogTitle>{t('deleteFile')}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    Are you sure you want to delete this file? This action cannot be undone.
+                                    {t('deleteConfirmation')}
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel>{tCommon('cancel')}</AlertDialogCancel>
                                 <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
-                                    Delete
+                                    {tCommon('delete')}
                                 </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>

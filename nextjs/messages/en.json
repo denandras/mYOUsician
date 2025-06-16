@@ -1,0 +1,292 @@
+{  "common": {
+    "loading": "Loading...",
+    "search": "Search",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "clear": "Clear",
+    "reset": "Reset",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "phone": "Phone",
+    "location": "Location",
+    "bio": "Bio",
+    "any": "Any",
+    "required": "required",
+    "optional": "optional",
+    "signedInAs": "Signed in as",
+    "notSignedIn": "Not signed in",
+    "signOut": "Sign Out"
+  },  "navigation": {
+    "home": "Home",
+    "homepage": "Homepage",
+    "dashboard": "Dashboard",
+    "goDashboard": "Go to Dashboard",
+    "database": "Database",
+    "profile": "Profile Editor",
+    "storage": "Storage",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "legal": "Legal",
+    "about": "About"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign In",
+      "subtitle": "Welcome back! Please sign in to your account.",
+      "email": "Email Address",
+      "password": "Password",
+      "forgotPassword": "Forgot your password?",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "signingIn": "Signing in..."
+    },    "register": {
+      "title": "Create Account",
+      "subtitle": "Join mYOUsician and connect with musicians worldwide.",
+      "email": "Email Address",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "acceptTerms": "I agree to the",
+      "termsOfService": "Terms of Service",
+      "and": "and",
+      "privacyPolicy": "Privacy Policy",
+      "mustAcceptTerms": "You must accept the Terms of Service and Privacy Policy",
+      "passwordMismatch": "Passwords don't match",
+      "createAccount": "Create account",
+      "creating": "Creating account...",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "needResend": "Need to resend verification email?",
+      "resendVerification": "Resend verification",
+      "registrationAttemptError": "A registration attempt for this email was already made recently. Please check your email for a verification link or wait before trying again.",
+      "errors": {
+        "emailRateLimit": "Too many email attempts. Please wait a few minutes before trying again.",
+        "signupDisabled": "Account registration is currently disabled. Please contact support.",
+        "weakPassword": "Password does not meet security requirements. Please use a stronger password.",
+        "unknownError": "An unknown error occurred during registration"
+      }
+    },    "forgotPassword": {
+      "title": "Reset Password",
+      "subtitle": "Enter your email address and we'll send you a link to reset your password.",
+      "email": "Email Address",
+      "sendReset": "Send Reset Link",
+      "backToLogin": "Back to Login",
+      "sending": "Sending...",
+      "checkEmail": "Check your email",
+      "checkEmailMessage": "We've sent a password reset link to your email address. Please check your inbox and follow the instructions.",
+      "unknownError": "An unknown error occurred"
+    },    "resetPassword": {
+      "title": "Reset Password",
+      "subtitle": "Enter your new password.",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "resetPassword": "Reset Password",
+      "resetting": "Resetting...",
+      "passwordMismatch": "Passwords don't match",
+      "passwordTooShort": "Password must be at least 6 characters long",
+      "invalidSession": "Invalid or expired reset link. Please request a new password reset.",
+      "sessionCheckFailed": "Failed to verify reset session",
+      "success": "Password reset successful!",
+      "successMessage": "Your password has been successfully reset. You can now sign in with your new password.",
+      "signIn": "Sign In",
+      "unknownError": "Failed to reset password. Please try again."
+    },    "verifyEmail": {
+      "title": "Verify Email",
+      "subtitle": "Please check your email and click the verification link.",
+      "resend": "Resend Verification",
+      "resending": "Resending...",
+      "checkEmail": "Check your email",
+      "checkEmailMessage": "We've sent a verification link to your email address. Please check your inbox and click the link to verify your account.",
+      "resendTitle": "Resend verification email",
+      "resendSubtitle": "Enter your email address to receive a new verification link.",
+      "email": "Email Address",
+      "backToLogin": "Back to Login",
+      "enterEmail": "Please enter your email address",
+      "resendSuccess": "Verification email sent successfully!",
+      "unknownError": "An unknown error occurred"
+    },    "twoFactor": {
+      "title": "Two-Factor Authentication",
+      "subtitle": "Enter the code from your authenticator app.",
+      "code": "Authentication Code",
+      "verify": "Verify",
+      "verifying": "Verifying...",
+      "loading": "Loading...",
+      "error": "An error occurred"
+    }
+  },  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome to mYOUsician",
+    "welcomeUser": "Welcome, {name}! 👋",
+    "memberFor": "Member for {days} days",
+    "subtitle": "Your personalized music networking platform",
+    "quickActions": "Quick Actions",
+    "quickActionsDescription": "Frequently used features",
+    "viewProfile": "View Profile",
+    "searchMusicians": "Search Musicians",
+    "manageStorage": "Manage Storage",
+    "profileEditor": "Profile Editor",
+    "profileEditorDescription": "Manage your account and data",
+    "databaseTitle": "Database",
+    "databaseDescription": "Find other musicians",
+    "stats": {
+      "connections": "Connections",
+      "profileViews": "Profile Views",
+      "messages": "Messages"
+    }
+  },
+  "database": {
+    "title": "Musician Database",
+    "subtitle": "Search and discover musicians by genre, instrument, and expertise.",
+    "searchFilters": "Search Filters",
+    "filtersDescription": "Find musicians by their skills and background",
+    "genre": "Genre",
+    "instrument": "Instrument",
+    "type": "Type",
+    "category": "Category",
+    "sortBy": "Sort By",
+    "searchByName": "Search by Name",
+    "nameSearchPlaceholder": "Enter name to search...",
+    "searching": "Searching...",
+    "clearFilters": "Clear Filters",
+    "searchResults": "Search Results",
+    "musiciansFound": "{count} musician{plural} found",
+    "noResults": "No musicians found matching your criteria.",
+    "tryDifferentFilters": "Try adjusting your search filters.",
+    "sortOptions": {
+      "nameAsc": "Name A-Z",
+      "nameDesc": "Name Z-A",
+      "educationDesc": "Education high to low",
+      "random": "Random"
+    },
+    "profile": {
+      "viewProfile": "View Profile",
+      "contact": "Contact",
+      "education": "Education",
+      "certificates": "Certificates",
+      "occupation": "Occupation",
+      "genres": "Genres & Instruments",
+      "social": "Social Media",
+      "videos": "Video Links",
+      "locationNotSpecified": "Location not specified",
+      "bioNotProvided": "Bio not provided"
+    }
+  },  "profile": {
+    "title": "My Profile",
+    "subtitle": "Manage your musician profile and showcase your talents.",
+    "personalInfo": "Personal Information",
+    "forename": "First Name",
+    "surname": "Last Name",
+    "professionalInfo": "Professional Information",
+    "musicalBackground": "Musical Background",
+    "education": "Education",
+    "addEducation": "Add Education",    "certificates": "Certificates",
+    "addCertificate": "Add Certificate",
+    "occupation": "Occupation",
+    "addOccupation": "Add Occupation",
+    "genresInstruments": "Genres & Instruments",
+    "addGenreInstrument": "Add Genre & Instrument",
+    "socialMedia": "Social Media",
+    "addSocialMedia": "Add Social Media",
+    "videoLinks": "Video Links",
+    "addVideoLink": "Add Video Link",
+    "saveProfile": "Save Profile",
+    "saving": "Saving...",
+    "saved": "Saved ✓",
+    "changePassword": "Change Password",
+    "changePasswordDescription": "Update your account password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm New Password",
+    "updatePassword": "Update Password",
+    "updating": "Updating...",
+    "updated": "Updated ✓",
+    "dangerZone": "Danger Zone",
+    "dangerZoneDescription": "Permanently delete your account and all associated data. This action cannot be undone.",
+    "deleteAccount": "Delete Account",
+    "deleteAccountDescription": "This action cannot be undone. This will permanently delete your account and remove all your data from our servers.",
+    "confirmEmailPrompt": "Please type your email address {email} to confirm:",
+    "enterEmailPlaceholder": "Enter your email address",
+    "deleting": "Deleting...",
+    "deleteProfile": "Delete Profile",
+    "confirmDelete": "Are you sure you want to delete your profile? This action cannot be undone."
+  },"storage": {
+    "title": "File Management",
+    "subtitle": "Upload, download, and share your files",
+    "upload": "Upload",
+    "download": "Download",
+    "noFiles": "No files uploaded yet",
+    "uploadFiles": "Upload your first files to get started.",
+    "uploading": "Uploading...",
+    "dropFile": "Drop your file here",
+    "uploadInstruction": "Drag and drop or click to select a file (max 50mb)",
+    "shareFile": "Share",
+    "shareDescription": "Copy the link below to share your file. This link will expire in 24 hours.",
+    "copied": "Copied!",
+    "deleteFile": "Delete File",
+    "deleteConfirmation": "Are you sure you want to delete this file? This action cannot be undone."
+  },
+  "legal": {
+    "title": "Legal Documents",
+    "selectDocument": "Select document on the left.",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service"
+  },
+  "errors": {
+    "general": "An error occurred. Please try again.",
+    "network": "Network error. Please check your connection.",
+    "unauthorized": "You are not authorized to perform this action.",
+    "notFound": "The requested resource was not found.",
+    "validation": "Please check your input and try again.",
+    "emailRequired": "Email is required",
+    "passwordRequired": "Password is required",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "emailInvalid": "Please enter a valid email address",
+    "passwordsDoNotMatch": "Passwords do not match"
+  },  "success": {
+    "profileSaved": "Profile saved successfully!",
+    "emailSent": "Email sent successfully!",
+    "passwordReset": "Password reset successfully!"  },
+  "hero": {
+    "title": "Welcome to mYOUsician"
+  },
+  "home": {
+    "welcomeTo": "Welcome to",
+    "subtitle": "A database of musicians, for musicians!",
+    "readyToJoin": "Ready to put yourself out to the market?",
+    "joinOthers": "Join other musicians on {productName}",
+    "features": "Features",
+    "featuresSubtitle": "Built with musicians in mind, for reliability and speed",
+    "advancedSearch": {
+      "title": "Advanced Musician Search",
+      "description": "Find musicians by genre, instrument, experience level, location, and more with powerful filtering options"
+    },
+    "richProfile": {
+      "title": "Rich Profile Creation", 
+      "description": "Create comprehensive musician profiles with education, certificates, social links, and video portfolios"
+    },
+    "locationBased": {
+      "title": "Location-Based Discovery",
+      "description": "Connect with musicians in your area or worldwide with country and city-specific search capabilities (Coming Soon)"
+    },
+    "videoPortfolio": {
+      "title": "Video Portfolio Showcase",
+      "description": "Share your musical talents through video links and build a compelling online presence"
+    },
+    "directNetworking": {
+      "title": "Direct Networking",
+      "description": "Connect with fellow musicians through secure contact options including email and phone"
+    },
+    "securePrivate": {
+      "title": "Secure",
+      "description": "Professional-grade security with multi-factor authentication and privacy controls"
+    }
+  }
+}

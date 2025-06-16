@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Shield, X } from 'lucide-react';
 import { setCookie, getCookie } from 'cookies-next/client';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
 
 const COOKIE_CONSENT_KEY = 'cookie-accept';
 const COOKIE_EXPIRY_DAYS = 365;

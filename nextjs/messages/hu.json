@@ -1,0 +1,288 @@
+{
+  "common": {
+    "loading": "Betöltés...",
+    "search": "Keresés",
+    "cancel": "Mégse",
+    "save": "Mentés",
+    "delete": "Törlés",
+    "edit": "Szerkesztés",
+    "close": "Bezárás",
+    "confirm": "Megerősítés",
+    "back": "Vissza",
+    "next": "Következő",
+    "previous": "Előző",
+    "submit": "Küldés",
+    "clear": "Törlés",
+    "reset": "Visszaállítás",
+    "email": "E-mail",
+    "password": "Jelszó",
+    "name": "Név",
+    "phone": "Telefon",
+    "location": "Helyszín",
+    "bio": "Bemutatkozás",
+    "any": "Bármely",
+    "required": "kötelező",
+    "optional": "opcionális",
+    "signedInAs": "Bejelentkezve mint",
+    "notSignedIn": "Nincs bejelentkezve",
+    "signOut": "Kijelentkezés"
+  },  "navigation": {
+    "home": "Főoldal",
+    "homepage": "Főoldal",
+    "dashboard": "Irányítópult",
+    "goDashboard": "Irányítópulthoz",
+    "database": "Adatbázis",
+    "profile": "Profil Szerkesztő",
+    "storage": "Tárhely",
+    "login": "Bejelentkezés",
+    "register": "Regisztráció",
+    "logout": "Kijelentkezés",
+    "legal": "Jogi",
+    "about": "Rólunk"
+  },
+  "auth": {    "login": {
+      "title": "Bejelentkezés",
+      "subtitle": "Üdvözlünk újra! Jelentkezz be a fiókodba.",
+      "email": "E-mail cím",
+      "password": "Jelszó",
+      "forgotPassword": "Elfelejtetted a jelszavad?",
+      "noAccount": "Nincs még fiókod?",
+      "signUp": "Regisztráció",
+      "signingIn": "Bejelentkezés..."
+    },    "register": {
+      "title": "Fiók létrehozása",
+      "subtitle": "Csatlakozz a mYOUsician-hoz és kapcsolódj zenészekkel világszerte.",
+      "email": "E-mail cím",
+      "password": "Jelszó",
+      "confirmPassword": "Jelszó megerősítése",
+      "acceptTerms": "Elfogadom a",
+      "termsOfService": "Felhasználási feltételeket",
+      "and": "és a",
+      "privacyPolicy": "Adatvédelmi szabályzatot",
+      "mustAcceptTerms": "El kell fogadnod a Felhasználási feltételeket és az Adatvédelmi szabályzatot",
+      "passwordMismatch": "A jelszavak nem egyeznek",
+      "createAccount": "Fiók létrehozása",
+      "creating": "Fiók létrehozása...",
+      "hasAccount": "Már van fiókod?",
+      "signIn": "Bejelentkezés",
+      "needResend": "Újra kell küldeni a megerősítő e-mailt?",
+      "resendVerification": "Megerősítés újraküldése",
+      "registrationAttemptError": "Ezzel az e-mail címmel nemrég már próbáltak regisztrálni. Kérjük, ellenőrizd az e-mailjeidet a megerősítő linkért, vagy várj, mielőtt újra próbálkozol.",      "errors": {
+        "emailRateLimit": "Túl sok e-mail kísérlet. Kérjük, várj néhány percet, mielőtt újra próbálkozol.",
+        "signupDisabled": "A fiókregisztráció jelenleg le van tiltva. Kérjük, vedd fel a kapcsolatot az ügyfélszolgálattal.",
+        "weakPassword": "A jelszó nem felel meg a biztonsági követelményeknek. Kérjük, használj erősebb jelszót.",
+        "unknownError": "Ismeretlen hiba történt a regisztráció során"
+      }
+    },    "forgotPassword": {
+      "title": "Jelszó visszaállítása",
+      "subtitle": "Add meg az e-mail címed és küldünk egy linket a jelszó visszaállításához.",
+      "email": "E-mail cím",
+      "sendReset": "Visszaállítási link küldése",
+      "backToLogin": "Vissza a bejelentkezéshez",
+      "sending": "Küldés...",
+      "checkEmail": "Ellenőrizd az e-mailjeidet",
+      "checkEmailMessage": "Jelszó visszaállítási linket küldtünk az e-mail címedre. Kérjük, ellenőrizd a beérkezett üzeneteket és kövesd az utasításokat.",
+      "unknownError": "Ismeretlen hiba történt"
+    },    "resetPassword": {
+      "title": "Jelszó visszaállítása",
+      "subtitle": "Add meg az új jelszavad.",
+      "newPassword": "Új jelszó",
+      "confirmPassword": "Jelszó megerősítése",
+      "resetPassword": "Jelszó visszaállítása",
+      "resetting": "Visszaállítás...",
+      "passwordMismatch": "A jelszavak nem egyeznek",
+      "passwordTooShort": "A jelszónak legalább 6 karakterből kell állnia",
+      "invalidSession": "Érvénytelen vagy lejárt visszaállítási link. Kérjük, igényelj új jelszó visszaállítást.",
+      "sessionCheckFailed": "Nem sikerült ellenőrizni a visszaállítási munkamenetet",
+      "success": "Jelszó sikeresen visszaállítva!",
+      "successMessage": "Jelszavad sikeresen visszaállítottuk. Most már bejelentkezhetsz az új jelszavaddal.",
+      "signIn": "Bejelentkezés",
+      "unknownError": "Nem sikerült visszaállítani a jelszót. Kérjük, próbáld újra."
+    },    "verifyEmail": {
+      "title": "E-mail ellenőrzése",
+      "subtitle": "Kérjük, ellenőrizd az e-mailjeidet és kattints az ellenőrzési linkre.",
+      "resend": "Ellenőrzés újraküldése",
+      "resending": "Újraküldés...",
+      "checkEmail": "Ellenőrizd az e-mailjeidet",
+      "checkEmailMessage": "Ellenőrzési linket küldtünk az e-mail címedre. Kérjük, ellenőrizd a beérkezett üzeneteket és kattints a linkre a fiók ellenőrzéséhez.",
+      "resendTitle": "Ellenőrzési e-mail újraküldése",
+      "resendSubtitle": "Add meg az e-mail címed új ellenőrzési link kéréséhez.",
+      "email": "E-mail cím",
+      "backToLogin": "Vissza a bejelentkezéshez",
+      "enterEmail": "Kérjük, add meg az e-mail címed",
+      "resendSuccess": "Ellenőrzési e-mail sikeresen elküldve!",
+      "unknownError": "Ismeretlen hiba történt"
+    },    "twoFactor": {
+      "title": "Kétfaktoros hitelesítés",
+      "subtitle": "Add meg a kódot a hitelesítő alkalmazásodból.",
+      "code": "Hitelesítési kód",
+      "verify": "Ellenőrzés",
+      "verifying": "Ellenőrzés...",
+      "loading": "Betöltés...",
+      "error": "Hiba történt"
+    }
+  },  "dashboard": {
+    "title": "Irányítópult",
+    "welcome": "Üdvözlünk a mYOUsician-ban",
+    "welcomeUser": "Üdvözlünk, {name}! 👋",
+    "memberFor": "Tag {days} napja",
+    "subtitle": "A te személyre szabott zenei hálózati platformod",
+    "quickActions": "Gyors műveletek",
+    "quickActionsDescription": "Gyakran használt funkciók",
+    "viewProfile": "Profil megtekintése",
+    "searchMusicians": "Zenészek keresése",
+    "manageStorage": "Tárhely kezelése",
+    "profileEditor": "Profil szerkesztő",
+    "profileEditorDescription": "Fiók és adatok kezelése",
+    "databaseTitle": "Adatbázis",
+    "databaseDescription": "Más zenészek keresése",
+    "stats": {
+      "connections": "Kapcsolatok",
+      "profileViews": "Profil megtekintések",
+      "messages": "Üzenetek"
+    }
+  },"database": {
+    "title": "Zenész adatbázis",
+    "subtitle": "Keresd meg és fedezd fel a zenészeket műfaj, hangszer és szakértelem szerint.",
+    "searchFilters": "Keresési szűrők",
+    "filtersDescription": "Találj zenészeket készségeik és hátterük alapján",
+    "genre": "Műfaj",
+    "instrument": "Hangszer",
+    "type": "Típus",
+    "category": "Kategória",
+    "sortBy": "Rendezés",
+    "searchByName": "Keresés név szerint",
+    "nameSearchPlaceholder": "Add meg a keresett nevet...",
+    "searching": "Keresés...",
+    "clearFilters": "Szűrők törlése",
+    "searchResults": "Keresési eredmények",
+    "musiciansFound": "{count} találat",
+    "noResults": "Nem található zenész a keresési feltételeknek megfelelően.",
+    "tryDifferentFilters": "Próbáld meg módosítani a keresési szűrőket.",
+    "sortOptions": {
+      "nameAsc": "Név A-Z",
+      "nameDesc": "Név Z-A",
+      "educationDesc": "Végzettség magastól alacsonyig",
+      "random": "Véletlenszerű"
+    },
+    "profile": {
+      "viewProfile": "Profil megtekintése",
+      "contact": "Kapcsolat",
+      "education": "Végzettség",
+      "certificates": "Eredmények & Oklevelek",
+      "occupation": "Foglalkozás",
+      "genres": "Műfajok és hangszerek",
+      "social": "Közösségi média",
+      "videos": "Videó linkek",
+      "locationNotSpecified": "Helyszín nincs megadva",
+      "bioNotProvided": "Bemutatkozás nincs megadva"
+    }
+  },  "profile": {
+    "title": "Saját profil",
+    "subtitle": "Kezeld a zenész profilodat és mutasd be a tehetséged.",
+    "personalInfo": "Személyes információk",
+    "forename": "Keresztnév",
+    "surname": "Vezetéknév",
+    "professionalInfo": "Szakmai információk",
+    "musicalBackground": "Zenei háttér",
+    "education": "Végzettség",
+    "addEducation": "Végzettség hozzáadása",    "certificates": "Eredmények & Oklevelek",
+    "addCertificate": "Eredmény/Oklevél hozzáadása",
+    "occupation": "Foglalkozás",
+    "addOccupation": "Foglalkozás hozzáadása",
+    "genresInstruments": "Műfajok és hangszerek",
+    "addGenreInstrument": "Műfaj és hangszer hozzáadása",
+    "socialMedia": "Közösségi média",
+    "addSocialMedia": "Közösségi média hozzáadása",
+    "videoLinks": "Videó linkek",
+    "addVideoLink": "Videó link hozzáadása",
+    "saveProfile": "Profil mentése",
+    "saving": "Mentés...",
+    "saved": "Mentve ✓",
+    "changePassword": "Jelszó megváltoztatása",
+    "changePasswordDescription": "Fiók jelszavának frissítése",
+    "newPassword": "Új jelszó",
+    "confirmPassword": "Új jelszó megerősítése",
+    "updatePassword": "Jelszó frissítése",
+    "updating": "Frissítés...",
+    "updated": "Frissítve ✓",
+    "dangerZone": "Veszélyzóna",
+    "dangerZoneDescription": "Fiók és összes kapcsolódó adat végleges törlése. Ez a művelet nem vonható vissza.",
+    "deleteAccount": "Fiók törlése",    "deleteAccountDescription": "Ez a művelet nem vonható vissza. Ezzel véglegesen törlöd a fiókodat és eltávolítod összes adatod a szervereinkről.",
+    "confirmEmailPrompt": "Kérjük, írd be az email címed {email} a megerősítéshez:",
+    "enterEmailPlaceholder": "Email cím megadása",
+    "deleting": "Törlés...",
+    "deleteProfile": "Profil törlése",
+    "confirmDelete": "Biztosan törölni szeretnéd a profilodat? Ez a művelet nem vonható vissza."
+  },  "storage": {
+    "title": "Fájlkezelő",
+    "subtitle": "Töltsd fel, töltsd le és oszd meg a fájljaidat",
+    "upload": "Feltöltés",
+    "download": "Letöltés",
+    "noFiles": "Még nincsenek feltöltött fájlok",
+    "uploadFiles": "Töltsd fel az első fájljaidat a kezdéshez.",
+    "uploading": "Feltöltés...",
+    "dropFile": "Ejtsd ide a fájlt",
+    "uploadInstruction": "Húzd ide vagy kattints fájl kiválasztásához (max 50mb)",
+    "shareFile": "Megosztás",
+    "shareDescription": "Másold az alábbi linket a fájl megosztásához. Ez a link 24 óra múlva lejár.",
+    "copied": "Másolva!",
+    "deleteFile": "Fájl törlése",
+    "deleteConfirmation": "Biztosan törölni szeretnéd ezt a fájlt? Ez a művelet nem vonható vissza."
+  },  "legal": {
+    "title": "Jogi dokumentumok",
+    "selectDocument": "Válassz dokumentumot a bal oldalon.",
+    "privacyPolicy": "Adatvédelmi irányelvek",
+    "termsOfService": "Szolgáltatási feltételek"
+  },  "errors": {
+    "general": "Hiba történt. Kérjük, próbáld újra.",
+    "network": "Hálózati hiba. Kérjük, ellenőrizd a kapcsolatod.",
+    "unauthorized": "Nincs jogosultságod ennek a műveletnek a végrehajtásához.",
+    "notFound": "A kért erőforrás nem található.",
+    "validation": "Kérjük, ellenőrizd a beviteled és próbáld újra.",
+    "emailRequired": "E-mail cím megadása kötelező",
+    "passwordRequired": "Jelszó megadása kötelező",
+    "passwordTooShort": "A jelszónak legalább 8 karakterből kell állnia",
+    "emailInvalid": "Kérjük, adj meg érvényes e-mail címet",
+    "passwordsDoNotMatch": "A jelszavak nem egyeznek"
+  },  "success": {
+    "profileSaved": "Profil sikeresen mentve!",
+    "emailSent": "E-mail sikeresen elküldve!",
+    "passwordReset": "Jelszó sikeresen visszaállítva!"
+  },
+  "hero": {
+    "title": "Üdvözlünk itt: mYOUsician"
+  },
+  "home": {
+    "welcomeTo": "Üdvözlünk itt:",
+    "subtitle": "Zenészek adatbázisa, zenészeknek!",
+    "readyToJoin": "Készen állsz, hogy piacra vidd magad?",
+    "joinOthers": "Csatlakozz más zenészekhez a {productName}-ön",
+    "features": "Funkciók",
+    "featuresSubtitle": "Zenészeket szem előtt tartva tervezve, megbízhatóság és sebesség érdekében",
+    "advancedSearch": {
+      "title": "Fejlett zenész keresés",
+      "description": "Találj zenészeket műfaj, hangszer, tapasztalati szint, helyszín és sok más szerint hatékony szűrési lehetőségekkel"
+    },
+    "richProfile": {
+      "title": "Sokrétű profil létrehozás",
+      "description": "Hozz létre átfogó zenész profilokat végzettséggel, eredményekkel, közösségi linkekkel és videó portfólióval"
+    },
+    "locationBased": {
+      "title": "Helyszín alapú felfedezés",
+      "description": "Kapcsolódj zenészekhez a környékeden vagy világszerte ország és város specifikus keresési lehetőségekkel (Hamarosan)"
+    },
+    "videoPortfolio": {
+      "title": "Videó portfólió",
+      "description": "Oszd meg zenei tehetséged videó linkeken keresztül és építs fel meggyőző online jelenlétet"
+    },
+    "directNetworking": {
+      "title": "Közvetlen hálózatépítés",
+      "description": "Kapcsolódj zenésztársaidhoz biztonságos kapcsolatfelvételi lehetőségeken keresztül, beleértve az e-mailt és telefont"
+    },
+    "securePrivate": {
+      "title": "Biztonságos",
+      "description": "Professzionális szintű biztonság többfaktoros hitelesítéssel és adatvédelmi beállításokkal"
+    }
+  }
+}

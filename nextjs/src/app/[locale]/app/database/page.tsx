@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -101,6 +102,25 @@ interface SearchFilters {
 }
 
 export default function DatabasePage() {
+    // Initialize translations and locale
+    const t = useTranslations();
+    const locale = useLocale();
+    
+    // Helper function to format name based on locale
+    const formatName = (forename: string | null, surname: string | null): string => {
+        if (!forename && !surname) {
+            return locale === 'hu' ? 'Névtelen' : 'Anonymous';
+        }
+        
+        if (locale === 'hu') {
+            // Hungarian format: Surname Forename
+            return `${surname || ''} ${forename || ''}`.trim();
+        } else {
+            // English format: Forename Surname
+            return `${forename || ''} ${surname || ''}`.trim();
+        }
+    };
+    
     // State for data
     const [musicians, setMusicians] = useState<MusicianProfile[]>([]);
     const [genres, setGenres] = useState<Genre[]>([]);
@@ -160,15 +180,54 @@ export default function DatabasePage() {
         setSelectedMusician(null);
         setProfileLoading(false);
         setProfileError(null);
+    };    // Sort options
+    const sortOptions = [
+        { value: 'name_asc', label: t('database.sortOptions.nameAsc') },
+        { value: 'name_desc', label: t('database.sortOptions.nameDesc') },
+        { value: 'education_desc', label: t('database.sortOptions.educationDesc') },
+        { value: 'random', label: t('database.sortOptions.random') }
+    ];
+      // Helper function to get localized name for genres and instruments
+    const getLocalizedName = (item: Genre | Instrument, field: 'name' | 'category') => {
+        if (locale === 'hu') {
+            if ('name_HUN' in item && item.name_HUN) return item.name_HUN;
+            if (field === 'category' && 'category_hun' in item && item.category_hun) return item.category_hun;
+            if ('name_hun' in item && item.name_hun) return item.name_hun;
+        }
+        return field === 'category' && 'category' in item ? item.category : item.name;
+    };    // Helper function to get localized category for instruments
+    const getLocalizedCategory = (instrument: Instrument): string => {
+        if (locale === 'hu' && instrument.category_hun) {
+            return instrument.category_hun;
+        }
+        return instrument.category;
     };
 
-    // Sort options
-    const sortOptions = [
-        { value: 'name_asc', label: 'Name A-Z' },
-        { value: 'name_desc', label: 'Name Z-A' },
-        { value: 'education_desc', label: 'Education high to low' },
-        { value: 'random', label: 'Random' }
-    ];    // Load reference data on component mount
+    // Helper function to get localized instrument name
+    const getLocalizedInstrumentName = (instrumentName: string): string => {
+        if (locale === 'hu' && instruments.length > 0) {
+            const foundInstrument = instruments.find(inst => 
+                inst.name.toLowerCase() === instrumentName.toLowerCase()
+            );
+            if (foundInstrument && foundInstrument.name_hun) {
+                return foundInstrument.name_hun;
+            }
+        }
+        return instrumentName;
+    };
+
+    // Helper function to get localized genre name
+    const getLocalizedGenreName = (genreName: string): string => {
+        if (locale === 'hu' && genres.length > 0) {
+            const foundGenre = genres.find(genre => 
+                genre.name.toLowerCase() === genreName.toLowerCase()
+            );
+            if (foundGenre && foundGenre.name_HUN) {
+                return foundGenre.name_HUN;
+            }
+        }
+        return genreName;
+    };// Load reference data on component mount
     useEffect(() => {
         loadReferenceData();
         loadCurrentUser();
@@ -321,7 +380,7 @@ export default function DatabasePage() {
             if (filters.nameSearch.trim()) {
                 const searchTerm = filters.nameSearch.toLowerCase().trim();
                 finalFilteredMusicians = finalFilteredMusicians.filter((musician: any) => {
-                    const fullName = `${musician.forename || ''} ${musician.surname || ''}`.toLowerCase();
+                    const fullName = formatName(musician.forename, musician.surname).toLowerCase();
                     return fullName.includes(searchTerm);
                 });
             }
@@ -469,22 +528,20 @@ export default function DatabasePage() {
         }
         
         return [];
-    };
-
-    const applySorting = (musicians: MusicianProfile[], sortBy: string): MusicianProfile[] => {
+    };    const applySorting = (musicians: MusicianProfile[], sortBy: string): MusicianProfile[] => {
         const sorted = [...musicians];
         
         switch (sortBy) {
             case 'name_asc':
                 return sorted.sort((a, b) => {
-                    const nameA = `${a.forename || ''} ${a.surname || ''}`.trim();
-                    const nameB = `${b.forename || ''} ${b.surname || ''}`.trim();
+                    const nameA = formatName(a.forename, a.surname);
+                    const nameB = formatName(b.forename, b.surname);
                     return nameA.localeCompare(nameB);
                 });
             case 'name_desc':
                 return sorted.sort((a, b) => {
-                    const nameA = `${a.forename || ''} ${a.surname || ''}`.trim();
-                    const nameB = `${b.forename || ''} ${b.surname || ''}`.trim();
+                    const nameA = formatName(a.forename, a.surname);
+                    const nameB = formatName(b.forename, b.surname);
                     return nameB.localeCompare(nameA);
                 });
             case 'education_desc':
@@ -830,22 +887,21 @@ export default function DatabasePage() {
 
         } catch (error) {
             console.error('Error in instrument search:', error);
-            setMusicians([]);
-        } finally {
+            setMusicians([]);        } finally {
             setLoading(false);
         }};
 
     // Memoize instrumentsByCategory with ranking
     const instrumentsByCategory = useMemo(() => {
         return instruments.reduce((acc, instrument) => {
-            const category = instrument.category || 'Other'; // Default to 'Other' if category is missing
+            const category = getLocalizedCategory(instrument);
             if (!acc[category]) {
                 acc[category] = [];
             }
             acc[category].push(instrument);
             return acc;
         }, {} as Record<string, Instrument[]>);
-    }, [instruments]);
+    }, [instruments, locale]);
 
     // Memoize sorted categories by category_rank for consistent ordering
     const sortedCategories = useMemo(() => {
@@ -933,10 +989,8 @@ export default function DatabasePage() {
                 return <Video className="h-4 w-4" />;            default:
                 return <ExternalLink className="h-4 w-4" />;
         }
-    };
-
-    const formatLocation = (location: unknown): string => {
-        if (!location) return 'Location not specified';
+    };    const formatLocation = (location: unknown): string => {
+        if (!location) return t('database.profile.locationNotSpecified');
         
         if (typeof location === 'object' && location !== null) {
             const locationObj = location as Record<string, unknown>;
@@ -945,62 +999,61 @@ export default function DatabasePage() {
             if (city && country) {
                 return `${String(city)}, ${String(country)}`;
             }
-            return String(city || country) || 'Location not specified';
+            return String(city || country) || t('database.profile.locationNotSpecified');
         }
         
         return String(location);
     };
 
     return (
-        <div className="space-y-6 p-3 sm:p-6">
-            <div className="flex items-center justify-between">
+        <div className="space-y-6 p-3 sm:p-6">            <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Musician Database</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">{t('database.title')}</h1>
                     <p className="text-muted-foreground">
-                        Search and discover musicians by genre, instrument, and expertise.
+                        {t('database.subtitle')}
                     </p>
                 </div>
-            </div>            {/* Search Filters */}
+            </div>{/* Search Filters */}
             <Card>
                 <CardHeader>                    <CardTitle className="flex items-center gap-2">
                         <Search className="h-5 w-5" />
-                        Search Filters
+                        {t('database.searchFilters')}
                     </CardTitle>
                     <CardDescription>
-                        Find musicians by their skills and background
+                        {t('database.filtersDescription')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {/* Main filter row */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">                        {/* Genre */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Genre</label>
+                            <label className="text-sm font-medium">{t('database.genre')}</label>
                             <Select value={filters.genre} onValueChange={(value) => updateFilter('genre', value)}>
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger><SelectContent>
-                                    <SelectItem value="any">Any</SelectItem>
+                                    <SelectItem value="any">{t('common.any')}</SelectItem>
                                     {genres.map((genre) => (
                                         <SelectItem key={genre.id} value={genre.name}>
-                                            {genre.name}
+                                            {getLocalizedName(genre, 'name')}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                         </div>                        {/* Instrument */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Instrument</label>
+                            <label className="text-sm font-medium">{t('database.instrument')}</label>
                             <Select value={filters.instrument} onValueChange={(value) => updateFilter('instrument', value)}>
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>                                <SelectContent>
-                                    <SelectItem value="any">Any</SelectItem>
+                                    <SelectItem value="any">{t('common.any')}</SelectItem>
                                     {sortedCategories.length > 0 ? (
                                         sortedCategories.map(category => (
-                                            <SelectGroup key={category} label={category}>
+                                            <SelectGroup key={category} label={getLocalizedName({name: category, category} as any, 'category')}>
                                                 {sortedInstrumentsByCategory[category].map(instrument => (
                                                     <SelectItem key={instrument.id} value={instrument.name}>
-                                                        {instrument.name}
+                                                        {getLocalizedName(instrument, 'name')}
                                                     </SelectItem>
                                                 ))}
                                             </SelectGroup>
@@ -1008,7 +1061,7 @@ export default function DatabasePage() {
                                     ) : (
                                         instruments.map(instrument => (
                                             <SelectItem key={instrument.id} value={instrument.name}>
-                                                {instrument.name}
+                                                {getLocalizedName(instrument, 'name')}
                                             </SelectItem>
                                         ))
                                     )}
@@ -1016,24 +1069,24 @@ export default function DatabasePage() {
                             </Select>
                         </div>                        {/* Type/Category */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Type</label>
+                            <label className="text-sm font-medium">{t('database.type')}</label>
                             <Select value={filters.category} onValueChange={(value) => updateFilter('category', value)}>
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger><SelectContent>
-                                    <SelectItem value="any">Any</SelectItem>
-                                    <SelectItem value="artist">Artist</SelectItem>
-                                    <SelectItem value="teacher">Teacher</SelectItem>
+                                    <SelectItem value="any">{t('common.any')}</SelectItem>
+                                    <SelectItem value="artist">{locale === 'hu' ? 'Művész' : 'Artist'}</SelectItem>
+                                    <SelectItem value="teacher">{locale === 'hu' ? 'Tanár' : 'Teacher'}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>                        {/* Sort By */}
                         <div className="space-y-2">
                             <label className="text-sm font-medium">
-                                Sort By <span className="text-red-500">*</span> <span className="text-xs text-red-500">(required)</span>
+                                {t('database.sortBy')} <span className="text-red-500">*</span> <span className="text-xs text-red-500">({t('common.required')})</span>
                             </label>
-                            <Select value={filters.sortBy} onValueChange={(value) => updateFilter('sortBy', value)}>
+                <Select value={filters.sortBy} onValueChange={(value) => updateFilter('sortBy', value)}>
                                 <SelectTrigger className={!filters.sortBy ? "bg-red-50 border-red-200" : ""}>
-                                    <SelectValue placeholder="Select sorting" />
+                                    <SelectValue placeholder={t('database.sortBy')} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {sortOptions.map((option) => (
@@ -1046,9 +1099,9 @@ export default function DatabasePage() {
                         </div>
                     </div>                    {/* Name search row */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Search by Name</label>
+                        <label className="text-sm font-medium">{t('database.searchByName')}</label>
                         <Input
-                            placeholder="Enter name to search..."
+                            placeholder={t('database.nameSearchPlaceholder')}
                             value={filters.nameSearch}
                             onChange={(e) => updateFilter('nameSearch', e.target.value)}
                             className="max-w-md"
@@ -1062,7 +1115,7 @@ export default function DatabasePage() {
                             className="flex items-center gap-2 text-white"
                         >
                             <Search className="h-4 w-4" />
-                            {loading ? 'Searching...' : 'Search'}
+                            {loading ? t('database.searching') : t('common.search')}
                         </Button>
                         <Button 
                             variant="delete"
@@ -1070,7 +1123,7 @@ export default function DatabasePage() {
                             className="flex items-center gap-2"
                         >
                             <Trash2 className="h-4 w-4" />
-                            Clear Filters
+                            {t('database.clearFilters')}
                         </Button>
                     </div>
                 </CardContent>
@@ -1078,32 +1131,29 @@ export default function DatabasePage() {
             {hasSearched && (
                 <Card ref={resultsRef}>
                     <CardHeader>
-                        <CardTitle>Search Results</CardTitle>
+                        <CardTitle>{t('database.searchResults')}</CardTitle>
                         <CardDescription>
-                            {musicians.length} musician{musicians.length !== 1 ? 's' : ''} found
+                            {t('database.musiciansFound', { count: musicians.length, plural: musicians.length !== 1 ? 's' : '' })}
                         </CardDescription>
                     </CardHeader>                    <CardContent>
                         {musicians.length > 0 ? (                            <div className="dynamic-masonry">
                                 {musicians.map((musician) => (
                                     <div key={musician.id} className="masonry-item">
-                                        <Card className="musician-card break-inside-avoid shadow-lg hover:shadow-xl bg-gradient-to-br from-white to-gray-50 border-0 ring-1 ring-gray-200 hover:ring-teal-300 overflow-hidden"><CardHeader className="pb-3 bg-gradient-to-r from-teal-50 to-blue-50 rounded-t-lg">                                            <div className="flex items-center gap-3">
-                                                <Avatar
+                                        <Card className="musician-card break-inside-avoid shadow-lg hover:shadow-xl bg-gradient-to-br from-white to-gray-50 border-0 ring-1 ring-gray-200 hover:ring-teal-300 overflow-hidden"><CardHeader className="pb-3 bg-gradient-to-r from-teal-50 to-blue-50 rounded-t-lg">                                            <div className="flex items-center gap-3">                                                <Avatar
                                                     forename={musician.forename}
                                                     surname={musician.surname}
                                                     size="md"
                                                     onClick={() => openProfileModal(musician)}
-                                                    title="View full profile"
+                                                    title={t('database.profile.viewProfile')}
                                                 />
                                                 <div className="flex-1 min-w-0">
                                                     <button 
                                                         className="text-left w-full"
                                                         onClick={() => openProfileModal(musician)}
-                                                        title="View full profile"
+                                                        title={t('database.profile.viewProfile')}
                                                     >                                                        <CardTitle className="text-lg truncate hover:text-teal-600 transition-colors cursor-pointer font-semibold text-gray-800">
-                                                            {musician.forename || musician.surname 
-                                                                ? `${musician.forename || ''} ${musician.surname || ''}`.trim() 
-                                                                : 'Anonymous'}
-                                                        </CardTitle>                                                    </button>                                                    <CardDescription className="truncate text-gray-500 flex items-center gap-1">
+                                                            {formatName(musician.forename, musician.surname)}
+                                                        </CardTitle></button>                                                    <CardDescription className="truncate text-gray-500 flex items-center gap-1">
                                                         <MapPin className="h-3 w-3" />
                                                         {formatLocation(musician.location)}
                                                     </CardDescription>
@@ -1113,8 +1163,8 @@ export default function DatabasePage() {
                                             <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
                                                 <h4 className="text-sm font-semibold mb-2 text-gray-700 flex items-center gap-2">
                                                     <Music className="h-4 w-4 text-teal-600" />
-                                                    Skills & Instruments
-                                                </h4>                                                <div className="flex flex-wrap gap-1.5">                                                    {musician.genre_instrument && musician.genre_instrument.length > 0 ? (
+                                                    {t('database.profile.genres')}
+                                                </h4><div className="flex flex-wrap gap-1.5">                                                    {musician.genre_instrument && musician.genre_instrument.length > 0 ? (
                                                         musician.genre_instrument.map((item, index) => {
                                                             let displayText: string;
                                                             let genre: string = '';
@@ -1127,13 +1177,40 @@ export default function DatabasePage() {
                                                                 if (parts.length >= 2) {
                                                                     genre = parts[0];
                                                                     instrument = parts.slice(1).join(' ');
-                                                                }
-                                                            } else if (item && typeof item === 'object') {
+                                                                }                                                            } else if (item && typeof item === 'object') {
                                                                 const itemObj = item as Record<string, unknown>;
                                                                 genre = String(itemObj.genre || '');
                                                                 instrument = String(itemObj.instrument || '');
-                                                                const category = itemObj.category ? ` (${String(itemObj.category)})` : '';
-                                                                displayText = `${genre} ${instrument}${category}`.trim();
+                                                                
+                                                                // Get localized names
+                                                                const localizedGenre = getLocalizedGenreName(genre);
+                                                                const localizedInstrument = getLocalizedInstrumentName(instrument);
+                                                                  // Get localized category - check if we have Hungarian category when locale is 'hu'
+                                                                let categoryText = '';
+                                                                if (itemObj.category) {
+                                                                    const storedCategory = String(itemObj.category);
+                                                                    // Find the instrument to get its localized category
+                                                                    const foundInstrument = instruments.find(inst => 
+                                                                        inst.name.toLowerCase() === instrument.toLowerCase()
+                                                                    );
+                                                                    
+                                                                    if (foundInstrument) {
+                                                                        categoryText = getLocalizedCategory(foundInstrument);
+                                                                    } else {
+                                                                        // Try to find by category if instrument not found
+                                                                        const foundByCategory = instruments.find(inst => 
+                                                                            inst.category.toLowerCase() === storedCategory.toLowerCase()
+                                                                        );
+                                                                        if (foundByCategory && locale === 'hu' && foundByCategory.category_hun) {
+                                                                            categoryText = foundByCategory.category_hun;
+                                                                        } else {
+                                                                            categoryText = storedCategory;
+                                                                        }
+                                                                    }
+                                                                }
+                                                                
+                                                                const category = categoryText ? ` (${categoryText})` : '';
+                                                                displayText = `${localizedGenre} ${localizedInstrument}${category}`.trim();
                                                             } else {
                                                                 displayText = String(item || '');
                                                             }                                                            return (
@@ -1163,15 +1240,14 @@ export default function DatabasePage() {
                                                                 </Badge>
                                                             );
                                                         })                                                    ) : (
-                                                        <span className="text-sm text-gray-400 italic bg-gray-100 px-3 py-1 rounded-full">No skills listed</span>
+                                                        <span className="text-sm text-gray-400 italic bg-gray-100 px-3 py-1 rounded-full">{locale === 'hu' ? 'Nincs képesség megadva' : 'No skills listed'}</span>
                                                     )}
                                                 </div>
                                             </div>                                            {/* Occupation */}
-                                            {musician.occupation && musician.occupation.length > 0 && musician.occupation.filter(occ => occ && occ.trim()).length > 0 && (
-                                                <div className="bg-red-50 rounded-lg p-3 border border-red-100">
+                                            {musician.occupation && musician.occupation.length > 0 && musician.occupation.filter(occ => occ && occ.trim()).length > 0 && (                                                <div className="bg-red-50 rounded-lg p-3 border border-red-100">
                                                     <h4 className="text-sm font-semibold mb-2 text-gray-700 flex items-center gap-2">
                                                         <Briefcase className="h-4 w-4 text-red-600" />
-                                                        Current Occupation
+                                                        {t('database.profile.occupation')}
                                                     </h4>
                                                     <div className="text-sm text-gray-600 font-medium">
                                                         {musician.occupation.filter(occ => occ && occ.trim()).join(', ')}
@@ -1181,17 +1257,16 @@ export default function DatabasePage() {
 
                                             {/* Education */}
                                             {musician.education && musician.education.length > 0 && (
-                                                <div className="bg-purple-50 rounded-lg p-3 border border-purple-100">
-                                                    <h4 className="text-sm font-semibold mb-2 text-gray-700 flex items-center gap-2">
+                                                <div className="bg-purple-50 rounded-lg p-3 border border-purple-100">                                                    <h4 className="text-sm font-semibold mb-2 text-gray-700 flex items-center gap-2">
                                                         <BookOpen className="h-4 w-4 text-purple-600" />
-                                                        Education
+                                                        {t('database.profile.education')}
                                                     </h4>
                                                     <div className="text-sm text-gray-600 space-y-1">
                                                         {musician.education.slice(0, 2).map((edu, index) => (
                                                             <div key={index}>{edu}</div>
                                                         ))}
                                                         {musician.education.length > 2 && (
-                                                            <div className="text-xs">+{musician.education.length - 2} more</div>
+                                                            <div className="text-xs">+{musician.education.length - 2} {locale === 'hu' ? 'további' : 'more'}</div>
                                                         )}
                                                     </div>
                                                 </div>
@@ -1295,17 +1370,16 @@ export default function DatabasePage() {
                                                     </Card>
                                                 </div>
                                 ))}
-                            </div>) : (
-                            <div className="text-center py-12 px-6">
+                            </div>) : (                            <div className="text-center py-12 px-6">
                                 <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 shadow-sm">
                                     <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                                    <p className="text-gray-500 text-lg font-medium mb-2">No musicians found</p>
-                                    <p className="text-gray-400 text-sm">Try adjusting your search criteria or clear filters to see more results.</p>
+                                    <p className="text-gray-500 text-lg font-medium mb-2">{t('database.noResults')}</p>
+                                    <p className="text-gray-400 text-sm">{t('database.tryDifferentFilters')}</p>
                                 </div>
                             </div>
                         )}
                     </CardContent>
-                </Card>            )}              {/* Profile Query Modal */}            <ProfileQueryModal 
+                </Card>            )}            {/* Profile Query Modal */}            <ProfileQueryModal 
                 isOpen={isProfileModalOpen}
                 onClose={closeProfileModal}
                 musician={selectedMusician}
@@ -1314,6 +1388,9 @@ export default function DatabasePage() {
                 onGenreSearch={handleGenreSearch}
                 onInstrumentSearch={handleInstrumentSearch}
                 onFullTagSearch={handleFullTagSearch}
+                locale={locale}
+                instruments={instruments}
+                genres={genres}
             />
         </div>
     );

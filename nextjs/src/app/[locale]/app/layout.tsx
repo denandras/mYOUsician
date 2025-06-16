@@ -1,11 +1,11 @@
-// src/app/app/layout.tsx
-import AppLayout from '@/components/AppLayout';
+// src/app/[locale]/app/layout.tsx
+import AppLayoutIntl from '@/components/AppLayoutIntl';
 import { GlobalProvider } from '@/lib/context/GlobalContext';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
         <GlobalProvider>
-            <AppLayout>{children}</AppLayout>
+            <AppLayoutIntl>{children}</AppLayoutIntl>
         </GlobalProvider>
     );
 }

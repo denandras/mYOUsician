@@ -1,7 +1,7 @@
 'use client';
 import React from "react";
 import {FileText, Shield} from "lucide-react";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 
 type LegalDocumentsParams = {
     minimalist: boolean;

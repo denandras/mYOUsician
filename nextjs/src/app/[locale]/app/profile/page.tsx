@@ -15,6 +15,7 @@ import { Database } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 import { LoadingCard } from '@/components/ui/loading-card';
 import { SOCIAL_PLATFORMS, validateSocialUrl as validateSocialUrlHelper } from '@/lib/socialPlatforms';
+import { useTranslations, useLocale } from 'next-intl';
 
 // Use the generated types directly
 type Instrument = Database['public']['Tables']['instruments']['Row'];
@@ -34,7 +35,21 @@ interface LocationData {
 
 export default function ProfilePage() {
     const { user, loading: userLoading } = useGlobal();
-    const router = useRouter();    const [newPassword, setNewPassword] = useState('');
+    const router = useRouter();
+    const t = useTranslations();
+    const locale = useLocale();
+
+    // Debug logging for profile translations
+    React.useEffect(() => {
+        console.log('👤 Profile Debug:', {
+            locale,
+            translationsLoaded: !!t,
+            sampleTranslations: {
+                title: t('profile.title'),
+                personalInfo: t('profile.personalInfo')
+            }
+        });
+    }, [locale, t]);    const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);    const [profileLoading, setProfileLoading] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1034,31 +1049,28 @@ export default function ProfilePage() {
                 </div>
             </div>
         );
-    }
-
-    return (
+    }    return (
         <div className="space-y-6 p-3 sm:p-6">
             <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tight">Profile Editor</h1>
+                <h1 className="text-3xl font-bold tracking-tight">{t('profile.title')}</h1>
                 <p className="text-muted-foreground">
-                    Manage your account settings and musician profile
+                    {t('profile.subtitle')}
                 </p>
             </div>
 
             <div className="grid gap-6">
                 <div className="lg:col-span-2 space-y-6">
                     {/* Personal Data - keep existing */}
-                    <Card>
-                        <CardHeader>
+                    <Card>                        <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <User className="h-5 w-5" />
-                                Personal Data
+                                {t('profile.personalInfo')}
                             </CardTitle>
-                            <CardDescription>Your personal information</CardDescription>
+                            <CardDescription>{t('profile.personalInfo')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <Label htmlFor="forename">First Name</Label>
+                                    <Label htmlFor="forename">{t('profile.forename')}</Label>
                                     <Input
                                         id="forename"
                                         value={profile.forename}                                        onChange={(e) => {                            setProfile(prev => ({ 
@@ -1069,9 +1081,8 @@ export default function ProfilePage() {
                                         placeholder="Enter your first name"
                                         className={!profile.forename ? "text-muted-foreground placeholder:text-muted-foreground/60" : ""}
                                     />
-                                </div>
-                                <div>
-                                    <Label htmlFor="surname">Last Name</Label>
+                                </div>                                <div>
+                                    <Label htmlFor="surname">{t('profile.surname')}</Label>
                                     <Input
                                         id="surname"
                                         value={profile.surname}                                        onChange={(e) => {                            setProfile(prev => ({ 
@@ -1162,23 +1173,22 @@ export default function ProfilePage() {
                                         ? "bg-green-400 hover:bg-green-500" 
                                         : ""
                                 }`}>
-                                {profileLoading ? 'Saving...' : personalDataSaved ? 'Saved ✓' : 'Save'}
+                                {profileLoading ? t('profile.saving') : personalDataSaved ? t('profile.saved') : t('profile.saveProfile')}
                             </Button>
                         </CardContent>
                     </Card>
 
-                    {/* About Section */}
-                    <Card>
+                    {/* About Section */}                    <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Briefcase className="h-5 w-5" />
-                                About
+                                {t('profile.professionalInfo')}
                             </CardTitle>
-                            <CardDescription>Tell us about yourself</CardDescription>
+                            <CardDescription>{t('profile.musicalBackground')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div>
-                                <Label htmlFor="bio">Bio</Label>                                <Textarea
+                                <Label htmlFor="bio">{t('common.bio')}</Label><Textarea
                                     id="bio"
                                     rows={4}
                                     value={profile.bio}                                    onChange={(e) => {                        setProfile(prev => ({ 
@@ -1190,7 +1200,7 @@ export default function ProfilePage() {
                                     className={`mt-2 ${!profile.bio ? "text-muted-foreground placeholder:text-muted-foreground/60" : ""}`}
                                 />
                             </div>                            <div>
-                                <Label>Occupation</Label>                                {profile.occupation.map((occupation, index) => {
+                                <Label>{t('profile.occupation')}</Label>{profile.occupation.map((occupation, index) => {
                                     const hasData = occupation && occupation.trim();
                                       return (
                                         <div key={index} className="flex gap-2 mt-2">
@@ -1226,18 +1236,17 @@ export default function ProfilePage() {
                                             )}
                                         </div>
                                     );
-                                })}
-                                <Button
+                                })}                                <Button
                                     type="button"
                                     variant="outline"
                                     onClick={() => addArrayItem('occupation')}
                                     className="mt-2"
                                 >
                                     <Plus className="h-4 w-4 mr-2" />
-                                    Add Occupation
+                                    {t('profile.addOccupation')}
                                 </Button>
                             </div>                            <div>
-                                <Label>Education</Label>
+                                <Label>{t('profile.education')}</Label>
                                 {profile.education.map((education, index) => {
                                     const hasData = education.type || education.school;
                                     return (
@@ -1301,20 +1310,17 @@ export default function ProfilePage() {
                                             )}
                                         </div>
                                     );
-                                })}
-                                <Button
+                                })}                                <Button
                                     type="button"
                                     variant="outline"
                                     onClick={addEducation}
                                     className="mt-2"
                                 >
                                     <Plus className="h-4 w-4 mr-2" />
-                                    Add Education
+                                    {t('profile.addEducation')}
                                 </Button>
-                            </div>
-
-                            <div>
-                                <Label>Certificates & Awards</Label>                                {profile.certificates.map((certificate, index) => {
+                            </div>                            <div>
+                                <Label>{t('profile.certificates')}</Label>{profile.certificates.map((certificate, index) => {
                                     const hasData = certificate && certificate.trim();
                                       return (
                                         <div key={index} className="flex gap-2 mt-2">
@@ -1350,13 +1356,12 @@ export default function ProfilePage() {
                                             )}
                                         </div>
                                     );
-                                })}
-                                <Button
+                                })}                                <Button
                                     type="button"
                                     variant="outline"
                                     onClick={() => addArrayItem('certificates')}
                                     className="mt-2"
-                                >                                    <Plus className="h-4 w-4 mr-2" />                                    Add Certificate                                </Button>
+                                >                                    <Plus className="h-4 w-4 mr-2" />                                    {t('profile.addCertificate')}                                </Button>
                             </div>                            <Button
                                 onClick={saveAboutSection}
                                 disabled={profileLoading}
@@ -1366,22 +1371,21 @@ export default function ProfilePage() {
                                         ? "bg-green-400 hover:bg-green-500" 
                                         : ""
                                 }`}>
-                                {profileLoading ? 'Saving...' : aboutSaved ? 'Saved ✓' : 'Save'}
+                                {profileLoading ? t('profile.saving') : aboutSaved ? t('profile.saved') : t('profile.saveProfile')}
                             </Button>
                         </CardContent>
                     </Card>
 
-                    {/* Artistic Profile */}
-                    <Card>
+                    {/* Artistic Profile */}                    <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Music className="h-5 w-5" />
-                                Artistic Profile
+                                {t('profile.musicalBackground')}
                             </CardTitle>
-                            <CardDescription>Your musical skills and presence</CardDescription>
+                            <CardDescription>{t('profile.musicalBackground')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">                            <div>
-                                <Label>Genres & Instruments</Label>                                {profile.genre_instrument.map((item, index) => {
+                                <Label>{t('profile.genresInstruments')}</Label>{profile.genre_instrument.map((item, index) => {
                                     const hasData = item.genre || item.instrument || item.category;                                    return (
                                         <div key={index} className="flex gap-2 mt-2">
                                             <div className="flex-1">
@@ -1471,18 +1475,17 @@ export default function ProfilePage() {
                                             )}
                                         </div>
                                     );
-                                })}
-                                <Button
+                                })}                                <Button
                                     type="button"
                                     variant="outline"
                                     onClick={addGenreInstrument}
                                     className="mt-2"
                                 >
                                     <Plus className="h-4 w-4 mr-2" />
-                                    Add Genre & Instrument
+                                    {t('profile.addGenreInstrument')}
                                 </Button>
                             </div>                            <div>
-                                <Label>Video Links</Label>                                {profile.video_links.map((link, index) => {
+                                <Label>{t('profile.videoLinks')}</Label>{profile.video_links.map((link, index) => {
                                     const hasData = link && link.trim();
                                     const isValid = validateVideoUrl(link);
                                       return (
@@ -1523,20 +1526,17 @@ export default function ProfilePage() {
                                             )}
                                         </div>
                                     );
-                                })}
-                                <Button
+                                })}                                <Button
                                     type="button"
                                     variant="outline"
                                     onClick={() => addArrayItem('video_links')}
                                     className="mt-2"
                                 >
                                     <Plus className="h-4 w-4 mr-2" />
-                                    Add Video Link
+                                    {t('profile.addVideoLink')}
                                 </Button>
-                            </div>
-
-                            <div>
-                                <Label>Social Links</Label>
+                            </div>                            <div>
+                                <Label>{t('profile.socialMedia')}</Label>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                                     {getSortedSocialPlatforms().map(platform => {
                                         const currentValue = profile.social[platform.name.toLowerCase()] || '';
@@ -1575,23 +1575,22 @@ export default function ProfilePage() {
                                         ? "bg-green-400 hover:bg-green-500" 
                                         : ""
                                 }`}>
-                                {profileLoading ? 'Saving...' : artisticProfileSaved ? 'Saved ✓' : 'Save'}
+                                {profileLoading ? t('profile.saving') : artisticProfileSaved ? t('profile.saved') : t('profile.saveProfile')}
                             </Button>
                         </CardContent>
                     </Card>
 
-                    {/* Change Password */}
-                    <Card>
+                    {/* Change Password */}                    <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Key className="h-5 w-5" />
-                                Change Password
+                                {t('profile.changePassword')}
                             </CardTitle>
-                            <CardDescription>Update your account password</CardDescription>
+                            <CardDescription>{t('profile.changePasswordDescription')}</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <form onSubmit={handlePasswordChange} className="space-y-4">                                <div>
-                                    <Label htmlFor="new-password">New Password</Label>
+                                    <Label htmlFor="new-password">{t('profile.newPassword')}</Label>
                                     <Input
                                         type="password"
                                         id="new-password"
@@ -1602,9 +1601,8 @@ export default function ProfilePage() {
                                         }}
                                         required
                                     />
-                                </div>
-                                <div>
-                                    <Label htmlFor="confirm-password">Confirm New Password</Label>
+                                </div>                                <div>
+                                    <Label htmlFor="confirm-password">{t('profile.confirmPassword')}</Label>
                                     <Input
                                         type="password"
                                         id="confirm-password"
@@ -1614,8 +1612,7 @@ export default function ProfilePage() {
                                             if (passwordError) setPasswordError('');
                                         }}
                                         required
-                                    />
-                                </div>                                <Button
+                                    />                                </div>                                <Button
                                     type="submit"
                                     disabled={loading}
                                     variant={passwordSaved ? "default" : passwordError ? "destructive" : "delete"}
@@ -1626,19 +1623,18 @@ export default function ProfilePage() {
                                                 ? "bg-[#083e4d] hover:bg-[#062f3b]"
                                                 : ""
                                     }`}
-                                >
-                                    {loading 
-                                        ? 'Updating...' 
+                                >                                    {loading 
+                                        ? t('profile.updating') 
                                         : passwordSaved 
-                                            ? 'Updated ✓' 
+                                            ? t('profile.updated') 
                                             : passwordError 
                                                 ? passwordError
-                                                : 'Update Password'
+                                                : t('profile.updatePassword')
                                     }
                                 </Button>
                             </form>
                         </CardContent>
-                    </Card>                    <MFASetup
+                    </Card><MFASetup
                         onStatusChange={() => {
                             setSuccess('Two-factor authentication settings updated successfully');
                         }}
@@ -1646,21 +1642,19 @@ export default function ProfilePage() {
 
                     {/* Danger Zone */}
                     <Card className="border-red-200 bg-red-50">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-red-600">
+                        <CardHeader>                            <CardTitle className="flex items-center gap-2 text-red-600">
                                 <AlertTriangle className="h-5 w-5" />
-                                Danger Zone
+                                {t('profile.dangerZone')}
                             </CardTitle>
                             <CardDescription className="text-red-700">
-                                Permanently delete your account and all associated data. This action cannot be undone.
+                                {t('profile.dangerZoneDescription')}
                             </CardDescription>
-                        </CardHeader>                        <CardContent>
-                            <Button
+                        </CardHeader>                        <CardContent>                            <Button
                                 onClick={() => setShowDeleteDialog(true)}
                                 variant="delete"
                                 className="w-full"
                             >
-                                Delete Account
+                                {t('profile.deleteAccount')}
                             </Button>
                         </CardContent>
                     </Card>
@@ -1670,24 +1664,21 @@ export default function ProfilePage() {
             {/* Delete Account Confirmation Dialog */}
             <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
                 <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+                    <AlertDialogHeader>                        <AlertDialogTitle className="flex items-center gap-2 text-red-600">
                             <AlertTriangle className="h-5 w-5" />
-                            Delete Account
+                            {t('profile.deleteAccount')}
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
+                            {t('profile.deleteAccountDescription')}
                         </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <div className="my-4">
-                        <Label htmlFor="delete-confirm">
-                            Please type your email address <strong>{user?.email}</strong> to confirm:
+                    </AlertDialogHeader>                    <div className="my-4">                        <Label htmlFor="delete-confirm">
+                            {t('profile.confirmEmailPrompt', { email: user?.email || '' })}
                         </Label>
                         <Input
                             id="delete-confirm"
                             value={deleteConfirmText}
                             onChange={(e) => setDeleteConfirmText(e.target.value)}
-                            placeholder="Enter your email address"
+                            placeholder={t('profile.enterEmailPlaceholder')}
                             className="mt-2"
                         />
                     </div>
@@ -1698,13 +1689,13 @@ export default function ProfilePage() {
                             }}
                             className="bg-[#083e4d] text-white hover:bg-[#062f3b] border-[#083e4d] transition-colors duration-200"
                         >
-                            Cancel
+                            {t('common.cancel')}
                         </AlertDialogCancel>                        <AlertDialogAction
                             onClick={handleProfileDelete}
                             disabled={deleteLoading || deleteConfirmText !== user?.email}
                             className="bg-[#e62745] text-white hover:bg-[#cc2340] transition-colors duration-200"
                         >
-                            {deleteLoading ? 'Deleting...' : 'Delete Account'}
+                            {deleteLoading ? t('profile.deleting') : t('profile.deleteAccount')}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

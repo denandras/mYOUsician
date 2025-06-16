@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
 import { Check } from 'lucide-react';
 import PricingService from "@/lib/pricing";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
