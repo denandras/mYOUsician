@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Select Component</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-case { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        select { width: 200px; height: 40px; }
+    </style>
+</head>
+<body>
+    <h1>Select Component Test</h1>
+    
+    <div class="test-case">
+        <h3>Test Case 1: Empty placeholder (should show nothing)</h3>
+        <select>
+            <option value="" disabled hidden></option>
+            <option value="option1">Option 1</option>
+            <option value="option2">Option 2</option>
+        </select>
+    </div>
+    
+    <div class="test-case">
+        <h3>Test Case 2: Hungarian placeholder</h3>
+        <select>
+            <option value="" disabled hidden>Válassz rendezést</option>
+            <option value="name_asc">Név A-Z</option>
+            <option value="name_desc">Név Z-A</option>
+        </select>
+    </div>
+    
+    <div class="test-case">
+        <h3>Test Case 3: English placeholder</h3>
+        <select>
+            <option value="" disabled hidden>Select sorting</option>
+            <option value="name_asc">Name A-Z</option>
+            <option value="name_desc">Name Z-A</option>
+        </select>
+    </div>
+    
+    <div class="test-case">
+        <h3>Test Case 4: Default hardcoded "Select" (what was happening before)</h3>
+        <select>
+            <option value="" disabled hidden>Select</option>
+            <option value="option1">Option 1</option>
+            <option value="option2">Option 2</option>
+        </select>
+    </div>
+</body>
+</html>

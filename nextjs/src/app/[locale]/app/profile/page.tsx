@@ -997,16 +997,16 @@ export default function ProfilePage() {
 
     // Add helper functions for cleaner placeholder text
     const getCountryPlaceholder = () => {
-        if (locationServiceStatus === 'loading') return "Loading countries...";
-        if (locationServiceStatus === 'unavailable') return "Service unavailable";
-        return "Select country";
+        if (locationServiceStatus === 'loading') return t('profile.loadingCountries');
+        if (locationServiceStatus === 'unavailable') return t('profile.serviceUnavailable');
+        return t('profile.selectCountry');
     };
 
     const getCityPlaceholder = () => {
-        if (locationServiceStatus === 'unavailable') return "Service unavailable";
-        if (!profile.location.countryCode) return "Select country first";
-        if (loadingLocations) return "Loading cities...";
-        return "Select city";
+        if (locationServiceStatus === 'unavailable') return t('profile.serviceUnavailable');
+        if (!profile.location.countryCode) return t('profile.selectCountryFirst');
+        if (loadingLocations) return t('profile.loadingCities');
+        return t('profile.selectCity');
     };    // Load data when component mounts or user changes    
     useEffect(() => {
         loadReferenceData();
@@ -1278,7 +1278,7 @@ export default function ProfilePage() {
                                                             value={education.type}
                                                             onValueChange={(value) => updateEducation(index, 'type', value)}
                                                         >                                                        <SelectTrigger className={!education.type ? "text-muted-foreground" : ""}>
-                                                            <SelectValue placeholder="Select education level" />
+                                                            <SelectValue placeholder={t('profile.selectEducationLevel')} />
                                                         </SelectTrigger>
                                                             <SelectContent>
                                                                 {(() => {
@@ -1425,7 +1425,7 @@ export default function ProfilePage() {
                                                         onValueChange={(value) => updateGenreInstrument(index, 'genre', value)}
                                                     >
                                                         <SelectTrigger className={!item.genre ? "text-muted-foreground" : ""}>
-                                                            <SelectValue placeholder="Genre" />
+                                                            <SelectValue placeholder={t('profile.selectGenre')} />
                                                         </SelectTrigger>
                                                         <SelectContent>
                                                             {referenceData.genres && Array.isArray(referenceData.genres) 
@@ -1454,7 +1454,7 @@ export default function ProfilePage() {
                                                         onValueChange={(value) => updateGenreInstrument(index, 'instrument', value)}
                                                     >
                                                         <SelectTrigger className={!item.instrument ? "text-muted-foreground" : ""}>
-                                                            <SelectValue placeholder="Instrument" />
+                                                            <SelectValue placeholder={t('profile.selectInstrument')} />
                                                         </SelectTrigger><SelectContent>
                                                             {sortedCategories.length > 0 ? (
                                                                 sortedCategories.map(category => {
@@ -1487,7 +1487,7 @@ export default function ProfilePage() {
                                                         onValueChange={(value) => updateGenreInstrument(index, 'category', value)}
                                                     >
                                                         <SelectTrigger className={!item.category ? "text-muted-foreground" : ""}>
-                                                            <SelectValue placeholder="Category" />
+                                                            <SelectValue placeholder={t('profile.selectCategory')} />
                                                         </SelectTrigger>
                                                         <SelectContent>
                                                             <SelectItem value="artist">

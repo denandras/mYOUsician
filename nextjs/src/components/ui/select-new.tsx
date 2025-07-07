@@ -19,7 +19,8 @@ const Select = React.forwardRef<
   // Set initial value and handle prop updates
   React.useEffect(() => {
     if (selectRef.current) {
-      const newValue = value ?? '';      // Always update the DOM value to match the prop
+      // Use empty string only if value is explicitly empty string, otherwise use actual value
+      const newValue = value || '';      // Always update the DOM value to match the prop
       if (selectRef.current.value !== newValue) {
         selectRef.current.value = newValue;
         
@@ -83,11 +84,14 @@ const Select = React.forwardRef<
   const options = extractOptions(children);
 
   // Extract placeholder from SelectValue if present
-  let placeholder = "Select";
+  let placeholder = "";
   React.Children.forEach(children, child => {
     if (React.isValidElement(child) && child.type === SelectValue) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      placeholder = (child.props as any).placeholder || placeholder;
+      const childPlaceholder = (child.props as any).placeholder;
+      if (childPlaceholder) {
+        placeholder = childPlaceholder;
+      }
     }
   });
 
@@ -103,14 +107,16 @@ const Select = React.forwardRef<
     <select
       className={`flex h-10 w-full rounded-none border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none [-webkit-appearance:none] [background-image:url("data:image/svg+xml;charset=US-ASCII,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e")] bg-no-repeat [background-position:right_0.75rem_center] [background-size:16px_12px] pr-10 [border-radius:0!important] [-webkit-border-radius:0!important] ${className || ''}`}
       ref={combinedRef}
-      value={value ?? ''}
+      value={value || ''}
       onChange={handleChange}
       disabled={disabled}
       {...props}
     >
-      <option value="" disabled hidden>
-        {placeholder}
-      </option>
+      {placeholder && (
+        <option value="" disabled hidden>
+          {placeholder}
+        </option>
+      )}
       {options}
     </select>
   )

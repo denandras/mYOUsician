@@ -662,7 +662,7 @@ export default function DatabasePage() {
             instrument: 'any',
             category: 'any', // Default to "Any"
             nameSearch: '',
-            sortBy: ''
+            sortBy: '' // Explicitly set to empty string to show placeholder
         });
         // Don't clear musicians data or hasSearched state
         // Let users see previous results until they search again
@@ -1081,7 +1081,7 @@ export default function DatabasePage() {
                             <label className="text-sm font-medium">{t('database.genre')}</label>
                             <Select value={filters.genre} onValueChange={(value) => updateFilter('genre', value)}>
                                 <SelectTrigger>
-                                    <SelectValue />
+                                    <SelectValue placeholder={locale === 'hu' ? 'Válassz műfajt' : 'Select genre'} />
                                 </SelectTrigger><SelectContent>
                                     <SelectItem value="any">{t('common.any')}</SelectItem>
                                     {genres.map((genre) => (
@@ -1096,7 +1096,7 @@ export default function DatabasePage() {
                             <label className="text-sm font-medium">{t('database.instrument')}</label>
                             <Select value={filters.instrument} onValueChange={(value) => updateFilter('instrument', value)}>
                                 <SelectTrigger>
-                                    <SelectValue />
+                                    <SelectValue placeholder={locale === 'hu' ? 'Válassz hangszert' : 'Select instrument'} />
                                 </SelectTrigger>                                <SelectContent>
                                     <SelectItem value="any">{t('common.any')}</SelectItem>
                                     {sortedCategories.length > 0 ? (
@@ -1123,7 +1123,7 @@ export default function DatabasePage() {
                             <label className="text-sm font-medium">{t('database.type')}</label>
                             <Select value={filters.category} onValueChange={(value) => updateFilter('category', value)}>
                                 <SelectTrigger>
-                                    <SelectValue />
+                                    <SelectValue placeholder={locale === 'hu' ? 'Válassz típust' : 'Select type'} />
                                 </SelectTrigger><SelectContent>
                                     <SelectItem value="any">{t('common.any')}</SelectItem>
                                     <SelectItem value="artist">{locale === 'hu' ? 'Művész' : 'Artist'}</SelectItem>
@@ -1135,9 +1135,9 @@ export default function DatabasePage() {
                             <label className="text-sm font-medium">
                                 {t('database.sortBy')} <span className="text-red-500">*</span> <span className="text-xs text-red-500">({t('common.required')})</span>
                             </label>
-                <Select value={filters.sortBy} onValueChange={(value) => updateFilter('sortBy', value)}>
+                <Select value={filters.sortBy || ''} onValueChange={(value) => updateFilter('sortBy', value)}>
                                 <SelectTrigger className={!filters.sortBy ? "bg-red-50 border-red-200" : ""}>
-                                    <SelectValue placeholder={t('database.sortBy')} />
+                                    <SelectValue placeholder={locale === 'hu' ? 'Válassz rendezést' : 'Select sorting'} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {sortOptions.map((option) => (
