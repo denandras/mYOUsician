@@ -938,7 +938,7 @@ export default function ProfilePage() {
     }, []);
 
     // Helper function to get localized name for genres and instruments
-    const getLocalizedName = (item: any, field: 'name' | 'category') => {
+    const getLocalizedName = (item: Genre | Instrument, field: 'name' | 'category') => {
         if (locale === 'hu') {
             if ('name_HUN' in item && item.name_HUN) return item.name_HUN;
             if (field === 'category' && 'category_hun' in item && item.category_hun) return item.category_hun;
@@ -948,50 +948,11 @@ export default function ProfilePage() {
     };
 
     // Helper function to get localized category for instruments
-    const getLocalizedCategory = (instrument: any): string => {
+    const getLocalizedCategory = (instrument: Instrument): string => {
         if (locale === 'hu' && instrument.category_hun) {
             return instrument.category_hun;
         }
         return instrument.category;
-    };
-
-    // Helper function to get localized genre name
-    const getLocalizedGenreName = (genreName: string): string => {
-        if (locale === 'hu' && referenceData.genres.length > 0) {
-            const foundGenre = referenceData.genres.find(genre => 
-                genre.name.toLowerCase() === genreName.toLowerCase()
-            );
-            if (foundGenre && foundGenre.name_HUN) {
-                return foundGenre.name_HUN;
-            }
-        }
-        return genreName;
-    };
-
-    // Helper function to get localized instrument name
-    const getLocalizedInstrumentName = (instrumentName: string): string => {
-        if (locale === 'hu' && referenceData.instruments.length > 0) {
-            const foundInstrument = referenceData.instruments.find(inst => 
-                inst.name.toLowerCase() === instrumentName.toLowerCase()
-            );
-            if (foundInstrument && foundInstrument.name_hun) {
-                return foundInstrument.name_hun;
-            }
-        }
-        return instrumentName;
-    };
-
-    // Helper function to get localized education name
-    const getLocalizedEducationName = (educationName: string): string => {
-        if (locale === 'hu' && referenceData.education_types.length > 0) {
-            const foundEducation = referenceData.education_types.find(edu => 
-                edu.name.toLowerCase() === educationName.toLowerCase()
-            );
-            if (foundEducation && foundEducation.name_HUN) {
-                return foundEducation.name_HUN;
-            }
-        }
-        return educationName;
     };
 
     // Add validation function

@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 
 const legalDocuments = {
     'privacy': {
-        title: 'Privacy Notice',
+        title: 'Privacy Policy',
         path: '/terms/privacy-notice.md'
     },
     'terms': {

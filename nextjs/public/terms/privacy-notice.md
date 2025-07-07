@@ -1,17 +1,17 @@
-# Privacy Notice
+# Privacy Policy
 
 Last Updated: December 14, 2024
 
 ## 1. Company Information
 
-This Privacy Notice applies to:
+This Privacy Policy applies to:
 Company Name:
 
 Tax number: 1234567890
 
 ## 2. Introduction
 
-This Privacy Notice explains how we collect, use, disclose, and safeguard your information when you use SupaSasS services.
+This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use SupaSasS services.
 
 ## 3. Information We Collect
 
@@ -90,9 +90,9 @@ We use cookies for:
 - We do not knowingly collect children's data
 - Parents may request data deletion
 
-## 11. Changes to Privacy Notice
+## 11. Changes to Privacy Policy
 
-- We may update this notice periodically
+- We may update this policy periodically
 - Changes effective upon posting
 - Material changes notified via email
 

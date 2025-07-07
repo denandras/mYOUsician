@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -196,12 +196,12 @@ export default function DatabasePage() {
         }
         return field === 'category' && 'category' in item ? item.category : item.name;
     };    // Helper function to get localized category for instruments
-    const getLocalizedCategory = (instrument: Instrument): string => {
+    const getLocalizedCategory = useCallback((instrument: Instrument): string => {
         if (locale === 'hu' && instrument.category_hun) {
             return instrument.category_hun;
         }
         return instrument.category;
-    };
+    }, [locale]);
 
     // Helper function to get localized instrument name
     const getLocalizedInstrumentName = (instrumentName: string): string => {
@@ -952,7 +952,7 @@ export default function DatabasePage() {
             acc[category].push(instrument);
             return acc;
         }, {} as Record<string, Instrument[]>);
-    }, [instruments, locale]);
+    }, [instruments, getLocalizedCategory]);
 
     // Memoize sorted categories by category_rank for consistent ordering
     const sortedCategories = useMemo(() => {

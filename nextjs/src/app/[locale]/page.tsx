@@ -21,7 +21,7 @@ export default function Home() {
       sampleTranslation: t('hero.title'),
       welcomeMessage: t('home.welcomeTo')
     });
-  }, [locale, t]);
+  }, [locale, t, productName]);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);

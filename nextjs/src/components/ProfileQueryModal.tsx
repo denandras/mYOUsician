@@ -62,28 +62,7 @@ export function ProfileQueryModal({
     locale = 'en',
     instruments = [],
     genres = []
-}: ProfileQueryModalProps) {    // Helper function to get localized category for instruments
-    const getLocalizedCategory = (instrumentName: string, storedCategory: string): string => {
-        if (locale === 'hu' && instruments.length > 0) {
-            // First try to find by instrument name to get its Hungarian category
-            const foundInstrument = instruments.find(inst => 
-                inst.name.toLowerCase() === instrumentName.toLowerCase()
-            );
-            if (foundInstrument && foundInstrument.category_hun) {
-                return foundInstrument.category_hun;
-            }
-            
-            // If not found by instrument name, try to find by English category
-            const foundByCategory = instruments.find(inst => 
-                inst.category.toLowerCase() === storedCategory.toLowerCase()
-            );
-            if (foundByCategory && foundByCategory.category_hun) {
-                return foundByCategory.category_hun;
-            }
-        }
-        return storedCategory;
-    };
-
+}: ProfileQueryModalProps) {
     // Helper function to get localized instrument name
     const getLocalizedInstrumentName = (instrumentName: string): string => {
         if (locale === 'hu' && instruments.length > 0) {
