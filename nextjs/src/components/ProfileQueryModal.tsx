@@ -97,7 +97,34 @@ export function ProfileQueryModal({
         return instrumentName;
     };
 
-    // Helper function to get localized genre name
+    // Fallback genre translations for common genres
+    const getGenreFallback = (genreName: string): string => {
+        if (locale === 'hu') {
+            const fallbacks: Record<string, string> = {
+                'classical': 'Klasszikus',
+                'jazz': 'Jazz',
+                'rock': 'Rock',
+                'pop': 'Pop',
+                'folk': 'Folk',
+                'country': 'Country',
+                'blues': 'Blues',
+                'electronic': 'Elektronikus',
+                'hip-hop': 'Hip-hop',
+                'alternative': 'Alternatív',
+                'indie': 'Indie',
+                'reggae': 'Reggae',
+                'metal': 'Metal',
+                'punk': 'Punk',
+                'funk': 'Funk',
+                'soul': 'Soul',
+                'r&b': 'R&B',
+                'world': 'Világzene',
+                'experimental': 'Kísérleti'
+            };
+            return fallbacks[genreName.toLowerCase()] || genreName;
+        }
+        return genreName;
+    };    // Helper function to get localized genre name
     const getLocalizedGenreName = (genreName: string): string => {
         if (locale === 'hu' && genres.length > 0) {
             const foundGenre = genres.find(genre => 
@@ -105,6 +132,8 @@ export function ProfileQueryModal({
             );
             if (foundGenre && foundGenre.name_HUN) {
                 return foundGenre.name_HUN;
+            } else {
+                return getGenreFallback(genreName);
             }
         }
         return genreName;
@@ -367,11 +396,21 @@ export function ProfileQueryModal({
                                                     const localizedGenre = getLocalizedGenreName(genre);
                                                     const localizedInstrument = getLocalizedInstrumentName(instrument);
                                                     
-                                                    // Get localized category
-                                                    const storedCategory = String(itemObj.category || '');
-                                                    const localizedCategory = getLocalizedCategory(instrument, storedCategory);
-                                                    const category = localizedCategory ? ` (${localizedCategory})` : '';
-                                                    displayText = `${localizedGenre} ${localizedInstrument}${category}`.trim();
+                                                    // Get localized type (artist/teacher) instead of category
+                                                    let typeText = '';
+                                                    if (itemObj.category) {
+                                                        const type = String(itemObj.category);
+                                                        if (type === 'artist') {
+                                                            typeText = locale === 'hu' ? 'Művész' : 'Artist';
+                                                        } else if (type === 'teacher') {
+                                                            typeText = locale === 'hu' ? 'Tanár' : 'Teacher';
+                                                        } else {
+                                                            typeText = type;
+                                                        }
+                                                    }
+                                                    
+                                                    const type = typeText ? ` (${typeText})` : '';
+                                                    displayText = `${localizedGenre} ${localizedInstrument}${type}`.trim();
                                                 } else {
                                                     displayText = String(item || '');
                                                 }

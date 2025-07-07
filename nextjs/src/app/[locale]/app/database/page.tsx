@@ -216,7 +216,34 @@ export default function DatabasePage() {
         return instrumentName;
     };
 
-    // Helper function to get localized genre name
+    // Fallback genre translations for common genres
+    const getGenreFallback = (genreName: string): string => {
+        if (locale === 'hu') {
+            const fallbacks: Record<string, string> = {
+                'classical': 'Klasszikus',
+                'jazz': 'Jazz',
+                'rock': 'Rock',
+                'pop': 'Pop',
+                'folk': 'Folk',
+                'country': 'Country',
+                'blues': 'Blues',
+                'electronic': 'Elektronikus',
+                'hip-hop': 'Hip-hop',
+                'alternative': 'Alternatív',
+                'indie': 'Indie',
+                'reggae': 'Reggae',
+                'metal': 'Metal',
+                'punk': 'Punk',
+                'funk': 'Funk',
+                'soul': 'Soul',
+                'r&b': 'R&B',
+                'world': 'Világzene',
+                'experimental': 'Kísérleti'
+            };
+            return fallbacks[genreName.toLowerCase()] || genreName;
+        }
+        return genreName;
+    };    // Helper function to get localized genre name
     const getLocalizedGenreName = (genreName: string): string => {
         if (locale === 'hu' && genres.length > 0) {
             const foundGenre = genres.find(genre => 
@@ -224,6 +251,8 @@ export default function DatabasePage() {
             );
             if (foundGenre && foundGenre.name_HUN) {
                 return foundGenre.name_HUN;
+            } else {
+                return getGenreFallback(genreName);
             }
         }
         return genreName;
@@ -473,13 +502,13 @@ export default function DatabasePage() {
             return field.map(item => {
                 if (typeof item === 'string') {
                     return item; // Already formatted string
-                }
-                if (typeof item === 'object' && item !== null) {
+                }                if (typeof item === 'object' && item !== null) {
                     // If it's in the { type, school } format
                     if ('type' in item && 'school' in item) {
                         const type = (item as any).type || '';
                         const school = (item as any).school || '';
-                        return school ? `${type} at ${school}` : type;
+                        const connector = locale === 'hu' ? 'itt:' : 'at';
+                        return school ? `${type} ${connector} ${school}` : type;
                     }
                 }
                 return String(item);
@@ -549,11 +578,14 @@ export default function DatabasePage() {
                     const getHighestEducationRank = (education: string[]) => {
                         if (!education || education.length === 0) return 0;
                         
-                        let highestRank = 0;
-                        education.forEach(eduItem => {
-                            const eduName = eduItem.includes(' at ') 
-                                ? eduItem.split(' at ')[0].trim() 
-                                : eduItem;
+                        let highestRank = 0;                        education.forEach(eduItem => {
+                            // Handle both English "at" and Hungarian "itt:" separators
+                            let eduName = eduItem;
+                            if (eduItem.includes(' at ')) {
+                                eduName = eduItem.split(' at ')[0].trim();
+                            } else if (eduItem.includes(' itt: ')) {
+                                eduName = eduItem.split(' itt: ')[0].trim();
+                            }
                             
                             const foundEdu = educationTypes.find(et => 
                                 et.name.toLowerCase() === eduName.toLowerCase()
@@ -1185,32 +1217,22 @@ export default function DatabasePage() {
                                                                 // Get localized names
                                                                 const localizedGenre = getLocalizedGenreName(genre);
                                                                 const localizedInstrument = getLocalizedInstrumentName(instrument);
-                                                                  // Get localized category - check if we have Hungarian category when locale is 'hu'
-                                                                let categoryText = '';
+                                                                
+                                                                // Get localized type (artist/teacher) instead of category
+                                                                let typeText = '';
                                                                 if (itemObj.category) {
-                                                                    const storedCategory = String(itemObj.category);
-                                                                    // Find the instrument to get its localized category
-                                                                    const foundInstrument = instruments.find(inst => 
-                                                                        inst.name.toLowerCase() === instrument.toLowerCase()
-                                                                    );
-                                                                    
-                                                                    if (foundInstrument) {
-                                                                        categoryText = getLocalizedCategory(foundInstrument);
+                                                                    const type = String(itemObj.category);
+                                                                    if (type === 'artist') {
+                                                                        typeText = locale === 'hu' ? 'Művész' : 'Artist';
+                                                                    } else if (type === 'teacher') {
+                                                                        typeText = locale === 'hu' ? 'Tanár' : 'Teacher';
                                                                     } else {
-                                                                        // Try to find by category if instrument not found
-                                                                        const foundByCategory = instruments.find(inst => 
-                                                                            inst.category.toLowerCase() === storedCategory.toLowerCase()
-                                                                        );
-                                                                        if (foundByCategory && locale === 'hu' && foundByCategory.category_hun) {
-                                                                            categoryText = foundByCategory.category_hun;
-                                                                        } else {
-                                                                            categoryText = storedCategory;
-                                                                        }
+                                                                        typeText = type;
                                                                     }
                                                                 }
                                                                 
-                                                                const category = categoryText ? ` (${categoryText})` : '';
-                                                                displayText = `${localizedGenre} ${localizedInstrument}${category}`.trim();
+                                                                const type = typeText ? ` (${typeText})` : '';
+                                                                displayText = `${localizedGenre} ${localizedInstrument}${type}`.trim();
                                                             } else {
                                                                 displayText = String(item || '');
                                                             }                                                            return (
@@ -1218,17 +1240,16 @@ export default function DatabasePage() {
                                                                     key={index} 
                                                                     variant="secondary" 
                                                                     className="text-xs cursor-pointer hover:bg-teal-100 hover:text-teal-800 transition-all duration-200 transform hover:scale-105 bg-white border border-gray-200 text-gray-700 font-medium"
-                                                                    onClick={() => {
-                                                                        // Extract category from displayText if it's in parentheses
-                                                                        let category = '';
+                                                                    onClick={() => {                                                                        // Extract type from displayText if it's in parentheses
+                                                                        let type = '';
                                                                         if (item && typeof item === 'object') {
                                                                             const itemObj = item as Record<string, unknown>;
-                                                                            category = String(itemObj.category || '');
+                                                                            type = String(itemObj.category || '');
                                                                         }
                                                                         
                                                                         // Use full tag search for complete data
                                                                         if (genre && instrument) {
-                                                                            handleFullTagSearch(genre, instrument, category);
+                                                                            handleFullTagSearch(genre, instrument, type);
                                                                         } else if (genre) {
                                                                             handleGenreSearch(genre);
                                                                         } else if (instrument) {

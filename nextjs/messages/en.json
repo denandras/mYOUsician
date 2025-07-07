@@ -185,6 +185,8 @@
     "personalInfo": "Personal Information",
     "forename": "First Name",
     "surname": "Last Name",
+    "country": "Country",
+    "city": "City",
     "professionalInfo": "Professional Information",
     "musicalBackground": "Musical Background",
     "education": "Education",

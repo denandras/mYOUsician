@@ -183,6 +183,8 @@
     "personalInfo": "Személyes információk",
     "forename": "Keresztnév",
     "surname": "Vezetéknév",
+    "country": "Ország",
+    "city": "Város",
     "professionalInfo": "Szakmai információk",
     "musicalBackground": "Zenei háttér",
     "education": "Végzettség",

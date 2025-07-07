@@ -935,7 +935,66 @@ export default function ProfilePage() {
             return newProfile;
         });
         setPersonalDataSaved(false);
-    }, []);    // Add validation function
+    }, []);
+
+    // Helper function to get localized name for genres and instruments
+    const getLocalizedName = (item: any, field: 'name' | 'category') => {
+        if (locale === 'hu') {
+            if ('name_HUN' in item && item.name_HUN) return item.name_HUN;
+            if (field === 'category' && 'category_hun' in item && item.category_hun) return item.category_hun;
+            if ('name_hun' in item && item.name_hun) return item.name_hun;
+        }
+        return field === 'category' && 'category' in item ? item.category : item.name;
+    };
+
+    // Helper function to get localized category for instruments
+    const getLocalizedCategory = (instrument: any): string => {
+        if (locale === 'hu' && instrument.category_hun) {
+            return instrument.category_hun;
+        }
+        return instrument.category;
+    };
+
+    // Helper function to get localized genre name
+    const getLocalizedGenreName = (genreName: string): string => {
+        if (locale === 'hu' && referenceData.genres.length > 0) {
+            const foundGenre = referenceData.genres.find(genre => 
+                genre.name.toLowerCase() === genreName.toLowerCase()
+            );
+            if (foundGenre && foundGenre.name_HUN) {
+                return foundGenre.name_HUN;
+            }
+        }
+        return genreName;
+    };
+
+    // Helper function to get localized instrument name
+    const getLocalizedInstrumentName = (instrumentName: string): string => {
+        if (locale === 'hu' && referenceData.instruments.length > 0) {
+            const foundInstrument = referenceData.instruments.find(inst => 
+                inst.name.toLowerCase() === instrumentName.toLowerCase()
+            );
+            if (foundInstrument && foundInstrument.name_hun) {
+                return foundInstrument.name_hun;
+            }
+        }
+        return instrumentName;
+    };
+
+    // Helper function to get localized education name
+    const getLocalizedEducationName = (educationName: string): string => {
+        if (locale === 'hu' && referenceData.education_types.length > 0) {
+            const foundEducation = referenceData.education_types.find(edu => 
+                edu.name.toLowerCase() === educationName.toLowerCase()
+            );
+            if (foundEducation && foundEducation.name_HUN) {
+                return foundEducation.name_HUN;
+            }
+        }
+        return educationName;
+    };
+
+    // Add validation function
     const validateSocialUrl = (platformName: string, url: string): boolean => {
         if (!url.trim()) return true; // Empty URLs are allowed
         
@@ -1098,7 +1157,7 @@ export default function ProfilePage() {
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <Label>Country</Label>
+                                    <Label>{t('profile.country')}</Label>
                                     <Select
                                         value={profile.location.country}
                                         onValueChange={handleCountryChange}
@@ -1117,7 +1176,7 @@ export default function ProfilePage() {
                                     </Select>
                                 </div>
                                 <div>
-                                    <Label>City</Label>
+                                    <Label>{t('profile.city')}</Label>
                                     <Select
                                         value={profile.location.city}
                                         onValueChange={handleCityChange}
@@ -1268,11 +1327,22 @@ export default function ProfilePage() {
                                                                     }
                                                                     const sortedEducation = referenceData.education_types
                                                                         .sort((a, b) => (a.rank || 999) - (b.rank || 999));
-                                                                    return sortedEducation.map(edu => (
-                                                                        <SelectItem key={edu.id} value={edu.name}>
-                                                                            {edu.name}
-                                                                        </SelectItem>
-                                                                    ));
+                                                                    return sortedEducation.map(edu => {
+                                                                        // Debug logging
+                                                                        console.log('🎓 Education Debug:', {
+                                                                            locale,
+                                                                            eduName: edu.name,
+                                                                            eduNameHUN: edu.name_HUN,
+                                                                            shouldShowHungarian: locale === 'hu' && edu.name_HUN,
+                                                                            localizedName: getLocalizedName(edu, 'name')
+                                                                        });
+                                                                        
+                                                                        return (
+                                                                            <SelectItem key={edu.id} value={edu.name}>
+                                                                                {getLocalizedName(edu, 'name')}
+                                                                            </SelectItem>
+                                                                        );
+                                                                    });
                                                                 })()}
                                                             </SelectContent>
                                                         </Select>
@@ -1398,11 +1468,22 @@ export default function ProfilePage() {
                                                         </SelectTrigger>
                                                         <SelectContent>
                                                             {referenceData.genres && Array.isArray(referenceData.genres) 
-                                                                ? referenceData.genres.map(genre => (
-                                                                    <SelectItem key={genre.id} value={genre.name}>
-                                                                        {genre.name}
-                                                                    </SelectItem>
-                                                                ))
+                                                                ? referenceData.genres.map(genre => {
+                                                                    // Debug logging
+                                                                    console.log('🎵 Genre Debug:', {
+                                                                        locale,
+                                                                        genreName: genre.name,
+                                                                        genreNameHUN: genre.name_HUN,
+                                                                        shouldShowHungarian: locale === 'hu' && genre.name_HUN,
+                                                                        localizedName: getLocalizedName(genre, 'name')
+                                                                    });
+                                                                    
+                                                                    return (
+                                                                        <SelectItem key={genre.id} value={genre.name}>
+                                                                            {getLocalizedName(genre, 'name')}
+                                                                        </SelectItem>
+                                                                    );
+                                                                })
                                                                 : null
                                                             }
                                                         </SelectContent>
@@ -1415,20 +1496,26 @@ export default function ProfilePage() {
                                                             <SelectValue placeholder="Instrument" />
                                                         </SelectTrigger><SelectContent>
                                                             {sortedCategories.length > 0 ? (
-                                                                sortedCategories.map(category => (
-                                                                    <SelectGroup key={category} label={category}>
-                                                                        {sortedInstrumentsByCategory[category].map(instrument => (
-                                                                            <SelectItem key={instrument.id} value={instrument.name}>
-                                                                                {instrument.name}
-                                                                            </SelectItem>
-                                                                        ))}
-                                                                    </SelectGroup>
-                                                                ))
+                                                                sortedCategories.map(category => {
+                                                                    // Find the first instrument in this category to get the translated category name
+                                                                    const firstInstrument = sortedInstrumentsByCategory[category][0];
+                                                                    const translatedCategory = getLocalizedCategory(firstInstrument);
+                                                                    
+                                                                    return (
+                                                                        <SelectGroup key={category} label={translatedCategory}>
+                                                                            {sortedInstrumentsByCategory[category].map(instrument => (
+                                                                                <SelectItem key={instrument.id} value={instrument.name}>
+                                                                                    {getLocalizedName(instrument, 'name')}
+                                                                                </SelectItem>
+                                                                            ))}
+                                                                        </SelectGroup>
+                                                                    );
+                                                                })
                                                             ) : (
                                                                 referenceData.instruments && Array.isArray(referenceData.instruments)
                                                                     ? referenceData.instruments.map(instrument => (
                                                                         <SelectItem key={instrument.id} value={instrument.name}>
-                                                                            {instrument.name}
+                                                                            {getLocalizedName(instrument, 'name')}
                                                                         </SelectItem>
                                                                     ))
                                                                     : null
@@ -1442,8 +1529,12 @@ export default function ProfilePage() {
                                                             <SelectValue placeholder="Category" />
                                                         </SelectTrigger>
                                                         <SelectContent>
-                                                            <SelectItem value="artist">artist</SelectItem>
-                                                            <SelectItem value="teacher">teacher</SelectItem>
+                                                            <SelectItem value="artist">
+                                                                {locale === 'hu' ? 'művész' : 'artist'}
+                                                            </SelectItem>
+                                                            <SelectItem value="teacher">
+                                                                {locale === 'hu' ? 'tanár' : 'teacher'}
+                                                            </SelectItem>
                                                         </SelectContent>
                                                     </Select>
                                                 </div>
