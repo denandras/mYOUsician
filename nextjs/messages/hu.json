@@ -143,7 +143,7 @@
     }
   },"database": {
     "title": "Zenész adatbázis",
-    "subtitle": "Keresd meg és fedezd fel a zenészeket műfaj, hangszer és szakértelem szerint.",
+    "subtitle": "Keresd meg és fedezd fel a zenészeket műfaj és hangszer szerint.",
     "searchFilters": "Keresési szűrők",
     "filtersDescription": "Találj zenészeket készségeik és hátterük alapján",
     "genre": "Műfaj",

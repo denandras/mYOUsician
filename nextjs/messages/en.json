@@ -145,7 +145,7 @@
   },
   "database": {
     "title": "Musician Database",
-    "subtitle": "Search and discover musicians by genre, instrument, and expertise.",
+    "subtitle": "Search and discover musicians by genre and instrument.",
     "searchFilters": "Search Filters",
     "filtersDescription": "Find musicians by their skills and background",
     "genre": "Genre",

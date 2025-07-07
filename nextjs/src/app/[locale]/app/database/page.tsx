@@ -433,9 +433,7 @@ export default function DatabasePage() {
                     occupation: parseArrayField(musician.occupation),
                     education: parseEducationField(musician.education),
                     certificates: parseArrayField(musician.certificates),
-                    genre_instrument: Array.isArray(musician.genre_instrument) 
-                        ? musician.genre_instrument 
-                        : [],
+                    genre_instrument: parseGenreInstrumentField(musician.genre_instrument),
                     video_links: parseArrayField(musician.video_links),
                     social: socialData,
                     created_at: musician.created_at || new Date().toISOString(),
@@ -457,7 +455,7 @@ export default function DatabasePage() {
             setLoading(false);
         }
     };    // Helper function to parse array fields properly
-    const parseArrayField = (field: unknown): string[] => {
+    const parseArrayField = (field: unknown): any[] => {
         if (!field) return [];
         
         // If it's already an array
@@ -467,14 +465,24 @@ export default function DatabasePage() {
                 try {
                     const parsed = JSON.parse(field[0]);
                     if (Array.isArray(parsed)) {
-                        return parsed.length > 0 ? parsed.filter(item => item && item.trim() && item !== 'Student' && item !== '[]') : [];
+                        return parsed.length > 0 ? parsed.filter(item => {
+                            if (typeof item === 'string') {
+                                return item && item.trim() && item !== 'Student' && item !== '[]';
+                            }
+                            return item && item !== null && item !== undefined;
+                        }) : [];
                     }
                 } catch {
                     // If parsing fails, treat as regular string
                     return field[0] && field[0].trim() && field[0] !== 'Student' && field[0] !== '[]' ? [field[0]] : [];
                 }
             }
-            return field.filter(item => item && item.trim() && item !== 'Student' && item !== '[]');
+            return field.filter(item => {
+                if (typeof item === 'string') {
+                    return item && item.trim() && item !== 'Student' && item !== '[]';
+                }
+                return item && item !== null && item !== undefined;
+            });
         }
         
         // If it's a string, try to parse it
@@ -482,11 +490,53 @@ export default function DatabasePage() {
             try {
                 const parsed = JSON.parse(field);
                 if (Array.isArray(parsed)) {
-                    return parsed.filter(item => item && item.trim() && item !== 'Student' && item !== '[]');
+                    return parsed.filter(item => {
+                        if (typeof item === 'string') {
+                            return item && item.trim() && item !== 'Student' && item !== '[]';
+                        }
+                        return item && item !== null && item !== undefined;
+                    });
                 }
                 return field && field.trim() && field !== 'Student' && field !== '[]' ? [field] : [];
             } catch {
                 return field && field.trim() && field !== 'Student' && field !== '[]' ? [field] : [];
+            }
+        }
+        
+        return [];
+    };
+
+    // Helper function to parse genre_instrument field specifically
+    const parseGenreInstrumentField = (field: unknown): any[] => {
+        if (!field) return [];
+        
+        // If it's already an array
+        if (Array.isArray(field)) {
+            // Check if first element is a stringified array
+            if (field.length === 1 && typeof field[0] === 'string') {
+                try {
+                    const parsed = JSON.parse(field[0]);
+                    if (Array.isArray(parsed)) {
+                        return parsed.filter(item => item && item !== null && item !== undefined);
+                    }
+                } catch {
+                    // If parsing fails, treat as regular string
+                    return field[0] ? [field[0]] : [];
+                }
+            }
+            return field.filter(item => item && item !== null && item !== undefined);
+        }
+        
+        // If it's a string, try to parse it
+        if (typeof field === 'string') {
+            try {
+                const parsed = JSON.parse(field);
+                if (Array.isArray(parsed)) {
+                    return parsed.filter(item => item && item !== null && item !== undefined);
+                }
+                return field ? [field] : [];
+            } catch {
+                return field ? [field] : [];
             }
         }
         
@@ -651,84 +701,47 @@ export default function DatabasePage() {
                 return;
             }
             
-            // Apply filters for complete tag search
-            let filteredData = allProfiles || [];
-            
-            // Apply genre, instrument, and category filters if specified
-            if (genre && genre !== 'any') {
-                filteredData = filteredData.filter((profile: any) => {
-                    let genreInstrumentData = profile.genre_instrument;
-                    if (typeof genreInstrumentData === 'string') {
-                        try {
-                            genreInstrumentData = JSON.parse(genreInstrumentData);
-                        } catch {
-                            genreInstrumentData = [genreInstrumentData];
-                        }
+            // Apply filters for complete tag search using the same logic as main search
+            const filteredData = (allProfiles || []).filter((profile: any) => {
+                // Handle genre_instrument field which might be an array or JSON string
+                let genreInstrumentData = profile.genre_instrument;
+                if (typeof genreInstrumentData === 'string') {
+                    try {
+                        genreInstrumentData = JSON.parse(genreInstrumentData);
+                    } catch {
+                        // If parsing fails, treat as array with single string
+                        genreInstrumentData = [genreInstrumentData];
+                    }
+                }
+                
+                if (!Array.isArray(genreInstrumentData)) {
+                    return false;
+                }
+                
+                // Check each genre-instrument combination in the array
+                return genreInstrumentData.some((item: any) => {
+                    const itemGenre = typeof item === 'object' ? item.genre : '';
+                    const itemInstrument = typeof item === 'object' ? item.instrument : '';
+                    const itemCategory = typeof item === 'object' ? item.category : '';
+                    
+                    // Genre must match if specified
+                    if (genre && genre !== 'any' && (!itemGenre || itemGenre.toLowerCase() !== genre.toLowerCase())) {
+                        return false;
                     }
                     
-                    if (!Array.isArray(genreInstrumentData)) return false;
-                    
-                    return genreInstrumentData.some((item: any) => {
-                        if (typeof item === 'string') {
-                            return item.toLowerCase().includes(genre.toLowerCase());
-                        }
-                        if (item && typeof item === 'object') {
-                            const itemGenre = String(item.genre || '').toLowerCase();
-                            return itemGenre === genre.toLowerCase();
-                        }
+                    // If instrument filter is specified (not "Any"), it must match
+                    if (instrument && instrument !== 'any' && (!itemInstrument || itemInstrument.toLowerCase() !== instrument.toLowerCase())) {
                         return false;
-                    });
-                });
-            }
-            
-            if (instrument && instrument !== 'any') {
-                filteredData = filteredData.filter((profile: any) => {
-                    let genreInstrumentData = profile.genre_instrument;
-                    if (typeof genreInstrumentData === 'string') {
-                        try {
-                            genreInstrumentData = JSON.parse(genreInstrumentData);
-                        } catch {
-                            genreInstrumentData = [genreInstrumentData];
-                        }
                     }
                     
-                    if (!Array.isArray(genreInstrumentData)) return false;
-                    
-                    return genreInstrumentData.some((item: any) => {
-                        if (typeof item === 'string') {
-                            return item.toLowerCase().includes(instrument.toLowerCase());
-                        }
-                        if (item && typeof item === 'object') {
-                            const itemInstrument = String(item.instrument || '').toLowerCase();
-                            return itemInstrument === instrument.toLowerCase();
-                        }
+                    // If category filter is specified (not "Any"), it must match
+                    if (category && category !== 'any' && (!itemCategory || itemCategory.toLowerCase() !== category.toLowerCase())) {
                         return false;
-                    });
-                });
-            }
-            
-            if (category && category !== 'any') {
-                filteredData = filteredData.filter((profile: any) => {
-                    let genreInstrumentData = profile.genre_instrument;
-                    if (typeof genreInstrumentData === 'string') {
-                        try {
-                            genreInstrumentData = JSON.parse(genreInstrumentData);
-                        } catch {
-                            genreInstrumentData = [genreInstrumentData];
-                        }
                     }
                     
-                    if (!Array.isArray(genreInstrumentData)) return false;
-                    
-                    return genreInstrumentData.some((item: any) => {
-                        if (item && typeof item === 'object') {
-                            const itemCategory = String(item.category || '').toLowerCase();
-                            return itemCategory === category.toLowerCase();
-                        }
-                        return false;
-                    });
+                    return true;
                 });
-            }
+            });
             
             // Filter out current user if needed
             const finalFilteredMusicians = filteredData.filter((musician: any) => {
@@ -741,16 +754,22 @@ export default function DatabasePage() {
                 occupation: parseArrayField(musician.occupation),
                 education: parseEducationField(musician.education),
                 certificates: parseArrayField(musician.certificates),
-                genre_instrument: parseArrayField(musician.genre_instrument),
+                genre_instrument: parseGenreInstrumentField(musician.genre_instrument),
                 video_links: parseArrayField(musician.video_links),
                 social: parseSocialField(musician.social)
             }));
-              // Apply sorting
+            // Apply sorting
             const sortedMusicians = applySorting(parsedMusicians, newFilters.sortBy);
+            
+            // Ensure both hasSearched and musicians are updated together
+            setHasSearched(true);
             setMusicians(sortedMusicians);
 
-            // Scroll to results after search completes
-            scrollToResults();
+            // Small delay to ensure state updates properly
+            setTimeout(() => {
+                // Scroll to results after search completes
+                scrollToResults();
+            }, 100);
 
         } catch (error) {
             console.error('Error in full tag search:', error);
@@ -824,7 +843,7 @@ export default function DatabasePage() {
                 occupation: parseArrayField(musician.occupation),
                 education: parseEducationField(musician.education),
                 certificates: parseArrayField(musician.certificates),
-                genre_instrument: parseArrayField(musician.genre_instrument),
+                genre_instrument: parseGenreInstrumentField(musician.genre_instrument),
                 video_links: parseArrayField(musician.video_links),
                 social: parseSocialField(musician.social)
             }));
@@ -906,7 +925,7 @@ export default function DatabasePage() {
                 occupation: parseArrayField(musician.occupation),
                 education: parseEducationField(musician.education),
                 certificates: parseArrayField(musician.certificates),
-                genre_instrument: parseArrayField(musician.genre_instrument),
+                genre_instrument: parseGenreInstrumentField(musician.genre_instrument),
                 video_links: parseArrayField(musician.video_links),
                 social: parseSocialField(musician.social)
             }));
