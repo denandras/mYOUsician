@@ -9,6 +9,8 @@ type User = {
     email: string;
     id: string;
     registered_at: Date;
+    forename?: string | null;
+    surname?: string | null;
 };
 
 interface GlobalContextType {
@@ -36,10 +38,19 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
                 // Get initial user data
                 const { data: { user } } = await client.auth.getUser();
                 if (user) {
+                    // Fetch profile data to get forename and surname
+                    const { data: profile } = await client
+                        .from('musician_profiles')
+                        .select('forename, surname')
+                        .eq('id', user.id)
+                        .single();
+
                     setUser({
                         email: user.email!,
                         id: user.id,
-                        registered_at: new Date(user.created_at)
+                        registered_at: new Date(user.created_at),
+                        forename: profile?.forename || null,
+                        surname: profile?.surname || null
                     });
                 } else {
                     setUser(null);
@@ -52,10 +63,19 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
                         if (event === 'SIGNED_OUT' || !session?.user) {
                             setUser(null);
                         } else if (session?.user) {
+                            // Fetch profile data for the logged-in user
+                            const { data: profile } = await client
+                                .from('musician_profiles')
+                                .select('forename, surname')
+                                .eq('id', session.user.id)
+                                .single();
+
                             setUser({
                                 email: session.user.email!,
                                 id: session.user.id,
-                                registered_at: new Date(session.user.created_at)
+                                registered_at: new Date(session.user.created_at),
+                                forename: profile?.forename || null,
+                                surname: profile?.surname || null
                             });
                         }
                     }

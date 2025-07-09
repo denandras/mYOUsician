@@ -43,7 +43,9 @@ export default function DashboardContent() {
         <div className="space-y-6 p-3 sm:p-6">
             <Card>
                 <CardHeader>
-                    <CardTitle>{t('dashboard.welcomeUser', { name: user?.email?.split('@')[0] || 'User' })}</CardTitle>
+                    <CardTitle>{t('dashboard.welcomeUser', { 
+                        name: user?.forename || user?.email?.split('@')[0] || 'User' 
+                    })}</CardTitle>
                     <CardDescription className="flex items-center gap-2">
                         <CalendarDays className="h-4 w-4" />
                         {t('dashboard.memberFor', { days: daysSinceRegistration })}

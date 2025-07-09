@@ -453,7 +453,7 @@ export default function DatabasePage() {
         return result;
     }, [instrumentsByCategory, sortedCategories]);
 
-    // Main search function
+    // Main search function with proper database filtering
     const searchMusicians = async () => {
         if (!filters.sortBy) {
             return;
@@ -466,9 +466,36 @@ export default function DatabasePage() {
             const supabase = await createSPASassClient();
             const client = supabase.getSupabaseClient();
             
-            const { data: allProfiles, error: profilesError } = await client
-                .from('musician_profiles')
-                .select('*');
+            // Debug: Check client configuration
+            console.log('Supabase client URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+            console.log('Supabase client anon key (first 20 chars):', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 20));
+            
+            // Test basic connectivity first
+            const { data: testData, error: testError } = await client
+                .from('genres')
+                .select('*')
+                .limit(1);
+            
+            if (testError) {
+                console.error('Test query failed:', testError);
+                setMusicians([]);
+                setLoading(false);
+                return;
+            }
+            
+            console.log('Test query successful, database connection works');
+            
+            // Start with basic query
+            let query = client.from('musician_profiles').select('*');
+            
+            // Apply name search filter at database level
+            if (filters.nameSearch.trim()) {
+                const searchTerm = filters.nameSearch.trim();
+                query = query.or(`forename.ilike.%${searchTerm}%,surname.ilike.%${searchTerm}%`);
+            }
+            
+            // Get all matching profiles
+            const { data: allProfiles, error: profilesError } = await query;
             
             if (profilesError) {
                 console.error('Error querying musician_profiles:', profilesError);
@@ -476,11 +503,21 @@ export default function DatabasePage() {
                 setLoading(false);
                 return;
             }
-              
-            // Filter in JavaScript
-            const filteredData = (allProfiles || []).filter((profile: any) => {
-                // Genre filter
-                if (filters.genre && filters.genre !== 'any') {
+            
+            console.log(`Found ${allProfiles?.length || 0} total musician profiles in database`);
+            
+            if (!allProfiles || allProfiles.length === 0) {
+                setMusicians([]);
+                setLoading(false);
+                return;
+            }
+            
+            // Apply complex filtering for genre, instrument, and category
+            let filteredProfiles = allProfiles;
+            
+            if (filters.genre !== 'any' || filters.instrument !== 'any' || filters.category !== 'any') {
+                filteredProfiles = allProfiles.filter((profile: any) => {
+                    // Parse genre_instrument data
                     let genreInstrumentData = profile.genre_instrument;
                     if (typeof genreInstrumentData === 'string') {
                         try {
@@ -492,44 +529,40 @@ export default function DatabasePage() {
                     
                     if (!Array.isArray(genreInstrumentData)) return false;
                     
-                    const hasMatchingGenre = genreInstrumentData.some((item: any) => {
+                    // Check if any genre_instrument item matches all selected filters
+                    return genreInstrumentData.some((item: any) => {
+                        if (typeof item !== 'object' || item === null) {
+                            return false;
+                        }
+                        
                         const itemGenre = String(item.genre || '').toLowerCase();
                         const itemInstrument = String(item.instrument || '').toLowerCase();
                         const itemCategory = String(item.category || '').toLowerCase();
                         
-                        if (!itemGenre || itemGenre.toLowerCase() !== filters.genre.toLowerCase()) {
+                        // Match genre if specified
+                        if (filters.genre !== 'any' && itemGenre !== filters.genre.toLowerCase()) {
                             return false;
                         }
                         
-                        if (filters.instrument && filters.instrument !== 'any' && (!itemInstrument || itemInstrument.toLowerCase() !== filters.instrument.toLowerCase())) {
+                        // Match instrument if specified
+                        if (filters.instrument !== 'any' && itemInstrument !== filters.instrument.toLowerCase()) {
                             return false;
                         }
                         
-                        if (filters.category && filters.category !== 'any' && (!itemCategory || itemCategory.toLowerCase() !== filters.category.toLowerCase())) {
+                        // Match category if specified
+                        if (filters.category !== 'any' && itemCategory !== filters.category.toLowerCase()) {
                             return false;
                         }
                         
                         return true;
                     });
-                    
-                    if (!hasMatchingGenre) return false;
-                }
-                
-                return true;
-            });
-            
-            // Apply name search filter
-            let finalFilteredMusicians = filteredData;
-            if (filters.nameSearch.trim()) {
-                const searchTerm = filters.nameSearch.toLowerCase().trim();
-                finalFilteredMusicians = finalFilteredMusicians.filter((musician: any) => {
-                    const fullName = formatName(musician.forename, musician.surname).toLowerCase();
-                    return fullName.includes(searchTerm);
                 });
             }
-
-            // Parse and normalize data
-            const parsedMusicians = finalFilteredMusicians.map((musician: any) => {
+            
+            console.log(`Found ${filteredProfiles.length} musicians matching criteria`);
+            
+            // Parse and normalize the filtered data
+            const parsedMusicians = filteredProfiles.map((musician: any) => {
                 const normalizedMusician: MusicianProfile = {
                     id: musician.id || '',
                     email: musician.email || null,
@@ -550,7 +583,8 @@ export default function DatabasePage() {
 
                 return normalizedMusician;
             });
-
+            
+            // Apply sorting
             const sortedMusicians = applySorting(parsedMusicians, filters.sortBy);
             setMusicians(sortedMusicians);
             
@@ -592,7 +626,7 @@ export default function DatabasePage() {
         };
         setFilters(newFilters);
         
-        // Perform search immediately
+        // Perform search immediately using direct database query
         setLoading(true);
         setHasSearched(true);
         
@@ -600,6 +634,7 @@ export default function DatabasePage() {
             const supabase = await createSPASassClient();
             const client = supabase.getSupabaseClient();
             
+            // Get all profiles
             const { data: allProfiles, error: profilesError } = await client
                 .from('musician_profiles')
                 .select('*');
@@ -607,34 +642,37 @@ export default function DatabasePage() {
             if (profilesError) {
                 console.error('Error querying musician_profiles:', profilesError);
                 setMusicians([]);
+                setLoading(false);
                 return;
             }
             
-            const filteredData = (allProfiles || []).filter((profile: any) => {
+            if (!allProfiles || allProfiles.length === 0) {
+                setMusicians([]);
+                setLoading(false);
+                return;
+            }
+            
+            // Filter by genre
+            const filteredProfiles = allProfiles.filter((profile: any) => {
                 let genreInstrumentData = profile.genre_instrument;
                 if (typeof genreInstrumentData === 'string') {
                     try {
                         genreInstrumentData = JSON.parse(genreInstrumentData);
                     } catch {
-                        genreInstrumentData = [genreInstrumentData];
+                        genreInstrumentData = [];
                     }
                 }
                 
                 if (!Array.isArray(genreInstrumentData)) return false;
                 
                 return genreInstrumentData.some((item: any) => {
-                    if (typeof item === 'string') {
-                        return item.toLowerCase().includes(genre.toLowerCase());
-                    }
-                    if (item && typeof item === 'object') {
-                        const itemGenre = String(item.genre || '').toLowerCase();
-                        return itemGenre === genre.toLowerCase();
-                    }
-                    return false;
+                    if (typeof item !== 'object' || item === null) return false;
+                    const itemGenre = String(item.genre || '').toLowerCase();
+                    return itemGenre === genre.toLowerCase();
                 });
             });
-            
-            const parsedMusicians = filteredData.map((musician: any) => ({
+
+            const parsedMusicians = filteredProfiles.map((musician: any) => ({
                 ...musician,
                 occupation: parseArrayField(musician.occupation),
                 education: parseEducationField(musician.education),
@@ -644,8 +682,7 @@ export default function DatabasePage() {
                 social: parseSocialField(musician.social)
             }));
             
-            const sortedMusicians = applySorting(parsedMusicians, newFilters.sortBy);
-            setMusicians(sortedMusicians);
+            setMusicians(parsedMusicians);
             scrollToResults();
 
         } catch (error) {
@@ -666,7 +703,7 @@ export default function DatabasePage() {
         };
         setFilters(newFilters);
         
-        // Perform search immediately
+        // Perform search immediately using direct database query
         setLoading(true);
         setHasSearched(true);
         
@@ -674,6 +711,7 @@ export default function DatabasePage() {
             const supabase = await createSPASassClient();
             const client = supabase.getSupabaseClient();
             
+            // Get all profiles
             const { data: allProfiles, error: profilesError } = await client
                 .from('musician_profiles')
                 .select('*');
@@ -681,34 +719,37 @@ export default function DatabasePage() {
             if (profilesError) {
                 console.error('Error querying musician_profiles:', profilesError);
                 setMusicians([]);
+                setLoading(false);
                 return;
             }
             
-            const filteredData = (allProfiles || []).filter((profile: any) => {
+            if (!allProfiles || allProfiles.length === 0) {
+                setMusicians([]);
+                setLoading(false);
+                return;
+            }
+            
+            // Filter by instrument
+            const filteredProfiles = allProfiles.filter((profile: any) => {
                 let genreInstrumentData = profile.genre_instrument;
                 if (typeof genreInstrumentData === 'string') {
                     try {
                         genreInstrumentData = JSON.parse(genreInstrumentData);
                     } catch {
-                        genreInstrumentData = [genreInstrumentData];
+                        genreInstrumentData = [];
                     }
                 }
                 
                 if (!Array.isArray(genreInstrumentData)) return false;
                 
                 return genreInstrumentData.some((item: any) => {
-                    if (typeof item === 'string') {
-                        return item.toLowerCase().includes(instrument.toLowerCase());
-                    }
-                    if (item && typeof item === 'object') {
-                        const itemInstrument = String(item.instrument || '').toLowerCase();
-                        return itemInstrument === instrument.toLowerCase();
-                    }
-                    return false;
+                    if (typeof item !== 'object' || item === null) return false;
+                    const itemInstrument = String(item.instrument || '').toLowerCase();
+                    return itemInstrument === instrument.toLowerCase();
                 });
             });
-            
-            const parsedMusicians = filteredData.map((musician: any) => ({
+
+            const parsedMusicians = filteredProfiles.map((musician: any) => ({
                 ...musician,
                 occupation: parseArrayField(musician.occupation),
                 education: parseEducationField(musician.education),
@@ -718,8 +759,7 @@ export default function DatabasePage() {
                 social: parseSocialField(musician.social)
             }));
             
-            const sortedMusicians = applySorting(parsedMusicians, newFilters.sortBy);
-            setMusicians(sortedMusicians);
+            setMusicians(parsedMusicians);
             scrollToResults();
 
         } catch (error) {
@@ -850,9 +890,9 @@ export default function DatabasePage() {
             <DynamicHeader />
             {/* Main Content */}
             <div className="flex-1">
-                <div className="container mx-auto p-4 space-y-6">
+                <div className="container mx-auto p-4 space-y-6 max-w-6xl">
                     {/* Header */}
-                    <div className="text-center space-y-2">
+                    <div className="text-center space-y-4 py-8">
                         <h1 className="text-3xl font-bold">{t('database.title')}</h1>
                         <p className="text-gray-600">{t('database.subtitle')}</p>
                     </div>
@@ -988,7 +1028,7 @@ export default function DatabasePage() {
                                                 instrument: 'any',
                                                 category: 'any',
                                                 nameSearch: '',
-                                                sortBy: ''
+                                                sortBy: 'name_asc'  // Keep default sorting instead of clearing it
                                             });
                                             setMusicians([]);
                                             setHasSearched(false);

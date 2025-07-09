@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // Check if we're using sample data for development
-    const useSampleData = true; // Change this to false in production
+    const useSampleData = false; // Change this to false in production
     
     if (useSampleData) {
       console.log('Using sample data for development');

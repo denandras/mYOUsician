@@ -75,5 +75,27 @@ export const sampleProfiles = [
     },
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
+  },
+  {
+    id: 'sample-4',
+    email: 'sarah.student@example.com',
+    forename: 'Sarah',
+    surname: 'Johnson',
+    location: { city: 'Vienna', country: 'Austria' },
+    phone: '+431234567',
+    bio: 'Music student passionate about learning multiple instruments.',
+    occupation: ['Music Student'],
+    education: [
+      { type: 'Bachelor', school: 'University of Music and Performing Arts Vienna' }
+    ],
+    certificates: ['Theory Grade 5'],
+    genre_instrument: [
+      { genre: 'classical', instrument: 'piano', category: 'student' },
+      { genre: 'jazz', instrument: 'saxophone', category: 'student' }
+    ],
+    video_links: [],
+    social: {},
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   }
 ];
