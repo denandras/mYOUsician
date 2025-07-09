@@ -1,5 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# SECURITY: Environment files contain sensitive data like API keys and database credentials
+# These files should NEVER be committed to version control
+
 # dependencies
 /node_modules
 /.pnp
@@ -35,6 +38,15 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# test files that might contain sensitive data
+*test*
+*.test.*
+test-*
 
 # vercel
 .vercel

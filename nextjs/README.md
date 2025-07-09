@@ -2,6 +2,22 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+### Environment Setup
+
+1. Copy the example environment file:
+```bash
+cp .env.example .env.local
+```
+
+2. Fill in your actual values in `.env.local`:
+   - Get your Supabase credentials from your [Supabase dashboard](https://app.supabase.com)
+   - Set up your Google Analytics tag
+   - Configure other service credentials as needed
+
+⚠️ **Security Notice**: Never commit `.env.local` or any file containing sensitive credentials to git. These files are already excluded in `.gitignore`.
+
+### Development Server
+
 First, run the development server:
 
 ```bash

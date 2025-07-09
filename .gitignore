@@ -29,8 +29,19 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
+# local env files - SECURITY: Never commit environment files with sensitive data
 .env*.local
+.env
+.env.development
+.env.test
+.env.production
+
+# test files that might contain sensitive data
+*test*
+*.test.*
+test-*
+*credentials*
+*secrets*
 
 # vercel
 .vercel
