@@ -471,7 +471,7 @@ export default function DatabasePage() {
             console.log('Supabase client anon key (first 20 chars):', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 20));
             
             // Test basic connectivity first
-            const { data: testData, error: testError } = await client
+            const { error: testError } = await client
                 .from('genres')
                 .select('*')
                 .limit(1);
