@@ -3,25 +3,29 @@ import React from 'react';
 import { Link } from '@/i18n/routing';
 import Image from 'next/image';
 import { ExternalLink, Heart } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 const Footer = () => {
+    const t = useTranslations('footer');
+    const tNav = useTranslations('navigation');
     const productName = process.env.NEXT_PUBLIC_PRODUCTNAME || 'mYOUsician';
     const currentYear = new Date().getFullYear();
 
     const navigation = {
         product: [
-            { name: 'Features', href: '/#features' },
-            { name: 'Database', href: '/database' },
-            { name: 'Pricing', href: '/#pricing' },
-        ],        support: [
-            { name: 'Report an Issue', href: 'https://tally.so/r/wkQAZd', external: true },
-            { name: 'Contact Us', href: 'mailto:support@myousician.com' },
+            { name: t('product.features'), href: '/#features' },
+            { name: tNav('database'), href: '/database' },
+            { name: t('product.pricing'), href: '/#pricing' },
+        ],
+        support: [
+            { name: t('support.reportIssue'), href: 'https://tally.so/r/wkQAZd', external: true },
+            { name: t('support.contact'), href: 'mailto:support@myousician.com' },
         ],
         legal: [
-            { name: 'Privacy Policy', href: '/legal/privacy' },
-            { name: 'Terms of Service', href: '/legal/terms' },
-            { name: 'Data Security', href: '/legal/data-security' },
-            { name: 'Documentation', href: '/legal/docs' },
+            { name: t('legal.privacy'), href: '/legal/privacy' },
+            { name: t('legal.terms'), href: '/legal/terms' },
+            { name: t('legal.dataSecurity'), href: '/legal/data-security' },
+            { name: t('legal.documentation'), href: '/legal/docs' },
         ],
     };
 
@@ -61,8 +65,7 @@ const Footer = () => {
                         </div>
                         
                         <p className="text-muted-foreground text-sm leading-relaxed max-w-md">
-                            The premier platform for musicians to connect, collaborate, and grow their network. 
-                            Discover talented artists and build meaningful musical relationships worldwide.
+                            {t('description')}
                         </p>
                     </div>
                     
@@ -70,7 +73,7 @@ const Footer = () => {
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
                         {/* Product Links */}
                         <div>
-                            <h3 className="text-sm font-semibold text-foreground mb-3 tracking-wide">Product</h3>
+                            <h3 className="text-sm font-semibold text-foreground mb-3 tracking-wide">{t('sections.product')}</h3>
                             <ul className="space-y-2">
                                 {navigation.product.map((item) => (
                                     <li key={item.name}>
@@ -93,7 +96,7 @@ const Footer = () => {
                         
                         {/* Support Links */}
                         <div>
-                            <h3 className="text-sm font-semibold text-foreground mb-3 tracking-wide">Support</h3>
+                            <h3 className="text-sm font-semibold text-foreground mb-3 tracking-wide">{t('sections.support')}</h3>
                             <ul className="space-y-2">
                                 {navigation.support.map((item) => (
                                     <li key={item.name}>
@@ -122,7 +125,7 @@ const Footer = () => {
                         
                         {/* Legal Links */}
                         <div>
-                            <h3 className="text-sm font-semibold text-foreground mb-3 tracking-wide">Legal</h3>
+                            <h3 className="text-sm font-semibold text-foreground mb-3 tracking-wide">{t('sections.legal')}</h3>
                             <ul className="space-y-2">
                                 {navigation.legal.map((item) => (
                                     <li key={item.name}>
@@ -148,16 +151,16 @@ const Footer = () => {
                 {/* Bottom copyright bar */}
                 <div className="py-4 border-t border-border/40 flex flex-col sm:flex-row justify-between items-center">
                     <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-2 sm:mb-0">
-                        <span>© {currentYear} {productName}. All rights reserved.</span>
+                        <span>{t('copyright', { year: currentYear, productName })}</span>
                     </div>
                     
                     <div className="flex items-center space-x-4">
                         <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                            <span>Made with</span>
+                            <span>{t('madeWith.text')}</span>
                             <Heart className="w-4 h-4 text-red-500 fill-current animate-pulse" />
-                            <span>for musicians worldwide</span>
+                            <span>{t('madeWith.forMusicians')}</span>
                         </div>
-                        <span className="text-xs text-muted-foreground ml-2">v1.0</span>
+                        <span className="text-xs text-muted-foreground ml-2">{t('version')}</span>
                     </div>
                 </div>
             </div>

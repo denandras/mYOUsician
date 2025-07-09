@@ -175,13 +175,4 @@ For questions about these Terms:
 
 If any provision of these Terms is found unenforceable, the remaining provisions will continue in effect.
 
-## 16. Language
-
-These Terms are available in both English and Hungarian. In case of discrepancies, the English version prevails.
-
----
-
-**Hungarian Summary / Magyar összefoglaló:**
-
 A mYOUsician zenész hálózati platform szolgáltatásait szabályozó feltételek. A platform nyilvános adatbázisa regisztráció nélkül elérhető, míg a profil szerkesztés regisztrációt igényel. A szolgáltatás magyar és EU jogszabályok szerint működik. A felhasználók dönthetnek arról, hogy milyen információkat tesznek nyilvánossá a profiljukban.
-

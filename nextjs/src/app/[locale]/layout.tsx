@@ -9,6 +9,7 @@ import { Analytics } from '@vercel/analytics/next';
 import CookieConsent from "@/components/Cookies";
 import { GoogleAnalytics } from '@next/third-parties/google';
 import Footer from "@/components/Footer";
+import { GlobalProvider } from '@/lib/context/GlobalContext';
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -49,15 +50,17 @@ export default async function LocaleLayout({
     <html lang={locale} suppressHydrationWarning>
       <body className={`${theme} ${poppins.variable} font-sans flex flex-col min-h-screen`} suppressHydrationWarning>
         <NextIntlClientProvider messages={messages} locale={locale}>
-          <div className="flex-1">
-            {children}
-          </div>
-          <Footer />
-          <Analytics />
-          <CookieConsent />
-          { gaID && (
-              <GoogleAnalytics gaId={gaID}/>
-          )}
+          <GlobalProvider>
+            <div className="flex-1">
+              {children}
+            </div>
+            <Footer />
+            <Analytics />
+            <CookieConsent />
+            { gaID && (
+                <GoogleAnalytics gaId={gaID}/>
+            )}
+          </GlobalProvider>
         </NextIntlClientProvider>
       </body>
     </html>

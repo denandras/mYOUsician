@@ -37,7 +37,6 @@
     "login": "Bejelentkezés",
     "register": "Regisztráció",
     "logout": "Kijelentkezés",
-    "legal": "Jogi",
     "about": "Rólunk"
   },
   "auth": {    "login": {
@@ -254,7 +253,25 @@
     "title": "Jogi dokumentumok",
     "selectDocument": "Válassz dokumentumot a bal oldalon.",
     "privacyPolicy": "Adatvédelmi irányelvek",
-    "termsOfService": "Szolgáltatási feltételek"
+    "termsOfService": "Szolgáltatási feltételek",
+    "documents": {
+      "privacy": {
+        "title": "Adatvédelmi nyilatkozat",
+        "description": "Hogyan kezeljük és védjük az adataidat"
+      },
+      "terms": {
+        "title": "Általános szerződési feltételek",
+        "description": "A szolgáltatás használatának szabályai és irányelvei"
+      },
+      "dataSecurity": {
+        "title": "Adatbiztonság",
+        "description": "Hogyan tároljuk és védjük az információidat"
+      },
+      "documentation": {
+        "title": "Dokumentáció",
+        "description": "Útmutató a platform használatához"
+      }
+    }
   },  "errors": {
     "general": "Hiba történt. Kérjük, próbáld újra.",
     "network": "Hálózati hiba. Kérjük, ellenőrizd a kapcsolatod.",
@@ -308,9 +325,31 @@
     "gdprCompliant": "GDPR-megfelelő platform"
   },
   "footer": {
-    "privacyPolicy": "Adatvédelmi nyilatkozat",
-    "termsOfService": "Általános szerződési feltételek",
-    "copyright": "Minden jog fenntartva",
-    "madeWithLove": "Szeretettel készítve zenészek számára világszerte"
+    "description": "A vezető platform zenészek számára, hogy kapcsolódjanak, együttműködjenek és fejlesszék hálózatukat. Fedezz fel tehetséges művészeket és építs fel jelentős zenei kapcsolatokat világszerte.",
+    "sections": {
+      "product": "Termék",
+      "support": "Támogatás",
+      "legal": "Jogi"
+    },
+    "product": {
+      "features": "Funkciók",
+      "pricing": "Árazás"
+    },
+    "support": {
+      "reportIssue": "Probléma jelentése",
+      "contact": "Kapcsolat"
+    },
+    "legal": {
+      "privacy": "Adatvédelmi nyilatkozat",
+      "terms": "Általános szerződési feltételek",
+      "dataSecurity": "Adatbiztonság",
+      "documentation": "Dokumentáció"
+    },
+    "copyright": "© {year} {productName}. Minden jog fenntartva.",
+    "madeWith": {
+      "text": "Készítve",
+      "forMusicians": "zenészek számára világszerte"
+    },
+    "version": "v1.0"
   }
 }

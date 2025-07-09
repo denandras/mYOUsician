@@ -3,23 +3,24 @@
 import React from 'react';
 import LegalDocument from '@/components/LegalDocument';
 import { notFound } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 const legalDocuments = {
     'privacy': {
-        title: 'Privacy Policy',
-        path: '/terms/privacy-notice.md'
+        titleKey: 'legal.documents.privacy.title',
+        filename: 'privacy-notice.md'
     },
     'terms': {
-        title: 'Terms of Service',
-        path: '/terms/terms-of-service.md'
+        titleKey: 'legal.documents.terms.title',
+        filename: 'terms-of-service.md'
     },
     'data-security': {
-        title: 'Data Storage and Security',
-        path: '/terms/data-security.md'
+        titleKey: 'legal.documents.dataSecurity.title',
+        filename: 'data-security.md'
     },
     'docs': {
-        title: 'Documentation',
-        path: '/terms/documentation.md'
+        titleKey: 'legal.documents.documentation.title',
+        filename: 'documentation.md'
     }
 } as const;
 
@@ -27,7 +28,7 @@ type LegalDocument = keyof typeof legalDocuments;
 
 interface LegalPageProps {
     document: LegalDocument;
-    lng: string;
+    locale: string;
 }
 
 interface LegalPageParams {
@@ -35,19 +36,26 @@ interface LegalPageParams {
 }
 
 export default function LegalPage({ params }: LegalPageParams) {
-    const {document} = React.use<LegalPageProps>(params);
+    const { document, locale } = React.use<LegalPageProps>(params);
+    const t = useTranslations();
 
     if (!legalDocuments[document]) {
         notFound();
     }
 
-    const { title, path } = legalDocuments[document];
+    const { titleKey, filename } = legalDocuments[document];
+    const title = t(titleKey);
+    
+    // Construct the localized path, with fallback to default language
+    const localizedPath = `/terms/${locale}/${filename}`;
+    const fallbackPath = `/terms/en/${filename}`;
 
     return (
         <div className="container mx-auto px-4 py-8">
             <LegalDocument
                 title={title}
-                filePath={path}
+                filePath={localizedPath}
+                fallbackPath={fallbackPath}
             />
         </div>
     );

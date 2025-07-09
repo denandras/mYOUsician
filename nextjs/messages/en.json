@@ -36,7 +36,6 @@
     "login": "Login",
     "register": "Register",
     "logout": "Logout",
-    "legal": "Legal",
     "about": "About"
   },
   "auth": {
@@ -258,7 +257,25 @@
     "title": "Legal Documents",
     "selectDocument": "Select document on the left.",
     "privacyPolicy": "Privacy Policy",
-    "termsOfService": "Terms of Service"
+    "termsOfService": "Terms of Service",
+    "documents": {
+      "privacy": {
+        "title": "Privacy Policy",
+        "description": "How we handle and protect your data"
+      },
+      "terms": {
+        "title": "Terms of Service",
+        "description": "Rules and guidelines for using our service"
+      },
+      "dataSecurity": {
+        "title": "Data Security",
+        "description": "How we store and secure your information"
+      },
+      "documentation": {
+        "title": "Documentation",
+        "description": "Guide to using the platform"
+      }
+    }
   },
   "errors": {
     "general": "An error occurred. Please try again.",
@@ -312,9 +329,31 @@
     "gdprCompliant": "GDPR Compliant Platform"
   },
   "footer": {
-    "privacyPolicy": "Privacy Policy",
-    "termsOfService": "Terms of Service",
-    "copyright": "All rights reserved",
-    "madeWithLove": "Made with love for musicians worldwide"
+    "description": "The premier platform for musicians to connect, collaborate, and grow their network. Discover talented artists and build meaningful musical relationships worldwide.",
+    "sections": {
+      "product": "Product",
+      "support": "Support",
+      "legal": "Legal"
+    },
+    "product": {
+      "features": "Features",
+      "pricing": "Pricing"
+    },
+    "support": {
+      "reportIssue": "Report an Issue",
+      "contact": "Contact Us"
+    },
+    "legal": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "dataSecurity": "Data Security",
+      "documentation": "Documentation"
+    },
+    "copyright": "© {year} {productName}. All rights reserved.",
+    "madeWith": {
+      "text": "Made with",
+      "forMusicians": "for musicians worldwide"
+    },
+    "version": "v1.0"
   }
 }

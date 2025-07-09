@@ -7,10 +7,11 @@ import { Loader2 } from 'lucide-react';
 
 interface LegalDocumentProps {
     filePath: string;
+    fallbackPath?: string;
     title: string;
 }
 
-const LegalDocument: React.FC<LegalDocumentProps> = ({ filePath, title }) => {
+const LegalDocument: React.FC<LegalDocumentProps> = ({ filePath, fallbackPath, title }) => {
     const [content, setContent] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -19,9 +20,19 @@ const LegalDocument: React.FC<LegalDocumentProps> = ({ filePath, title }) => {
         setLoading(true);
         setError(null);
 
+        // Try to load the localized version first
         fetch(filePath)
             .then(response => {
                 if (!response.ok) {
+                    // If localized version fails and we have a fallback, try the fallback
+                    if (fallbackPath && filePath !== fallbackPath) {
+                        return fetch(fallbackPath).then(fallbackResponse => {
+                            if (!fallbackResponse.ok) {
+                                throw new Error('Failed to load document');
+                            }
+                            return fallbackResponse.text();
+                        });
+                    }
                     throw new Error('Failed to load document');
                 }
                 return response.text();
@@ -35,7 +46,7 @@ const LegalDocument: React.FC<LegalDocumentProps> = ({ filePath, title }) => {
                 setError('Failed to load document. Please try again later.');
                 setLoading(false);
             });
-    }, [filePath]);
+    }, [filePath, fallbackPath]);
 
     return (
         <Card className="w-full max-w-4xl mx-auto my-8 bg-white border-border">

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { ArrowRight, Shield, Users, Menu, X, Search, UserCheck, MapPin, Video } from 'lucide-react';
 import AuthAwareButtons from '@/components/AuthAwareButtons';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import DynamicHeader from '@/components/DynamicHeader';
 
 export default function Home() {
   const t = useTranslations();
@@ -22,30 +23,6 @@ export default function Home() {
       welcomeMessage: t('home.welcomeTo')
     });
   }, [locale, t, productName]);
-
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-  
-  // Handle click outside menu
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        // Check if click is on the menu button
-        const target = event.target as Element;
-        if (!target.closest('[data-menu-trigger]')) {
-          setIsMenuOpen(false);
-        }
-      }
-    };
-
-    if (isMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isMenuOpen]);
 
   const features = [
     {
@@ -93,50 +70,8 @@ export default function Home() {
     { label: 'Uptime', value: '99.9%' }
   ];*/  return (
       <div className="min-h-screen flex flex-col">
-        <div className="flex-1">
-        <nav className="fixed top-0 w-full bg-[#083e4d] z-50 border-b border-[#062f3b] shadow-md">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">            <div className="flex justify-between h-16 items-center">
-              <div className="flex-shrink-0">
-                <Link href="/" className="block">
-                  <Image 
-                    src="/branding/text_vanilla.svg" 
-                    alt={productName || "mYOUsician"}
-                    width={120}
-                    height={32}
-                    className="h-8 w-auto"
-                  />
-                </Link>
-              </div>
-
-              <div className="flex items-center space-x-3">
-                {/* Language Switcher */}
-                <LanguageSwitcher variant="buttons" />
-                
-                {/* Menu Button */}
-                <button
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  data-menu-trigger
-                  className="text-white hover:text-[#b5d1d6] transition-colors"
-                  aria-label="Toggle menu"
-                >
-                  {isMenuOpen ? (
-                    <X className="h-6 w-6" />
-                  ) : (
-                    <Menu className="h-6 w-6" />
-                  )}
-                </button>
-              </div>
-            </div>
-              {/* Collapsible Menu - Works on all screen sizes */}
-            {isMenuOpen && (
-              <div ref={menuRef} className="border-t border-[#062f3b] bg-[#083e4d]">
-                <div className="px-4 py-4 space-y-3">
-                  <AuthAwareButtons variant="mobile" />
-                </div>
-              </div>
-            )}
-          </div>
-        </nav>        <section className="relative pt-32 pb-24 overflow-hidden">
+        <DynamicHeader />
+        <div className="flex-1">        <section className="relative pt-20 pb-24 overflow-hidden">
           <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">            <div className="text-center">
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-6 min-h-[4.5rem] md:min-h-[6.5rem]">
                 <div className="order-2 sm:order-1">

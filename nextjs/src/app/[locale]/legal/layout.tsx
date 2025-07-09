@@ -2,40 +2,45 @@
 import React from 'react';
 import { Link } from '@/i18n/routing';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { ArrowLeft, FileText, ShieldAlert, Shield, Lock, BookOpen } from 'lucide-react';
-
-const legalDocuments = [
-    {
-        id: 'privacy',
-        title: 'Privacy Policy',
-        icon: ShieldAlert,
-        description: 'How we handle and protect your data'
-    },
-    {
-        id: 'terms',
-        title: 'Terms of Service',
-        icon: FileText,
-        description: 'Rules and guidelines for using our service'
-    },
-    {
-        id: 'data-security',
-        title: 'Data Security',
-        icon: Lock,
-        description: 'How we store and secure your information'
-    },
-    {
-        id: 'docs',
-        title: 'Documentation',
-        icon: BookOpen,
-        description: 'Guide to using the platform'
-    }
-];
+import DynamicHeader from '@/components/DynamicHeader';
 
 export default function LegalLayout({ children } : { children: React.ReactNode }) {
     const router = useRouter();
+    const t = useTranslations('legal');
+    const tCommon = useTranslations('common');
+
+    const legalDocuments = [
+        {
+            id: 'privacy',
+            title: t('documents.privacy.title'),
+            icon: ShieldAlert,
+            description: t('documents.privacy.description')
+        },
+        {
+            id: 'terms',
+            title: t('documents.terms.title'),
+            icon: FileText,
+            description: t('documents.terms.description')
+        },
+        {
+            id: 'data-security',
+            title: t('documents.dataSecurity.title'),
+            icon: Lock,
+            description: t('documents.dataSecurity.description')
+        },
+        {
+            id: 'docs',
+            title: t('documents.documentation.title'),
+            icon: BookOpen,
+            description: t('documents.documentation.description')
+        }
+    ];
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
+            <DynamicHeader />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1">
                 <div className="py-6">
                     <button
@@ -43,7 +48,7 @@ export default function LegalLayout({ children } : { children: React.ReactNode }
                         className="inline-flex items-center text-sm text-foreground/70 hover:text-foreground"
                     >
                         <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back
+                        {tCommon('back')}
                     </button>
                 </div>
 

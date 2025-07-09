@@ -1,11 +1,15 @@
 // src/app/[locale]/app/layout.tsx
-import AppLayoutIntl from '@/components/AppLayoutIntl';
-import { GlobalProvider } from '@/lib/context/GlobalContext';
+import DynamicHeader from '@/components/DynamicHeader';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
-        <GlobalProvider>
-            <AppLayoutIntl>{children}</AppLayoutIntl>
-        </GlobalProvider>
+        <div className="min-h-screen bg-background flex flex-col">
+            <DynamicHeader showSidebar={true} />
+            <main className="p-2 sm:p-4 flex-1">
+                <div className="max-w-4xl mx-auto">
+                    {children}
+                </div>
+            </main>
+        </div>
     );
 }

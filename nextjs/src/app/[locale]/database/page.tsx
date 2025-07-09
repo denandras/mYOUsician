@@ -1,7 +1,7 @@
 // src/app/[locale]/database/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import Image from 'next/image';
@@ -10,13 +10,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select-new";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup } from "@/components/ui/select-new";
 import { ProfileQueryModal } from '@/components/ProfileQueryModal';
 import { Avatar } from '@/components/ui/avatar';
 import { createSPASassClient } from '@/lib/supabase/client';
 import { Database } from '@/lib/types';
-import AuthAwareButtons from '@/components/AuthAwareButtons';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import DynamicHeader from '@/components/DynamicHeader';
 import Footer from '@/components/Footer';
 import { SOCIAL_PLATFORMS } from '@/lib/socialPlatforms';
 
@@ -433,6 +432,56 @@ export default function DatabasePage() {
         }
     };
 
+    // Helper function to get localized category for instruments
+    const getLocalizedCategory = (instrument: Instrument): string => {
+        if (locale === 'hu' && instrument.category_hun) {
+            return instrument.category_hun;
+        }
+        return instrument.category;
+    };
+
+    // Memoize instrumentsByCategory with ranking
+    const instrumentsByCategory = useMemo(() => {
+        return instruments.reduce((acc, instrument) => {
+            const category = getLocalizedCategory(instrument);
+            if (!acc[category]) {
+                acc[category] = [];
+            }
+            acc[category].push(instrument);
+            return acc;
+        }, {} as Record<string, Instrument[]>);
+    }, [instruments, locale]);
+
+    // Memoize sorted categories by category_rank for consistent ordering
+    const sortedCategories = useMemo(() => {
+        const categories = Object.keys(instrumentsByCategory);
+        return categories.sort((a, b) => {
+            // Find the category_rank for each category by looking at the first instrument in each category
+            const categoryA = instrumentsByCategory[a][0];
+            const categoryB = instrumentsByCategory[b][0];
+            const rankA = categoryA?.category_rank ?? 999;
+            const rankB = categoryB?.category_rank ?? 999;
+            return rankA - rankB;
+        });
+    }, [instrumentsByCategory]);
+
+    // Memoize instruments sorted by instrument_rank within each category
+    const sortedInstrumentsByCategory = useMemo(() => {
+        const result: Record<string, Instrument[]> = {};
+        sortedCategories.forEach(category => {
+            result[category] = instrumentsByCategory[category].sort((a, b) => {
+                // Sort by instrument_rank, fallback to name if ranks are equal or missing
+                const rankA = a.instrument_rank ?? 999;
+                const rankB = b.instrument_rank ?? 999;
+                if (rankA !== rankB) {
+                    return rankA - rankB;
+                }
+                return a.name.localeCompare(b.name);
+            });
+        });
+        return result;
+    }, [instrumentsByCategory, sortedCategories]);
+
     // Main search function
     const searchMusicians = async () => {
         if (!filters.sortBy) {
@@ -827,45 +876,7 @@ export default function DatabasePage() {
 
     return (
         <div className="min-h-screen flex flex-col">
-            {/* Navigation */}
-            <nav className="bg-[#083e4d] z-50 border-b border-[#062f3b] shadow-md">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16 items-center">
-                        <div className="flex-shrink-0">
-                            <Link href="/" className="block">
-                                <Image 
-                                    src="/branding/text_vanilla.svg" 
-                                    alt={productName || "mYOUsician"}
-                                    width={120}
-                                    height={32}
-                                    className="h-8 w-auto"
-                                />
-                            </Link>
-                        </div>
-
-                        <div className="flex items-center space-x-3">
-                            <LanguageSwitcher variant="buttons" />
-                            <button
-                                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                data-menu-trigger
-                                className="text-white hover:text-[#b5d1d6] transition-colors"
-                                aria-label="Toggle menu"
-                            >
-                                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-                            </button>
-                        </div>
-                    </div>
-                    
-                    {isMenuOpen && (
-                        <div ref={menuRef} className="border-t border-[#062f3b] bg-[#083e4d]">
-                            <div className="px-4 py-4 space-y-3">
-                                <AuthAwareButtons variant="mobile" />
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </nav>
-
+            <DynamicHeader />
             {/* Main Content */}
             <div className="flex-1">
                 <div className="container mx-auto p-4 space-y-6">
@@ -912,11 +923,29 @@ export default function DatabasePage() {
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="any">{t('database.filters.any')}</SelectItem>
-                                            {instruments.map(instrument => (
-                                                <SelectItem key={instrument.id} value={instrument.name}>
-                                                    {getLocalizedName(instrument)}
-                                                </SelectItem>
-                                            ))}
+                                            {sortedCategories.length > 0 ? (
+                                                sortedCategories.map(category => {
+                                                    // Find the first instrument in this category to get the translated category name
+                                                    const firstInstrument = sortedInstrumentsByCategory[category][0];
+                                                    const translatedCategory = getLocalizedCategory(firstInstrument);
+                                                    
+                                                    return (
+                                                        <SelectGroup key={category} label={translatedCategory}>
+                                                            {sortedInstrumentsByCategory[category].map(instrument => (
+                                                                <SelectItem key={instrument.id} value={instrument.name}>
+                                                                    {getLocalizedName(instrument)}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectGroup>
+                                                    );
+                                                })
+                                            ) : (
+                                                instruments.map(instrument => (
+                                                    <SelectItem key={instrument.id} value={instrument.name}>
+                                                        {getLocalizedName(instrument)}
+                                                    </SelectItem>
+                                                ))
+                                            )}
                                         </SelectContent>
                                     </Select>
                                 </div>

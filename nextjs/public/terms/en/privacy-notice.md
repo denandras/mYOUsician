@@ -158,6 +158,3 @@ We may update this Privacy Policy to reflect changes in our practices or legal r
 
 For questions about this Privacy Policy or our data practices:
 - Email: myousician.app@gmail.com
-
-This Privacy Policy is available in both English and Hungarian. In case of discrepancies, the English version prevails.
-
