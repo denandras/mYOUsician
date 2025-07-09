@@ -404,12 +404,12 @@ export default function DatabasePage() {
     };
 
     // Helper function to get localized category for instruments
-    const getLocalizedCategory = (instrument: Instrument): string => {
+    const getLocalizedCategory = useCallback((instrument: Instrument): string => {
         if (locale === 'hu' && instrument.category_hun) {
             return instrument.category_hun;
         }
         return instrument.category;
-    };
+    }, [locale]);
 
     // Memoize instrumentsByCategory with ranking
     const instrumentsByCategory = useMemo(() => {
@@ -421,7 +421,7 @@ export default function DatabasePage() {
             acc[category].push(instrument);
             return acc;
         }, {} as Record<string, Instrument[]>);
-    }, [instruments, locale, getLocalizedCategory]);
+    }, [instruments, getLocalizedCategory]);
 
     // Memoize sorted categories by category_rank for consistent ordering
     const sortedCategories = useMemo(() => {

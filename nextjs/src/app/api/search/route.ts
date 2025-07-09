@@ -64,7 +64,8 @@ export async function GET(request: NextRequest) {
       // Filter by name search
       if (nameSearch) {
         const searchTerms = nameSearch.toLowerCase().split(' ');
-        filteredProfiles = filteredProfiles.filter(profile => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        filteredProfiles = filteredProfiles.filter((profile: any) => {
           const fullName = `${profile.forename || ''} ${profile.surname || ''}`.toLowerCase();
           return searchTerms.every(term => fullName.includes(term));
         });
@@ -72,12 +73,14 @@ export async function GET(request: NextRequest) {
       
       // Filter by genre, instrument, and category
       if (genre !== 'any' || instrument !== 'any' || category !== 'any') {
-        filteredProfiles = filteredProfiles.filter(profile => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        filteredProfiles = filteredProfiles.filter((profile: any) => {
           if (!profile.genre_instrument || !Array.isArray(profile.genre_instrument)) {
             return false;
           }
           
-          return profile.genre_instrument.some(item => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          return profile.genre_instrument.some((item: any) => {
             if (typeof item !== 'object' || item === null) {
               return false;
             }
@@ -194,7 +197,8 @@ export async function GET(request: NextRequest) {
     
     // Filter by genre, instrument, and category if not 'any'
     if (genre !== 'any' || instrument !== 'any' || category !== 'any') {
-      filteredProfiles = filteredProfiles.filter(profile => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      filteredProfiles = filteredProfiles.filter((profile: any) => {
         // Parse genre_instrument data
         let genreInstrumentData = profile.genre_instrument;
         if (typeof genreInstrumentData === 'string') {
@@ -208,7 +212,8 @@ export async function GET(request: NextRequest) {
         if (!Array.isArray(genreInstrumentData)) return false;
         
         // Check if any genre_instrument item matches all selected filters
-        return genreInstrumentData.some(item => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return genreInstrumentData.some((item: any) => {
           // Convert to object if it's a string
           if (typeof item === 'string') {
             return genre === 'any'; // If we can't parse it, only match if no specific genre is requested
@@ -249,21 +254,24 @@ export async function GET(request: NextRequest) {
     if (sortBy) {
       switch (sortBy) {
         case 'name_asc':
-          filteredProfiles.sort((a, b) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          filteredProfiles.sort((a: any, b: any) => {
             const nameA = `${a.forename || ''} ${a.surname || ''}`.trim();
             const nameB = `${b.forename || ''} ${b.surname || ''}`.trim();
             return nameA.localeCompare(nameB);
           });
           break;
         case 'name_desc':
-          filteredProfiles.sort((a, b) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          filteredProfiles.sort((a: any, b: any) => {
             const nameA = `${a.forename || ''} ${a.surname || ''}`.trim();
             const nameB = `${b.forename || ''} ${b.surname || ''}`.trim();
             return nameB.localeCompare(nameA);
           });
           break;
         case 'education_desc':
-          filteredProfiles.sort((a, b) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          filteredProfiles.sort((a: any, b: any) => {
             const educationA = Array.isArray(a.education) ? a.education.length : 0;
             const educationB = Array.isArray(b.education) ? b.education.length : 0;
             return educationB - educationA;
@@ -274,7 +282,8 @@ export async function GET(request: NextRequest) {
           break;
         default:
           // Default to name ascending
-          filteredProfiles.sort((a, b) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          filteredProfiles.sort((a: any, b: any) => {
             const nameA = `${a.forename || ''} ${a.surname || ''}`.trim();
             const nameB = `${b.forename || ''} ${b.surname || ''}`.trim();
             return nameA.localeCompare(nameB);

@@ -47,7 +47,8 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
 
                 // Listen for auth state changes
                 const { data: { subscription } } = client.auth.onAuthStateChange(
-                    async (event, session) => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    async (event: any, session: any) => {
                         if (event === 'SIGNED_OUT' || !session?.user) {
                             setUser(null);
                         } else if (session?.user) {
