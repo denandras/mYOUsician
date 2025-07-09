@@ -34,6 +34,12 @@ export async function updateSession(request: NextRequest) {
     // IMPORTANT: DO NOT REMOVE auth.getUser()
 
     const {data: user} = await supabase.auth.getUser()
+    
+    // Allow public access to database page
+    if (request.nextUrl.pathname.includes('/database')) {
+        return supabaseResponse;
+    }
+    
     if (
         (!user || !user.user) && request.nextUrl.pathname.startsWith('/app')
     ) {

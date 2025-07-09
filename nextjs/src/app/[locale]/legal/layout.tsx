@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from '@/i18n/routing';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, FileText, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, FileText, ShieldAlert, Shield, Lock, BookOpen } from 'lucide-react';
 
 const legalDocuments = [
     {
@@ -16,6 +16,18 @@ const legalDocuments = [
         title: 'Terms of Service',
         icon: FileText,
         description: 'Rules and guidelines for using our service'
+    },
+    {
+        id: 'data-security',
+        title: 'Data Security',
+        icon: Lock,
+        description: 'How we store and secure your information'
+    },
+    {
+        id: 'docs',
+        title: 'Documentation',
+        icon: BookOpen,
+        description: 'Guide to using the platform'
     }
 ];
 

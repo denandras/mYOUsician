@@ -12,6 +12,14 @@ const legalDocuments = {
     'terms': {
         title: 'Terms of Service',
         path: '/terms/terms-of-service.md'
+    },
+    'data-security': {
+        title: 'Data Storage and Security',
+        path: '/terms/data-security.md'
+    },
+    'docs': {
+        title: 'Documentation',
+        path: '/terms/documentation.md'
     }
 } as const;
 

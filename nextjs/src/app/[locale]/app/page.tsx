@@ -73,7 +73,7 @@ export default function DashboardContent() {
                         </Link>
 
                         <Link
-                            href="/app/database"
+                            href="/database"
                             className="flex items-center gap-3 p-4 border rounded-lg hover:bg-accent transition-colors"
                         >
                             <div className="p-2 bg-primary/10 rounded-full">

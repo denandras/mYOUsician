@@ -92,7 +92,7 @@ export default function AppLayoutIntl({ children }: { children: React.ReactNode 
     const productName = process.env.NEXT_PUBLIC_PRODUCTNAME;    const navigation = [
         { name: tNav('homepage'), href: '/app' as const, icon: Home },
         { name: tNav('profile'), href: '/app/profile' as const, icon: User },
-        { name: tNav('database'), href: '/app/database' as const, icon: Database },
+        { name: tNav('database'), href: `/${locale}/database` as const, icon: Database },
     ];
 
     const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);

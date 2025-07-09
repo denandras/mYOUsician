@@ -80,7 +80,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const productName = process.env.NEXT_PUBLIC_PRODUCTNAME;    const navigation = [
         { name: 'Homepage', href: '/app', icon: Home },
         { name: 'Profile Editor', href: '/app/profile', icon: User },
-        { name: 'Database', href: '/app/database', icon: Database },
+        { name: 'Database', href: '/en/database', icon: Database }, // Default to English locale
     ];    const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);    return (<div className="min-h-screen bg-background flex flex-col">            {isSidebarOpen && (
                 <div
                     className="fixed inset-0 bg-gray-600 bg-opacity-75 z-20"

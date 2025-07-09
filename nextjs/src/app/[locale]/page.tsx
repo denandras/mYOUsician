@@ -160,6 +160,17 @@ export default function Home() {
               <div className="mt-10 flex gap-4 justify-center">
                 <AuthAwareButtons />
               </div>
+              
+              {/* Database Quick Access */}
+              <div className="mt-8 flex justify-center">
+                <Link
+                  href="/database"
+                  className="inline-flex items-center px-6 py-3 rounded-lg bg-[#083e4d] text-white font-medium hover:bg-[#062f3b] transition-colors"
+                >
+                  <Search className="mr-2 h-5 w-5" />
+                  {t('database.exploreDatabase')}
+                </Link>
+              </div>
             </div>
           </div>
         </section>

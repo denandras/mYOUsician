@@ -124,7 +124,7 @@ export function ProfileQueryModal({
             <Dialog open={isOpen} onOpenChange={onClose}>
                 <DialogContent className="max-w-md w-[96vw] sm:w-[90vw] p-4 sm:p-6">
                     <div className="flex flex-col items-center justify-center py-8 space-y-4">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" strokeWidth={1.5} />
                         <h3 className="text-lg font-semibold">Loading Profile...</h3>                        <p className="text-sm text-muted-foreground text-center">
                             Please wait while we fetch the musician&apos;s information.
                         </p>

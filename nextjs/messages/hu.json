@@ -144,21 +144,30 @@
   },"database": {
     "title": "Zenész adatbázis",
     "subtitle": "Keresd meg és fedezd fel a zenészeket műfaj és hangszer szerint.",
+    "exploreDatabase": "Adatbázis felfedezése",
     "searchFilters": "Keresési szűrők",
     "filtersDescription": "Találj zenészeket készségeik és hátterük alapján",
-    "genre": "Műfaj",
-    "instrument": "Hangszer",
-    "type": "Típus",
-    "category": "Kategória",
-    "sortBy": "Rendezés",
-    "searchByName": "Keresés név szerint",
-    "nameSearchPlaceholder": "Add meg a keresett nevet...",
+    "search": "Keresés",
     "searching": "Keresés...",
     "clearFilters": "Szűrők törlése",
-    "searchResults": "Keresési eredmények",
-    "musiciansFound": "{count} találat",
     "noResults": "Nem található zenész a keresési feltételeknek megfelelően.",
     "tryDifferentFilters": "Próbáld meg módosítani a keresési szűrőket.",
+    "filters": {
+      "genre": "Műfaj",
+      "instrument": "Hangszer",
+      "category": "Kategória",
+      "nameSearch": "Keresés név szerint",
+      "sortBy": "Rendezés",
+      "selectGenre": "Válassz műfajt",
+      "selectInstrument": "Válassz hangszert",
+      "selectCategory": "Válassz kategóriát",
+      "selectSort": "Válassz rendezési módot",
+      "searchPlaceholder": "Add meg a keresett nevet...",
+      "any": "Bármely"
+    },
+    "results": {
+      "title": "Keresési eredmények"
+    },
     "sortOptions": {
       "nameAsc": "Név A-Z",
       "nameDesc": "Név Z-A",
@@ -171,7 +180,7 @@
       "education": "Végzettség",
       "certificates": "Eredmények & Oklevelek",
       "occupation": "Foglalkozás",
-      "genres": "Műfajok és hangszerek",
+      "genresInstruments": "Műfajok és hangszerek",
       "social": "Közösségi média",
       "videos": "Videó linkek",
       "locationNotSpecified": "Helyszín nincs megadva",
@@ -268,7 +277,7 @@
   "home": {
     "welcomeTo": "Üdvözlünk itt:",
     "subtitle": "Zenészek adatbázisa, zenészeknek!",
-    "readyToJoin": "Készen állsz, hogy piacra vidd magad?",
+    "readyToJoin": "Készen állsz, hogy piacra dobd magad?",
     "joinOthers": "Csatlakozz más zenészekhez a {productName}-ön",
     "features": "Funkciók",
     "featuresSubtitle": "Zenészeket szem előtt tartva tervezve, megbízhatóság és sebesség érdekében",
@@ -295,6 +304,13 @@
     "securePrivate": {
       "title": "Biztonságos",
       "description": "Professzionális szintű biztonság többfaktoros hitelesítéssel és adatvédelmi beállításokkal"
-    }
+    },
+    "gdprCompliant": "GDPR-megfelelő platform"
+  },
+  "footer": {
+    "privacyPolicy": "Adatvédelmi nyilatkozat",
+    "termsOfService": "Általános szerződési feltételek",
+    "copyright": "Minden jog fenntartva",
+    "madeWithLove": "Szeretettel készítve zenészek számára világszerte"
   }
 }

@@ -146,21 +146,30 @@
   "database": {
     "title": "Musician Database",
     "subtitle": "Search and discover musicians by genre and instrument.",
+    "exploreDatabase": "Explore Database",
     "searchFilters": "Search Filters",
     "filtersDescription": "Find musicians by their skills and background",
-    "genre": "Genre",
-    "instrument": "Instrument",
-    "type": "Type",
-    "category": "Category",
-    "sortBy": "Sort By",
-    "searchByName": "Search by Name",
-    "nameSearchPlaceholder": "Enter name to search...",
+    "search": "Search",
     "searching": "Searching...",
     "clearFilters": "Clear Filters",
-    "searchResults": "Search Results",
-    "musiciansFound": "{count} musician{plural} found",
     "noResults": "No musicians found matching your criteria.",
     "tryDifferentFilters": "Try adjusting your search filters.",
+    "filters": {
+      "genre": "Genre",
+      "instrument": "Instrument",
+      "category": "Category",
+      "nameSearch": "Search by Name",
+      "sortBy": "Sort By",
+      "selectGenre": "Select genre",
+      "selectInstrument": "Select instrument",
+      "selectCategory": "Select category",
+      "selectSort": "Select sort order",
+      "searchPlaceholder": "Enter name to search...",
+      "any": "Any"
+    },
+    "results": {
+      "title": "Search Results"
+    },
     "sortOptions": {
       "nameAsc": "Name A-Z",
       "nameDesc": "Name Z-A",
@@ -173,7 +182,7 @@
       "education": "Education",
       "certificates": "Certificates",
       "occupation": "Occupation",
-      "genres": "Genres & Instruments",
+      "genresInstruments": "Genres & Instruments",
       "social": "Social Media",
       "videos": "Video Links",
       "locationNotSpecified": "Location not specified",
@@ -299,6 +308,13 @@
     "securePrivate": {
       "title": "Secure",
       "description": "Professional-grade security with multi-factor authentication and privacy controls"
-    }
+    },
+    "gdprCompliant": "GDPR Compliant Platform"
+  },
+  "footer": {
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "copyright": "All rights reserved",
+    "madeWithLove": "Made with love for musicians worldwide"
   }
 }

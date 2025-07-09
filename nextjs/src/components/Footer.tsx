@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from '@/i18n/routing';
 import Image from 'next/image';
-import { Github, Twitter, Linkedin, ExternalLink, Heart } from 'lucide-react';
+import { ExternalLink, Heart } from 'lucide-react';
 
 const Footer = () => {
     const productName = process.env.NEXT_PUBLIC_PRODUCTNAME || 'mYOUsician';
@@ -11,7 +11,7 @@ const Footer = () => {
     const navigation = {
         product: [
             { name: 'Features', href: '/#features' },
-            { name: 'Database', href: '/app/database' },
+            { name: 'Database', href: '/database' },
             { name: 'Pricing', href: '/#pricing' },
         ],        support: [
             { name: 'Report an Issue', href: 'https://tally.so/r/wkQAZd', external: true },
@@ -20,10 +20,8 @@ const Footer = () => {
         legal: [
             { name: 'Privacy Policy', href: '/legal/privacy' },
             { name: 'Terms of Service', href: '/legal/terms' },
-        ],        social: [
-            { name: 'Twitter', href: '#', icon: Twitter },
-            { name: 'GitHub', href: 'https://github.com/denandras/mYOUsician/', icon: Github },
-            { name: 'LinkedIn', href: '#', icon: Linkedin },
+            { name: 'Data Security', href: '/legal/data-security' },
+            { name: 'Documentation', href: '/legal/docs' },
         ],
     };
 
@@ -36,36 +34,44 @@ const Footer = () => {
                     backgroundSize: '40px 40px'
                 }} />
             </div>
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-                {/* Main Footer Content */}
-                <div className="py-8 sm:py-12 lg:py-16">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12">                        {/* Brand Section */}
-                        <div className="lg:col-span-5">
-                            <div className="flex items-center space-x-3 mb-4 sm:mb-6">
-                                <div className="p-1 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
-                                    <Image
-                                        src="/branding/logo_red-teal.svg"
-                                        alt={`${productName} logo`}
-                                        width={36}
-                                        height={36}
-                                        className="w-8 h-8 sm:w-9 sm:h-9"
-                                    />
-                                </div>
+            
+            {/* Main content container with max-width for better layout on wide screens */}
+            <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+                {/* Two-column layout */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 py-8 lg:py-12">
+                    {/* Column 1: Brand and description */}
+                    <div className="space-y-6">
+                        <div className="flex items-center space-x-3">
+                            <div className="p-1 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
                                 <Image
-                                    src="/branding/text_teal.svg"
-                                    alt={productName}
-                                    width={140}
-                                    height={28}
-                                    className="h-6 sm:h-7 w-auto"
+                                    src="/branding/logo_red-teal.svg"
+                                    alt={`${productName} logo`}
+                                    width={36}
+                                    height={36}
+                                    className="w-8 h-8 sm:w-9 sm:h-9"
                                 />
-                            </div>                            <p className="text-muted-foreground text-sm sm:text-base leading-relaxed max-w-md mb-6 sm:mb-8">
-                                The premier platform for musicians to connect, collaborate, and grow their network. 
-                                Discover talented artists and build meaningful musical relationships worldwide.
-                            </p>
-                        </div>                        {/* Navigation Sections */}
-                        <div className="lg:col-span-2">
-                            <h3 className="text-sm font-semibold text-foreground mb-3 sm:mb-4 lg:mb-6 tracking-wide">Product</h3>
-                            <ul className="space-y-2 sm:space-y-3 lg:space-y-4">
+                            </div>
+                            <Image
+                                src="/branding/text_teal.svg"
+                                alt={productName}
+                                width={140}
+                                height={28}
+                                className="h-6 sm:h-7 w-auto"
+                            />
+                        </div>
+                        
+                        <p className="text-muted-foreground text-sm leading-relaxed max-w-md">
+                            The premier platform for musicians to connect, collaborate, and grow their network. 
+                            Discover talented artists and build meaningful musical relationships worldwide.
+                        </p>
+                    </div>
+                    
+                    {/* Column 2: Navigation links in grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
+                        {/* Product Links */}
+                        <div>
+                            <h3 className="text-sm font-semibold text-foreground mb-3 tracking-wide">Product</h3>
+                            <ul className="space-y-2">
                                 {navigation.product.map((item) => (
                                     <li key={item.name}>
                                         <Link
@@ -74,18 +80,21 @@ const Footer = () => {
                                         >
                                             <span className="relative">
                                                 {item.name}
-                                                <span className="absolute inset-x-0 -bottom-0.5 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left" />
+                                                <span className="absolute inset-x-0 -bottom-0.5 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-all duration-300 ease-in-out origin-left" />
                                             </span>
-                                            <span className="ml-2 opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:translate-x-1">
+                                            <span className="ml-2 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out group-hover:translate-x-1">
                                                 →
                                             </span>
                                         </Link>
                                     </li>
                                 ))}
                             </ul>
-                        </div>                        <div className="lg:col-span-2">
-                            <h3 className="text-sm font-semibold text-foreground mb-3 sm:mb-4 lg:mb-6 tracking-wide">Support</h3>
-                            <ul className="space-y-2 sm:space-y-3 lg:space-y-4">
+                        </div>
+                        
+                        {/* Support Links */}
+                        <div>
+                            <h3 className="text-sm font-semibold text-foreground mb-3 tracking-wide">Support</h3>
+                            <ul className="space-y-2">
                                 {navigation.support.map((item) => (
                                     <li key={item.name}>
                                         <Link
@@ -96,12 +105,12 @@ const Footer = () => {
                                         >
                                             <span className="relative">
                                                 {item.name}
-                                                <span className="absolute inset-x-0 -bottom-0.5 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left" />
+                                                <span className="absolute inset-x-0 -bottom-0.5 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-all duration-300 ease-in-out origin-left" />
                                             </span>
                                             {item.external ? (
-                                                <ExternalLink className="w-3 h-3 ml-2 opacity-60 group-hover:opacity-100 transition-opacity duration-200" />
+                                                <ExternalLink className="w-3 h-3 ml-2 opacity-60 group-hover:opacity-100 transition-opacity duration-300 ease-in-out" />
                                             ) : (
-                                                <span className="ml-2 opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:translate-x-1">
+                                                <span className="ml-2 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out group-hover:translate-x-1">
                                                     →
                                                 </span>
                                             )}
@@ -109,9 +118,12 @@ const Footer = () => {
                                     </li>
                                 ))}
                             </ul>
-                        </div>                        <div className="lg:col-span-3">
-                            <h3 className="text-sm font-semibold text-foreground mb-3 sm:mb-4 lg:mb-6 tracking-wide">Legal & More</h3>
-                            <ul className="space-y-2 sm:space-y-3 lg:space-y-4">
+                        </div>
+                        
+                        {/* Legal Links */}
+                        <div>
+                            <h3 className="text-sm font-semibold text-foreground mb-3 tracking-wide">Legal</h3>
+                            <ul className="space-y-2">
                                 {navigation.legal.map((item) => (
                                     <li key={item.name}>
                                         <Link
@@ -120,9 +132,9 @@ const Footer = () => {
                                         >
                                             <span className="relative">
                                                 {item.name}
-                                                <span className="absolute inset-x-0 -bottom-0.5 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left" />
+                                                <span className="absolute inset-x-0 -bottom-0.5 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-all duration-300 ease-in-out origin-left" />
                                             </span>
-                                            <span className="ml-2 opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:translate-x-1">
+                                            <span className="ml-2 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out group-hover:translate-x-1">
                                                 →
                                             </span>
                                         </Link>
@@ -131,22 +143,21 @@ const Footer = () => {
                             </ul>
                         </div>
                     </div>
-                </div>                {/* Bottom Bar */}
-                <div className="py-4 sm:py-6 lg:py-8 border-t border-border/40">
-                    <div className="flex flex-col lg:flex-row justify-between items-center space-y-3 sm:space-y-4 lg:space-y-0">
-                        <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-8 text-sm text-muted-foreground">
-                            <p className="flex items-center space-x-2">
-                                <span>© {currentYear} {productName}. All rights reserved.</span>
-                            </p>
-                            <div className="flex items-center space-x-2">
-                                <span>Made with</span>
-                                <Heart className="w-4 h-4 text-red-500 fill-current animate-pulse" />
-                                <span>for musicians worldwide</span>
-                            </div>
+                </div>
+                
+                {/* Bottom copyright bar */}
+                <div className="py-4 border-t border-border/40 flex flex-col sm:flex-row justify-between items-center">
+                    <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-2 sm:mb-0">
+                        <span>© {currentYear} {productName}. All rights reserved.</span>
+                    </div>
+                    
+                    <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                            <span>Made with</span>
+                            <Heart className="w-4 h-4 text-red-500 fill-current animate-pulse" />
+                            <span>for musicians worldwide</span>
                         </div>
-                          <div className="flex items-center space-x-6 text-xs text-muted-foreground">
-                            <span>v0.1</span>
-                        </div>
+                        <span className="text-xs text-muted-foreground ml-2">v1.0</span>
                     </div>
                 </div>
             </div>

@@ -1163,7 +1163,7 @@ export default function DatabasePage() {
                             onClick={searchMusicians} 
                             disabled={!canSearch || loading}
                             variant="teal"
-                            className="flex items-center gap-2 text-white"
+                            className="flex items-center gap-2 text-white bg-teal-600 hover:bg-teal-700"
                         >
                             <Search className="h-4 w-4" />
                             {loading ? t('database.searching') : t('common.search')}
@@ -1171,7 +1171,7 @@ export default function DatabasePage() {
                         <Button 
                             variant="delete"
                             onClick={clearFilters}
-                            className="flex items-center gap-2"
+                            className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white"
                         >
                             <Trash2 className="h-4 w-4" />
                             {t('database.clearFilters')}
@@ -1190,7 +1190,7 @@ export default function DatabasePage() {
                         {musicians.length > 0 ? (                            <div className="dynamic-masonry">
                                 {musicians.map((musician) => (
                                     <div key={musician.id} className="masonry-item">
-                                        <Card className="musician-card break-inside-avoid shadow-lg hover:shadow-xl bg-gradient-to-br from-white to-gray-50 border-0 ring-1 ring-gray-200 hover:ring-teal-300 overflow-hidden"><CardHeader className="pb-3 bg-gradient-to-r from-teal-50 to-blue-50 rounded-t-lg">                                            <div className="flex items-center gap-3">                                                <Avatar
+                                        <Card className="musician-card break-inside-avoid shadow-lg hover:shadow-xl bg-gradient-to-br from-white to-gray-50 border-0 ring-1 ring-gray-200 hover:ring-teal-300 overflow-hidden flex flex-col h-full"><CardHeader className="pb-3 bg-gradient-to-r from-teal-50 to-blue-50 rounded-t-lg">                                            <div className="flex items-center gap-3">                                                <Avatar
                                                     forename={musician.forename}
                                                     surname={musician.surname}
                                                     size="md"
@@ -1210,7 +1210,7 @@ export default function DatabasePage() {
                                                     </CardDescription>
                                                 </div>
                                             </div>
-                                        </CardHeader>                                        <CardContent className="pt-0 space-y-4 p-4">                                            {/* Skills Section */}
+                                        </CardHeader>                                        <CardContent className="pt-0 space-y-4 p-4 flex-grow flex flex-col">                                            {/* Skills Section */}
                                             <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
                                                 <h4 className="text-sm font-semibold mb-2 text-gray-700 flex items-center gap-2">
                                                     <Music className="h-4 w-4 text-teal-600" />
@@ -1302,16 +1302,30 @@ export default function DatabasePage() {
                                                         {t('database.profile.education')}
                                                     </h4>
                                                     <div className="text-sm text-gray-600 space-y-1">
-                                                        {musician.education.slice(0, 2).map((edu, index) => (
-                                                            <div key={index}>{edu}</div>
-                                                        ))}
+                                                        {musician.education.slice(0, 2).map((edu, index) => {
+                                                            // Check if the education string contains a school name in brackets
+                                                            const matches = edu.match(/\[(.*?)\]\s*(?:itt:)?\s*\[(.*?)\]/);
+                                                            
+                                                            if (matches && matches.length >= 3) {
+                                                                const paper = matches[1];
+                                                                const school = matches[2];
+                                                                
+                                                                return (
+                                                                    <div key={index}>
+                                                                        {paper} {locale === 'hu' ? 'itt' : 'at'}: {school}
+                                                                    </div>
+                                                                );
+                                                            }
+                                                            
+                                                            return <div key={index}>{edu}</div>;
+                                                        })}
                                                         {musician.education.length > 2 && (
                                                             <div className="text-xs">+{musician.education.length - 2} {locale === 'hu' ? 'további' : 'more'}</div>
                                                         )}
                                                     </div>
                                                 </div>
                                             )}                                            {/* Contact & Links */}
-                                            <div className="flex items-center gap-2 pt-3 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-transparent p-3 rounded-b-lg -mx-4 -mb-4 mt-4">                                                {/* Email */}
+                                            <div className="flex items-center gap-2 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-transparent p-3 rounded-b-lg -mx-4 -mb-4 mt-auto">                                                {/* Email */}
                                                 {musician.email && (
                                                     <Button
                                                         variant="ghost"
