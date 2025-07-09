@@ -1,11 +1,10 @@
 "use client";
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import Image from 'next/image';
-import { ArrowRight, Shield, Users, Menu, X, Search, UserCheck, MapPin, Video } from 'lucide-react';
+import { ArrowRight, Shield, Users, Search, UserCheck, MapPin, Video } from 'lucide-react';
 import AuthAwareButtons from '@/components/AuthAwareButtons';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import DynamicHeader from '@/components/DynamicHeader';
 
 export default function Home() {

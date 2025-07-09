@@ -10,7 +10,7 @@ export class SassClient {
     private client: SupabaseClient<Database>;
     private clientType: ClientType;
 
-    constructor(client: SupabaseClient, clientType: ClientType) {
+    constructor(client: SupabaseClient<Database>, clientType: ClientType) {
         this.client = client;
         this.clientType = clientType;
 

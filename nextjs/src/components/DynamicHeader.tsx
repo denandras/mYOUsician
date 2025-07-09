@@ -11,8 +11,7 @@ import {
     X,
     ChevronDown,
     LogOut,
-    Database,
-    FileText
+    Database
 } from 'lucide-react';
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
@@ -45,7 +44,6 @@ export default function DynamicHeader({ showSidebar = false }: DynamicHeaderProp
     const locale = useLocale();
     const t = useTranslations('common');
     const tNav = useTranslations('navigation');
-    const tFooter = useTranslations('footer');
 
     const { user, loading } = useSafeGlobal();
 

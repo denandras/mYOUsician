@@ -27,7 +27,7 @@ export function sanitizeUrl(url: string): string {
         }
         
         return DOMPurify.sanitize(url);
-    } catch (e) {
+    } catch {
         // If it's not a valid URL, return empty string
         return '';
     }

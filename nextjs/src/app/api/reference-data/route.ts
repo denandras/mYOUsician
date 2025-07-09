@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createSPASassClient } from '@/lib/supabase/client';
 
 export const dynamic = 'force-dynamic'; // Make sure the route is not cached
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     console.log('Loading reference data via API...');
     

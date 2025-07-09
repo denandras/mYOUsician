@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from '@/i18n/routing';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { ArrowLeft, FileText, ShieldAlert, Shield, Lock, BookOpen } from 'lucide-react';
+import { ArrowLeft, FileText, ShieldAlert, Lock, BookOpen } from 'lucide-react';
 import DynamicHeader from '@/components/DynamicHeader';
 
 export default function LegalLayout({ children } : { children: React.ReactNode }) {

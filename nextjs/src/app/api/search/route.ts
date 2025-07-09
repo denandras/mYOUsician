@@ -2,14 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { RateLimiter } from '@/lib/rate-limit';
 import { createSPASassClient } from '@/lib/supabase/client';
 import { sanitizeInput } from '@/lib/sanitize';
-import { Json } from '@/lib/types';
 import { sampleProfiles } from '@/lib/sample-data';
 
 interface GenreInstrumentItem {
   genre?: string;
   instrument?: string;
   category?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // Create a rate limiter instance (10 requests per minute per IP)

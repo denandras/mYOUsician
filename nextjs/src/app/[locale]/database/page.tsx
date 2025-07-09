@@ -3,9 +3,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { Link } from '@/i18n/routing';
-import Image from 'next/image';
-import { Search, UserCheck, MapPin, Menu, X, Music, BookOpen, Mail, Phone, Video, ExternalLink, Youtube, Instagram, Facebook, Twitter, Linkedin, Briefcase, Loader2 } from 'lucide-react';
+import { Search, UserCheck, MapPin, X, Music, BookOpen, Mail, Phone, Video, ExternalLink, Youtube, Instagram, Facebook, Twitter, Linkedin, Briefcase, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +14,6 @@ import { Avatar } from '@/components/ui/avatar';
 import { createSPASassClient } from '@/lib/supabase/client';
 import { Database } from '@/lib/types';
 import DynamicHeader from '@/components/DynamicHeader';
-import Footer from '@/components/Footer';
 import { SOCIAL_PLATFORMS } from '@/lib/socialPlatforms';
 
 // Local Badge component to avoid import issues
@@ -89,7 +86,6 @@ const formatName = (forename: string | null, surname: string | null): string => 
 export default function DatabasePage() {
     const t = useTranslations();
     const locale = useLocale();
-    const productName = process.env.NEXT_PUBLIC_PRODUCTNAME;
     
     // Navigation state
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -203,31 +199,6 @@ export default function DatabasePage() {
         }
         return instrumentName;
     }, [locale, instruments]);
-
-    // Helper function to localize education type
-    const getLocalizedEducationType = (educationType: string): string => {
-        if (locale !== 'hu') return educationType;
-        
-        const educationTypeMap: Record<string, string> = {
-            'Bachelor': 'Alapképzés',
-            'Master': 'Mesterképzés',
-            'PhD': 'Doktori',
-            'Diploma': 'Diploma',
-            'Certificate': 'Bizonyítvány',
-            'BA': 'Alapképzés',
-            'MA': 'Mesterképzés',
-            'BSc': 'Alapképzés',
-            'MSc': 'Mesterképzés'
-        };
-        
-        for (const [engType, localizedType] of Object.entries(educationTypeMap)) {
-            if (educationType.toLowerCase() === engType.toLowerCase()) {
-                return localizedType;
-            }
-        }
-        
-        return educationType;
-    };
 
     // Parse helper functions
     const parseArrayField = (field: unknown): string[] => {
@@ -450,7 +421,7 @@ export default function DatabasePage() {
             acc[category].push(instrument);
             return acc;
         }, {} as Record<string, Instrument[]>);
-    }, [instruments, locale]);
+    }, [instruments, locale, getLocalizedCategory]);
 
     // Memoize sorted categories by category_rank for consistent ordering
     const sortedCategories = useMemo(() => {
