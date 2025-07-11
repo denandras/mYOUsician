@@ -19,7 +19,7 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: process.env.NEXT_PUBLIC_PRODUCTNAME,
-  description: "The best way to build your SaaS product.",
+  description: "Discover musicians, connect with talent - the global musician database.",
 };
 
 export default async function LocaleLayout({
