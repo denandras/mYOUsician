@@ -196,7 +196,7 @@ export default function DynamicHeader({ showSidebar = false }: DynamicHeaderProp
                                 <button
                                     onClick={toggleSidebar}
                                     data-sidebar-trigger
-                                    className="text-white hover:text-[#26545c] transition-colors lg:hidden"
+                                    className="text-white hover:text-gray-200 transition-colors lg:hidden"
                                     aria-label="Toggle sidebar"
                                 >
                                     <Menu className="h-6 w-6"/>
@@ -207,10 +207,10 @@ export default function DynamicHeader({ showSidebar = false }: DynamicHeaderProp
                             <button
                                 onClick={toggleMobileMenu}
                                 data-mobile-menu-trigger
-                                className="text-white hover:text-[#26545c] transition-colors"
+                                className="text-white hover:text-gray-200 transition-colors"
                                 aria-label="Toggle menu"
                             >
-                                <Menu className="h-6 w-6"/>
+                                {isMobileMenuOpen ? <X className="h-6 w-6"/> : <Menu className="h-6 w-6"/>}
                             </button>
 
                             {/* Logo */}

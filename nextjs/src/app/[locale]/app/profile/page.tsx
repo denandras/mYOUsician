@@ -1491,10 +1491,10 @@ export default function ProfilePage() {
                                                         </SelectTrigger>
                                                         <SelectContent>
                                                             <SelectItem value="artist">
-                                                                {locale === 'hu' ? 'művész' : 'artist'}
+                                                                {t('profile.categories.artist')}
                                                             </SelectItem>
                                                             <SelectItem value="teacher">
-                                                                {locale === 'hu' ? 'tanár' : 'teacher'}
+                                                                {t('profile.categories.teacher')}
                                                             </SelectItem>
                                                         </SelectContent>
                                                     </Select>

@@ -49,9 +49,8 @@ function insertFix() {
       /<SelectContent>\s*<SelectItem value="any">\{t\('database\.filters\.any'\)\}<\/SelectItem>\s*<SelectItem value="artist">\{locale === 'hu' \? 'művész' : 'artist'\}<\/SelectItem>\s*<SelectItem value="teacher">\{locale === 'hu' \? 'tanár' : 'teacher'\}<\/SelectItem>\s*<SelectItem value="student">\{locale === 'hu' \? 'tanuló' : 'student'\}<\/SelectItem>\s*<\/SelectContent>/g,
       `<SelectContent>
                                             <SelectItem value="any">{t('database.filters.any')}</SelectItem>
-                                            <SelectItem value="artist">{locale === 'hu' ? 'művész' : 'artist'}</SelectItem>
-                                            <SelectItem value="teacher">{locale === 'hu' ? 'tanár' : 'teacher'}</SelectItem>
-                                            <SelectItem value="student">{locale === 'hu' ? 'tanuló' : 'student'}</SelectItem>
+                                            <SelectItem value="artist">{t('database.categories.artist')}</SelectItem>
+                                            <SelectItem value="teacher">{t('database.categories.teacher')}</SelectItem>
                                         </SelectContent>`
     );
 

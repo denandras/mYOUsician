@@ -172,6 +172,11 @@
       "loadingCities": "Városok betöltése...",
       "serviceUnavailable": "Szolgáltatás nem elérhető"
     },
+    "categories": {
+      "artist": "Művész",
+      "teacher": "Tanár",
+      "student": "Tanuló"
+    },
     "results": {
       "title": "Keresési eredmények"
     },
@@ -241,7 +246,12 @@
     "enterEmailPlaceholder": "Email cím megadása",
     "deleting": "Törlés...",
     "deleteProfile": "Profil törlése",
-    "confirmDelete": "Biztosan törölni szeretnéd a profilodat? Ez a művelet nem vonható vissza."
+    "confirmDelete": "Biztosan törölni szeretnéd a profilodat? Ez a művelet nem vonható vissza.",
+    "categories": {
+      "artist": "Művész",
+      "teacher": "Tanár",
+      "student": "Tanuló"
+    }
   },  "storage": {
     "title": "Fájlkezelő",
     "subtitle": "Töltsd fel, töltsd le és oszd meg a fájljaidat",

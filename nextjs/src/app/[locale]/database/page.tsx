@@ -3,7 +3,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { Search, UserCheck, MapPin, X, Music, BookOpen, Mail, Phone, Video, ExternalLink, Youtube, Instagram, Facebook, Twitter, Linkedin, Briefcase, Loader2 } from 'lucide-react';
+import { Search, UserCheck, MapPin, X, Music, Mail, Phone, Video, ExternalLink, Youtube, Instagram, Facebook, Twitter, Linkedin, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -95,8 +95,13 @@ const formatLocation = (location: unknown): string => {
 };
 
 // Name helper
-const formatName = (forename: string | null, surname: string | null): string => {
-    return [forename, surname].filter(Boolean).join(' ') || 'Anonymous';
+const formatName = (forename: string | null, surname: string | null, email?: string | null): string => {
+    const nameString = [forename, surname].filter(Boolean).join(' ');
+    if (nameString) {
+        return nameString;
+    }
+    // If no name is provided, show email address or fallback to 'Anonymous'
+    return email || 'Anonymous';
 };
 
 export default function DatabasePage() {
@@ -278,6 +283,23 @@ export default function DatabasePage() {
         
         loadLocationData();
     }, []);
+
+    // Auto-select Hungary when locale is Hungarian and location data is available
+    useEffect(() => {
+        if (locale === 'hu' && locationServiceStatus === 'available' && locationData.countries.length > 0) {
+            // Find Hungary in the countries list
+            const hungary = locationData.countries.find(
+                country => country.countryName === 'Hungary' || country.countryCode === 'HU'
+            );
+            
+            if (hungary && filters.country === 'any') {
+                setFilters(prev => ({
+                    ...prev,
+                    country: hungary.countryName
+                }));
+            }
+        }
+    }, [locale, locationServiceStatus, locationData.countries, filters.country]);
 
     // Load cities for a specific country
     const loadCitiesForCountry = async (countryCode: string) => {
@@ -738,8 +760,44 @@ export default function DatabasePage() {
                 return;
             }
             
+            // First, filter out users without any skills (genre_instrument)
+            const profilesWithSkills = allProfiles.filter((profile: any) => {
+                let genreInstrumentData = profile.genre_instrument;
+                
+                // Handle string format
+                if (typeof genreInstrumentData === 'string') {
+                    try {
+                        genreInstrumentData = JSON.parse(genreInstrumentData);
+                    } catch {
+                        return false; // Invalid JSON, consider as no skills
+                    }
+                }
+                
+                // Must be an array with at least one valid entry
+                if (!Array.isArray(genreInstrumentData) || genreInstrumentData.length === 0) {
+                    return false;
+                }
+                
+                // Check if there's at least one valid skill entry
+                const hasValidSkills = genreInstrumentData.some((item: any) => {
+                    if (typeof item === 'string' && item.trim()) {
+                        return true;
+                    }
+                    if (typeof item === 'object' && item !== null) {
+                        const hasGenre = String(item.genre || '').trim();
+                        const hasInstrument = String(item.instrument || '').trim();
+                        return hasGenre && hasInstrument;
+                    }
+                    return false;
+                });
+                
+                return hasValidSkills;
+            });
+            
+            console.log(`Found ${profilesWithSkills.length} musicians with skills (filtered out ${allProfiles.length - profilesWithSkills.length} without skills)`);
+            
             // Apply complex filtering for genre, instrument, category, and location
-            let filteredProfiles = allProfiles;
+            let filteredProfiles = profilesWithSkills;
             
             if (filters.genre !== 'any' || filters.instrument !== 'any' || filters.category !== 'any' || filters.country !== 'any' || filters.city !== 'any') {
                 filteredProfiles = allProfiles.filter((profile: any) => {
@@ -1231,9 +1289,8 @@ export default function DatabasePage() {
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="any">{t('database.filters.any')}</SelectItem>
-                                            <SelectItem value="artist">{locale === 'hu' ? 'művész' : 'artist'}</SelectItem>
-                                            <SelectItem value="teacher">{locale === 'hu' ? 'tanár' : 'teacher'}</SelectItem>
-                                            <SelectItem value="student">{locale === 'hu' ? 'tanuló' : 'student'}</SelectItem>
+                                            <SelectItem value="artist">{t('database.categories.artist')}</SelectItem>
+                                            <SelectItem value="teacher">{t('database.categories.teacher')}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -1401,7 +1458,7 @@ export default function DatabasePage() {
                                                                     title={t('database.profile.viewProfile')}
                                                                 >
                                                                     <CardTitle className="text-lg truncate hover:text-teal-600 transition-colors cursor-pointer font-semibold text-gray-800">
-                                                                        {formatName(musician.forename, musician.surname)}
+                                                                        {formatName(musician.forename, musician.surname, musician.email)}
                                                                     </CardTitle>
                                                                 </button>
                                                                 <CardDescription className="truncate text-gray-500 flex items-center gap-1">
@@ -1445,9 +1502,9 @@ export default function DatabasePage() {
                                                                             if (itemObj.category) {
                                                                                 const type = String(itemObj.category);
                                                                                 if (type === 'artist') {
-                                                                                    typeText = locale === 'hu' ? 'Művész' : 'Artist';
+                                                                                    typeText = t('database.categories.artist');
                                                                                 } else if (type === 'teacher') {
-                                                                                    typeText = locale === 'hu' ? 'Tanár' : 'Teacher';
+                                                                                    typeText = t('database.categories.teacher');
                                                                                 } else {
                                                                                     typeText = type;
                                                                                 }
@@ -1491,37 +1548,6 @@ export default function DatabasePage() {
                                                                 )}
                                                             </div>
                                                         </div>
-
-                                                        {/* Occupation */}
-                                                        {musician.occupation && musician.occupation.length > 0 && musician.occupation.filter(occ => occ && occ.trim()).length > 0 && (
-                                                            <div className="bg-red-50 rounded-lg p-3 border border-red-100">
-                                                                <h4 className="text-sm font-semibold mb-2 text-gray-700 flex items-center gap-2">
-                                                                    <Briefcase className="h-4 w-4 text-red-600" />
-                                                                    {t('database.profile.occupation')}
-                                                                </h4>
-                                                                <div className="text-sm text-gray-600 font-medium">
-                                                                    {musician.occupation.filter(occ => occ && occ.trim()).join(', ')}
-                                                                </div>
-                                                            </div>
-                                                        )}
-
-                                                        {/* Education */}
-                                                        {musician.education && musician.education.length > 0 && (
-                                                            <div className="bg-purple-50 rounded-lg p-3 border border-purple-100">
-                                                                <h4 className="text-sm font-semibold mb-2 text-gray-700 flex items-center gap-2">
-                                                                    <BookOpen className="h-4 w-4 text-purple-600" />
-                                                                    {t('database.profile.education')}
-                                                                </h4>
-                                                                <div className="text-sm text-gray-600 space-y-1">
-                                                                    {formatEducation(musician.education).slice(0, 2).map((edu, index) => (
-                                                                        <div key={index}>{edu}</div>
-                                                                    ))}
-                                                                    {musician.education.length > 2 && (
-                                                                        <div className="text-xs">+{musician.education.length - 2} {locale === 'hu' ? 'további' : 'more'}</div>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        )}
 
                                                         {/* Spacer to push social icons to bottom when content is short */}
                                                         <div className="flex-grow"></div>

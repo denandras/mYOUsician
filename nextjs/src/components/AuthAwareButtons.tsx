@@ -71,7 +71,7 @@ export default function AuthAwareButtons({ variant = 'primary' }) {
                 {t('navigation.goDashboard')}
             </Link>        ) : (
             <>
-                <Link href="/auth/login" className="text-white hover:text-[#b5d1d6]">
+                <Link href="/auth/login" className="text-foreground hover:text-accent-foreground">
                     {t('navigation.login')}
                 </Link>
                 <Link

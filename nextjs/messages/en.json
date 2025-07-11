@@ -174,6 +174,11 @@
       "loadingCities": "Loading cities...",
       "serviceUnavailable": "Service unavailable"
     },
+    "categories": {
+      "artist": "Artist",
+      "teacher": "Teacher",
+      "student": "Student"
+    },
     "results": {
       "title": "Search Results"
     },
@@ -244,7 +249,12 @@
     "enterEmailPlaceholder": "Enter your email address",
     "deleting": "Deleting...",
     "deleteProfile": "Delete Profile",
-    "confirmDelete": "Are you sure you want to delete your profile? This action cannot be undone."
+    "confirmDelete": "Are you sure you want to delete your profile? This action cannot be undone.",
+    "categories": {
+      "artist": "Artist",
+      "teacher": "Teacher",
+      "student": "Student"
+    }
   },"storage": {
     "title": "File Management",
     "subtitle": "Upload, download, and share your files",

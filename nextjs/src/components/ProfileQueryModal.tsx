@@ -1,11 +1,12 @@
 "use client";
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar } from '@/components/ui/avatar';
-import { Mail, Phone, Video, ExternalLink, BookOpen, MapPin, Award, Youtube, Instagram, Facebook, Twitter, Linkedin, Music, Globe, AlertCircle, Loader2 } from 'lucide-react';
+import { Mail, Phone, Video, ExternalLink, BookOpen, MapPin, Award, Youtube, Instagram, Facebook, Twitter, Linkedin, Music, Globe, AlertCircle, Loader2, Briefcase } from 'lucide-react';
 
 interface MusicianProfile {
     id: string;
@@ -63,6 +64,8 @@ export function ProfileQueryModal({
     instruments = [],
     genres = []
 }: ProfileQueryModalProps) {
+    const t = useTranslations();
+
     // Helper function to get localized instrument name
     const getLocalizedInstrumentName = (instrumentName: string): string => {
         if (locale === 'hu' && instruments.length > 0) {
@@ -270,8 +273,12 @@ export function ProfileQueryModal({
         
         return String(location);
     };    // Helper function to format name based on locale
-    const formatName = (forename: string | null, surname: string | null, locale: string): string => {
+    const formatName = (forename: string | null, surname: string | null, locale: string, email?: string | null): string => {
         if (!forename && !surname) {
+            // If no name is provided, show email address or fallback to localized 'Anonymous'
+            if (email) {
+                return email;
+            }
             return locale === 'hu' ? 'Névtelen zenész' : 'Anonymous Musician';
         }
         
@@ -284,7 +291,7 @@ export function ProfileQueryModal({
         }
     };
 
-    const fullName = formatName(musician.forename, musician.surname, locale);return (        <Dialog open={isOpen} onOpenChange={onClose}>            <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden w-[98vw] xs:w-[95vw] sm:w-[95vw] md:w-[90vw] lg:w-[85vw] p-0 flex flex-col">
+    const fullName = formatName(musician.forename, musician.surname, locale, musician.email);return (        <Dialog open={isOpen} onOpenChange={onClose}>            <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden w-[98vw] xs:w-[95vw] sm:w-[95vw] md:w-[90vw] lg:w-[85vw] p-0 flex flex-col">
                 <DialogHeader className="px-3 pt-6 pb-3 xs:px-4 xs:pt-7 xs:pb-4 sm:px-4 sm:pt-8 sm:pb-4 md:px-6 md:pt-8 md:pb-4 flex-shrink-0">
                     <DialogTitle className="sr-only">
                         {fullName} - Musician Profile
@@ -304,7 +311,7 @@ export function ProfileQueryModal({
                                 <div className="flex-1 text-center sm:text-left">
                                     <h1 className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-bold break-words">{fullName}</h1>
                                     {musician.bio && (
-                                        <p className="text-sm xs:text-base sm:text-base md:text-lg text-muted-foreground mt-1 break-words">{musician.bio}</p>
+                                        <p className="text-sm xs:text-base sm:text-base md:text-lg text-muted-foreground mt-1 break-words text-justify">{musician.bio}</p>
                                     )}
                                 </div>
                             </div>                              {/* Contact Information Row */}
@@ -380,9 +387,9 @@ export function ProfileQueryModal({
                                                     if (itemObj.category) {
                                                         const type = String(itemObj.category);
                                                         if (type === 'artist') {
-                                                            typeText = locale === 'hu' ? 'Művész' : 'Artist';
+                                                            typeText = t('database.categories.artist');
                                                         } else if (type === 'teacher') {
-                                                            typeText = locale === 'hu' ? 'Tanár' : 'Teacher';
+                                                            typeText = t('database.categories.teacher');
                                                         } else {
                                                             typeText = type;
                                                         }
@@ -448,6 +455,25 @@ export function ProfileQueryModal({
                             )}
                         </div>                        {/* Right Column */}
                         <div className="space-y-3 sm:space-y-4 md:space-y-6">
+                            {/* Occupation */}
+                            {musician.occupation && musician.occupation.length > 0 && (
+                                <Card>
+                                    <CardContent className="pt-3 sm:pt-4 md:pt-6">
+                                        <h2 className="text-base sm:text-lg md:text-xl font-semibold mb-2 sm:mb-3 md:mb-4 flex items-center gap-2">
+                                            <Briefcase className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
+                                            <span className="break-words">Occupation</span>
+                                        </h2>
+                                        <div className="space-y-2">
+                                            {musician.occupation.map((job, index) => (
+                                                <div key={index} className="text-xs sm:text-sm border border-input bg-background p-2 md:p-3 rounded-md break-words hover:bg-accent/50 transition-colors">
+                                                    {job}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )}
+
                             {/* Education */}
                             {musician.education && musician.education.length > 0 && (
                                 <Card>

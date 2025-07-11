@@ -61,7 +61,7 @@ export function LanguageSwitcher({ variant = 'select', className = '' }: Languag
 
   if (variant === 'buttons') {
     return (
-      <div className={`relative ${className}`} ref={dropdownRef}>
+      <div className={`relative inline-block ${className}`} ref={dropdownRef}>
         <button
           onClick={() => setIsOpen(!isOpen)}
           disabled={isPending}
@@ -72,16 +72,14 @@ export function LanguageSwitcher({ variant = 'select', className = '' }: Languag
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+          <div className="absolute left-0 top-full mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-[9999] overflow-hidden">
             {languages.map((lang) => (
               <button
                 key={lang.code}
                 onClick={() => switchLanguage(lang.code)}
                 disabled={isPending}
-                className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-100 transition-colors ${
-                  locale === lang.code ? 'bg-gray-50 font-medium' : ''
-                } ${lang.code === languages[0].code ? 'rounded-t-md' : ''} ${
-                  lang.code === languages[languages.length - 1].code ? 'rounded-b-md' : ''
+                className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-100 transition-colors first:rounded-t-md last:rounded-b-md ${
+                  locale === lang.code ? 'bg-gray-50 font-medium text-gray-900' : 'text-gray-700'
                 }`}
               >
                 {lang.name}
