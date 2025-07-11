@@ -159,12 +159,20 @@
       "category": "Category",
       "nameSearch": "Search by Name",
       "sortBy": "Sort By",
+      "country": "Country",
+      "city": "City",
       "selectGenre": "Select genre",
       "selectInstrument": "Select instrument",
       "selectCategory": "Select category",
       "selectSort": "Select sort order",
+      "selectCountry": "Select country",
+      "selectCity": "Select city",
+      "selectCountryFirst": "Select country first",
       "searchPlaceholder": "Enter name to search...",
-      "any": "Any"
+      "any": "Any",
+      "loadingCountries": "Loading countries...",
+      "loadingCities": "Loading cities...",
+      "serviceUnavailable": "Service unavailable"
     },
     "results": {
       "title": "Search Results"

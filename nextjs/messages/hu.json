@@ -157,12 +157,20 @@
       "category": "Kategória",
       "nameSearch": "Keresés név szerint",
       "sortBy": "Rendezés",
+      "country": "Ország",
+      "city": "Város",
       "selectGenre": "Válassz műfajt",
       "selectInstrument": "Válassz hangszert",
       "selectCategory": "Válassz kategóriát",
       "selectSort": "Válassz rendezési módot",
+      "selectCountry": "Válassz országot",
+      "selectCity": "Válassz várost",
+      "selectCountryFirst": "Először válassz országot",
       "searchPlaceholder": "Add meg a keresett nevet...",
-      "any": "Bármely"
+      "any": "Bármely",
+      "loadingCountries": "Országok betöltése...",
+      "loadingCities": "Városok betöltése...",
+      "serviceUnavailable": "Szolgáltatás nem elérhető"
     },
     "results": {
       "title": "Keresési eredmények"

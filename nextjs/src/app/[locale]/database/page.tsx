@@ -45,6 +45,8 @@ interface SearchFilters {
     category: string;
     nameSearch: string;
     sortBy: string;
+    country: string;
+    city: string;
 }
 
 interface MusicianProfile {
@@ -63,6 +65,20 @@ interface MusicianProfile {
     social: any;
     created_at: string;
     updated_at: string;
+}
+
+// Location data interface
+interface LocationData {
+    countries: Array<{
+        geonameId: number;
+        countryName: string;
+        countryCode: string;
+    }>;
+    cities: Record<string, Array<{
+        geonameId: number;
+        name: string;
+        countryCode: string;
+    }>>
 }
 
 // Location helper
@@ -115,6 +131,14 @@ export default function DatabasePage() {
     const [musicians, setMusicians] = useState<MusicianProfile[]>([]);
     const [genres, setGenres] = useState<Genre[]>([]);
     const [instruments, setInstruments] = useState<Instrument[]>([]);
+    
+    // Location data state
+    const [locationData, setLocationData] = useState<LocationData>({
+        countries: [],
+        cities: {}
+    });
+    const [locationServiceStatus, setLocationServiceStatus] = useState<'loading' | 'available' | 'unavailable'>('loading');
+    const [loadingLocations, setLoadingLocations] = useState(false);
 
     // State for filters
     const [filters, setFilters] = useState<SearchFilters>({
@@ -122,7 +146,9 @@ export default function DatabasePage() {
         instrument: 'any',
         category: 'any',
         nameSearch: '',
-        sortBy: 'name_asc'
+        sortBy: 'name_asc',
+        country: 'any',
+        city: 'any'
     });
 
     // State for UI
@@ -169,6 +195,182 @@ export default function DatabasePage() {
         
         loadReferenceData();
     }, []);
+
+    // Load location data
+    useEffect(() => {
+        const loadLocationData = async () => {
+            setLocationServiceStatus('loading');
+            const cacheKey = 'geonames_countries';
+            const cacheExpiry = 7 * 24 * 60 * 60 * 1000; // 7 days
+            
+            // Check localStorage first
+            const cached = localStorage.getItem(cacheKey);
+            let cachedData = null;
+            
+            if (cached) {
+                const { data, timestamp } = JSON.parse(cached);
+                cachedData = data;
+                
+                // If cache is still valid, use it and set service as available
+                if (Date.now() - timestamp < cacheExpiry) {
+                    setLocationData(prev => ({ ...prev, countries: data }));
+                    setLocationServiceStatus('available');
+                    return;
+                }
+            }
+            
+            // Try to fetch fresh data from API
+            try {
+                const GEONAMES_USERNAME = process.env.NEXT_PUBLIC_GEONAMES_USERNAME;
+                if (!GEONAMES_USERNAME) {
+                    throw new Error('GeoNames username not configured');
+                }
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+                const response = await fetch(
+                    `https://secure.geonames.org/countryInfoJSON?username=${GEONAMES_USERNAME}`,
+                    { signal: controller.signal }
+                );
+                
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    throw new Error(`API responded with status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.status) {
+                    throw new Error(data.status.message || 'GeoNames API error');
+                }
+
+                const countries = data.geonames || [];
+
+                if (countries.length === 0) {
+                    throw new Error('No countries returned from API');
+                }
+
+                setLocationData(prev => ({ ...prev, countries }));
+                setLocationServiceStatus('available');
+
+                // Cache the fresh data
+                localStorage.setItem(cacheKey, JSON.stringify({
+                    data: countries,
+                    timestamp: Date.now()
+                }));
+
+            } catch (err: unknown) {
+                console.error('Error loading countries from API:', err);
+                
+                // If we have cached data, use it as fallback
+                if (cachedData && cachedData.length > 0) {
+                    setLocationData(prev => ({ ...prev, countries: cachedData }));
+                    setLocationServiceStatus('available');
+                } else {
+                    // No cache available, service is unavailable
+                    setLocationServiceStatus('unavailable');
+                    setLocationData({ countries: [], cities: {} });
+                }
+            }
+        };
+        
+        loadLocationData();
+    }, []);
+
+    // Load cities for a specific country
+    const loadCitiesForCountry = async (countryCode: string) => {
+        if (locationServiceStatus === 'unavailable') {
+            return;
+        }
+        
+        // Check if cities already loaded
+        if (locationData.cities[countryCode]) {
+            return;
+        }
+    
+        setLoadingLocations(true);
+        const cacheKey = `geonames_cities_${countryCode}`;
+        const cacheExpiry = 7 * 24 * 60 * 60 * 1000; // 7 days
+        
+        // Check localStorage first
+        const cached = localStorage.getItem(cacheKey);
+        let cachedData = null;
+        
+        if (cached) {
+            const { data, timestamp } = JSON.parse(cached);
+            cachedData = data;
+            
+            if (Date.now() - timestamp < cacheExpiry) {
+                setLocationData(prev => ({
+                    ...prev,
+                    cities: { ...prev.cities, [countryCode]: data }
+                }));
+                setLoadingLocations(false);
+                return;
+            }
+        }
+
+        try {
+            const GEONAMES_USERNAME = process.env.NEXT_PUBLIC_GEONAMES_USERNAME;
+            if (!GEONAMES_USERNAME) {
+                throw new Error('GeoNames username not configured');
+            }
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+            const response = await fetch(
+                `https://secure.geonames.org/searchJSON?country=${countryCode}&featureClass=P&maxRows=1000&orderby=population&username=${GEONAMES_USERNAME}`,
+                { signal: controller.signal }
+            );
+            
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+                throw new Error(`Cities API responded with status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.status) {
+                throw new Error(data.status.message || 'GeoNames cities API error');
+            }
+
+            const cities = data.geonames || [];
+
+            setLocationData(prev => ({
+                ...prev,
+                cities: { ...prev.cities, [countryCode]: cities }
+            }));
+
+            // Cache the fresh data
+            localStorage.setItem(cacheKey, JSON.stringify({
+                data: cities,
+                timestamp: Date.now()
+            }));
+
+        } catch (err: unknown) {
+            console.error('Error loading cities:', err);
+            
+            // If we have cached data, use it as fallback
+            if (cachedData && cachedData.length > 0) {
+                setLocationData(prev => ({
+                    ...prev,
+                    cities: { ...prev.cities, [countryCode]: cachedData }
+                }));
+            } else {
+                // No cache available for this country
+                setLocationData(prev => ({
+                    ...prev,
+                    cities: { ...prev.cities, [countryCode]: [] }
+                }));
+            }
+        } finally {
+            setLoadingLocations(false);
+        }
+    };
 
     // Helper function to get localized name
     const getLocalizedName = (item: Genre | Instrument): string => {
@@ -453,6 +655,30 @@ export default function DatabasePage() {
         return result;
     }, [instrumentsByCategory, sortedCategories]);
 
+    // Handle country change for location filter
+    const handleCountryChange = (countryName: string) => {
+        const country = locationData.countries.find(c => c.countryName === countryName);
+        if (country) {
+            setFilters({...filters, country: countryName, city: 'any'});
+            // Load cities for the selected country
+            loadCitiesForCountry(country.countryCode);
+        }
+    };
+
+    // Helper functions for location placeholders
+    const getCountryPlaceholder = () => {
+        if (locationServiceStatus === 'loading') return t('database.filters.loadingCountries');
+        if (locationServiceStatus === 'unavailable') return t('database.filters.serviceUnavailable');
+        return t('database.filters.selectCountry');
+    };
+
+    const getCityPlaceholder = () => {
+        if (locationServiceStatus === 'unavailable') return t('database.filters.serviceUnavailable');
+        if (!filters.country || filters.country === 'any') return t('database.filters.selectCountryFirst');
+        if (loadingLocations) return t('database.filters.loadingCities');
+        return t('database.filters.selectCity');
+    };
+
     // Main search function with proper database filtering
     const searchMusicians = async () => {
         if (!filters.sortBy) {
@@ -512,10 +738,10 @@ export default function DatabasePage() {
                 return;
             }
             
-            // Apply complex filtering for genre, instrument, and category
+            // Apply complex filtering for genre, instrument, category, and location
             let filteredProfiles = allProfiles;
             
-            if (filters.genre !== 'any' || filters.instrument !== 'any' || filters.category !== 'any') {
+            if (filters.genre !== 'any' || filters.instrument !== 'any' || filters.category !== 'any' || filters.country !== 'any' || filters.city !== 'any') {
                 filteredProfiles = allProfiles.filter((profile: any) => {
                     // Parse genre_instrument data
                     let genreInstrumentData = profile.genre_instrument;
@@ -529,33 +755,62 @@ export default function DatabasePage() {
                     
                     if (!Array.isArray(genreInstrumentData)) return false;
                     
-                    // Check if any genre_instrument item matches all selected filters
-                    return genreInstrumentData.some((item: any) => {
-                        if (typeof item !== 'object' || item === null) {
-                            return false;
+                    // Check genre, instrument, and category filters
+                    let matchesGenreInstrument = true;
+                    if (filters.genre !== 'any' || filters.instrument !== 'any' || filters.category !== 'any') {
+                        matchesGenreInstrument = genreInstrumentData.some((item: any) => {
+                            if (typeof item !== 'object' || item === null) {
+                                return false;
+                            }
+                            
+                            const itemGenre = String(item.genre || '').toLowerCase();
+                            const itemInstrument = String(item.instrument || '').toLowerCase();
+                            const itemCategory = String(item.category || '').toLowerCase();
+                            
+                            // Match genre if specified
+                            if (filters.genre !== 'any' && itemGenre !== filters.genre.toLowerCase()) {
+                                return false;
+                            }
+                            
+                            // Match instrument if specified
+                            if (filters.instrument !== 'any' && itemInstrument !== filters.instrument.toLowerCase()) {
+                                return false;
+                            }
+                            
+                            // Match category if specified
+                            if (filters.category !== 'any' && itemCategory !== filters.category.toLowerCase()) {
+                                return false;
+                            }
+                            
+                            return true;
+                        });
+                    }
+                    
+                    // Check location filters
+                    let matchesLocation = true;
+                    if (filters.country !== 'any' || filters.city !== 'any') {
+                        const location = profile.location;
+                        if (location && typeof location === 'object' && location !== null) {
+                            const locationObj = location as Record<string, unknown>;
+                            const profileCountry = String(locationObj.country || '').toLowerCase();
+                            const profileCity = String(locationObj.city || '').toLowerCase();
+                            
+                            // Match country if specified
+                            if (filters.country !== 'any' && profileCountry !== filters.country.toLowerCase()) {
+                                matchesLocation = false;
+                            }
+                            
+                            // Match city if specified
+                            if (filters.city !== 'any' && profileCity !== filters.city.toLowerCase()) {
+                                matchesLocation = false;
+                            }
+                        } else {
+                            // No location data means no match if location filter is specified
+                            matchesLocation = false;
                         }
-                        
-                        const itemGenre = String(item.genre || '').toLowerCase();
-                        const itemInstrument = String(item.instrument || '').toLowerCase();
-                        const itemCategory = String(item.category || '').toLowerCase();
-                        
-                        // Match genre if specified
-                        if (filters.genre !== 'any' && itemGenre !== filters.genre.toLowerCase()) {
-                            return false;
-                        }
-                        
-                        // Match instrument if specified
-                        if (filters.instrument !== 'any' && itemInstrument !== filters.instrument.toLowerCase()) {
-                            return false;
-                        }
-                        
-                        // Match category if specified
-                        if (filters.category !== 'any' && itemCategory !== filters.category.toLowerCase()) {
-                            return false;
-                        }
-                        
-                        return true;
-                    });
+                    }
+                    
+                    return matchesGenreInstrument && matchesLocation;
                 });
             }
             
@@ -622,7 +877,9 @@ export default function DatabasePage() {
             instrument: 'any',
             category: 'any',
             nameSearch: '',
-            sortBy: 'name_asc'
+            sortBy: 'name_asc',
+            country: 'any',
+            city: 'any'
         };
         setFilters(newFilters);
         
@@ -699,7 +956,9 @@ export default function DatabasePage() {
             instrument: instrument,
             category: 'any',
             nameSearch: '',
-            sortBy: 'name_asc'
+            sortBy: 'name_asc',
+            country: 'any',
+            city: 'any'
         };
         setFilters(newFilters);
         
@@ -776,7 +1035,9 @@ export default function DatabasePage() {
             instrument: instrument || 'any',
             category: category || 'any',
             nameSearch: '',
-            sortBy: 'name_asc'
+            sortBy: 'name_asc',
+            country: 'any',
+            city: 'any'
         };
         setFilters(newFilters);
         
@@ -1003,6 +1264,70 @@ export default function DatabasePage() {
                                         </SelectContent>
                                     </Select>
                                 </div>
+
+                                {/* Country Filter */}
+                                <div>
+                                    <Label>{t('database.filters.country')}</Label>
+                                    <Select 
+                                        value={filters.country} 
+                                        onValueChange={handleCountryChange}
+                                        disabled={locationServiceStatus === 'unavailable'}
+                                    >
+                                        <SelectTrigger className={locationServiceStatus === 'unavailable' ? 'opacity-50' : ''}>
+                                            <SelectValue placeholder={getCountryPlaceholder()} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="any">{t('database.filters.any')}</SelectItem>
+                                            {locationData.countries
+                                                .sort((a, b) => a.countryName.localeCompare(b.countryName))
+                                                .map(country => (
+                                                <SelectItem key={country.geonameId} value={country.countryName}>
+                                                    {country.countryName}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* City Filter */}
+                                <div>
+                                    <Label>{t('database.filters.city')}</Label>
+                                    <Select 
+                                        value={filters.city} 
+                                        onValueChange={(value) => setFilters({...filters, city: value})}
+                                        disabled={
+                                            locationServiceStatus === 'unavailable' || 
+                                            !filters.country || 
+                                            filters.country === 'any' ||
+                                            loadingLocations
+                                        }
+                                    >
+                                        <SelectTrigger className={
+                                            locationServiceStatus === 'unavailable' || 
+                                            !filters.country || 
+                                            filters.country === 'any' 
+                                                ? 'opacity-50' : ''
+                                        }>
+                                            <SelectValue placeholder={getCityPlaceholder()} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="any">{t('database.filters.any')}</SelectItem>
+                                            {filters.country && filters.country !== 'any' && (() => {
+                                                const country = locationData.countries.find(c => c.countryName === filters.country);
+                                                if (country && locationData.cities[country.countryCode]) {
+                                                    return locationData.cities[country.countryCode]
+                                                        .sort((a, b) => a.name.localeCompare(b.name))
+                                                        .map(city => (
+                                                            <SelectItem key={city.geonameId} value={city.name}>
+                                                                {city.name}
+                                                            </SelectItem>
+                                                        ));
+                                                }
+                                                return null;
+                                            })()}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             </div>
 
                             <div className="mt-4 flex gap-2">
@@ -1028,7 +1353,9 @@ export default function DatabasePage() {
                                                 instrument: 'any',
                                                 category: 'any',
                                                 nameSearch: '',
-                                                sortBy: 'name_asc'  // Keep default sorting instead of clearing it
+                                                sortBy: 'name_asc',  // Keep default sorting instead of clearing it
+                                                country: 'any',
+                                                city: 'any'
                                             });
                                             setMusicians([]);
                                             setHasSearched(false);
