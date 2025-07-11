@@ -474,65 +474,6 @@ export default function DatabasePage() {
         return [];
     };
 
-    // Helper function to format education with localized paper types
-    const formatEducation = (education: string[]): string[] => {
-        if (!education || education.length === 0) return [];
-        
-        const educationTypeMap: Record<string, string> = {
-            'Bachelor': locale === 'hu' ? 'Alapképzés' : 'Bachelor',
-            'Master': locale === 'hu' ? 'Mesterképzés' : 'Master',
-            'PhD': locale === 'hu' ? 'Doktori' : 'PhD',
-            'Diploma': locale === 'hu' ? 'Diploma' : 'Diploma',
-            'Certificate': locale === 'hu' ? 'Bizonyítvány' : 'Certificate',
-            'BA': locale === 'hu' ? 'Alapképzés' : 'BA',
-            'MA': locale === 'hu' ? 'Mesterképzés' : 'MA',
-            'BSc': locale === 'hu' ? 'Alapképzés' : 'BSc',
-            'MSc': locale === 'hu' ? 'Mesterképzés' : 'MSc'
-        };
-        
-        return education.map(edu => {
-            if (typeof edu === 'string') {
-                // Check if it's already formatted with connector
-                if (edu.includes(' itt: ') || edu.includes(' at ')) {
-                    const parts = edu.split(' ');
-                    const connector = locale === 'hu' ? 'itt:' : 'at';
-                    
-                    for (const [engType, localizedType] of Object.entries(educationTypeMap)) {
-                        if (parts[0].toLowerCase() === engType.toLowerCase()) {
-                            return `${localizedType} ${connector} ${parts.slice(2).join(' ')}`;
-                        }
-                    }
-                    return edu;
-                }
-                
-                // Try to parse if it looks like a structured format
-                const parts = edu.split(' ');
-                if (parts.length >= 2) {
-                    const possibleType = parts[0];
-                    const rest = parts.slice(1).join(' ');
-                    
-                    // Check if first part looks like an education type
-                    const educationTypes = Object.keys(educationTypeMap);
-                    if (educationTypes.some(type => possibleType.toLowerCase().includes(type.toLowerCase()))) {
-                        const connector = locale === 'hu' ? 'itt:' : 'at';
-                        
-                        // Try to get localized education type
-                        for (const [engType, localizedType] of Object.entries(educationTypeMap)) {
-                            if (possibleType.toLowerCase() === engType.toLowerCase()) {
-                                return `${localizedType} ${connector} ${rest}`;
-                            }
-                        }
-                        
-                        return `${possibleType} ${connector} ${rest}`;
-                    }
-                }
-                
-                return edu;
-            }
-            return String(edu);
-        });
-    };
-
     const parseGenreInstrumentField = (field: unknown): any[] => {
         if (!field) return [];
         
